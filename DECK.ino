@@ -31,10 +31,19 @@ PN532 nfc(pn532i2c);
 #include "DeckDatabase.h"
 DeckDatabase deckDatabase;
 
-bool rfidTagReadOnLastClick; 
-int loopCpt;
+#define PIN_BUTTON_OK D6
+int buttonOkState = LOW;
+
+// the current and previous readings from the input pin
+int thisButtonOkState = LOW;
+int lastButtonOkState = LOW;
+
+unsigned long lastButtonOkDebounceTime = 0;
+#define BUTTON_OK_DEBOUNCE_DELAY 50
 
 void setup(void) {
+  setupInputs();
+  
   Serial.begin(115200);
   Serial.println("Hello!");
 
@@ -63,9 +72,10 @@ void setup(void) {
 
   // configure board to read RFID tags
   nfc.SAMConfig();
+}
 
-  rfidTagReadOnLastClick = false;
-  loopCpt = 0;
+void setupInputs(void) {
+  pinMode(PIN_BUTTON_OK, INPUT_PULLUP);
 }
 
 void printRfidReaderInfo(uint32_t versiondata) {
@@ -76,9 +86,25 @@ void printRfidReaderInfo(uint32_t versiondata) {
 }
 
 void loop(void) {
-  pn532ReadRfidLoop();
-  Serial.print("LOOP: ");
-  Serial.println(loopCpt++);
+  loopInput();
+}
+
+void loopInput(void) {
+  thisButtonOkState = digitalRead(PIN_BUTTON_OK);
+   if (thisButtonOkState != lastButtonOkState) {
+    lastButtonOkDebounceTime = millis();
+  }
+  if ((millis() - lastButtonOkDebounceTime) > BUTTON_OK_DEBOUNCE_DELAY) {
+    if (thisButtonOkState != buttonOkState) {
+      buttonOkState = thisButtonOkState;
+      if (buttonOkState == HIGH) {
+        Serial.println("START SCAN");
+        pn532ReadRfidLoop();
+        Serial.println("END SCAN");
+      }
+    }
+  }
+  lastButtonOkState = thisButtonOkState;
 }
 
 String rfidUidBufferToString(uint8_t uid[]) {
@@ -102,19 +128,15 @@ void pn532ReadRfidLoop(void) {
   if (success) {
     // Display some basic information about the card
 
-    Serial.print("UID Fct String Value: ");
-    Serial.println(rfidGetLabelToDisplayFromKey(rfidUidBufferToString(uid)));
-    
     Serial.print("Label from JSON: ");
     Serial.println(deckDatabase.getLabelByUid("/stim.json", rfidUidBufferToString(uid)));
-   ;
     
     Serial.println("");
     
   }
 }
 
-
+//deprecated
 String rfidGetLabelToDisplayFromKey(String key) {
   String result;
 
