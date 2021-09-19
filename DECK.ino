@@ -27,12 +27,22 @@
 PN532_I2C pn532i2c(Wire);
 PN532 nfc(pn532i2c);	
 
+// CONFIG
+#include "DeckDatabase.h"
+DeckDatabase deckDatabase;
+
 bool rfidTagReadOnLastClick; 
 int loopCpt;
 
 void setup(void) {
   Serial.begin(115200);
   Serial.println("Hello!");
+
+  Serial.println(F(""));
+  Serial.println(F(""));
+  deckDatabase.mountFS();
+  deckDatabase.listDir("/");
+  deckDatabase.printJsonFile("/stim.json");
 
   nfc.begin();
 
@@ -94,6 +104,8 @@ void pn532ReadRfidLoop(void) {
 
     Serial.print("UID Fct String Value: ");
     Serial.println(rfidGetLabelToDisplayFromKey(rfidUidBufferToString(uid)));
+    
+    deckDatabase.getStimByUid("/stim.json", rfidUidBufferToString(uid));
     
     Serial.println("");
     
