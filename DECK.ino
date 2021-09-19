@@ -105,7 +105,9 @@ void pn532ReadRfidLoop(void) {
     Serial.print("UID Fct String Value: ");
     Serial.println(rfidGetLabelToDisplayFromKey(rfidUidBufferToString(uid)));
     
-    deckDatabase.getStimByUid("/stim.json", rfidUidBufferToString(uid));
+    Serial.print("Label from JSON: ");
+    Serial.println(deckDatabase.getLabelByUid("/stim.json", rfidUidBufferToString(uid)));
+   ;
     
     Serial.println("");
     

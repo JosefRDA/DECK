@@ -69,8 +69,19 @@ class DeckDatabase {
     Serial.println();
   }
 
-  void getStimByUid(const char * filename, String uid)
+  String getLabelByUid(const char * filename, String uid) {
+    JsonObject stim = getStimByUid(filename, uid);
+    if(stim) {
+      return stim["label"].as<char*>();
+    } else {
+      return String("[NULL]");
+    }
+  }
+
+  JsonObject getStimByUid(const char * filename, String uid)
   {
+    JsonObject result;
+    
     // Open file for reading
     File file = LittleFS.open(filename, "r");
     if (!file) 
@@ -93,13 +104,15 @@ class DeckDatabase {
       for(JsonVariant value : stimArray) {
         JsonObject stimValue = value.as<JsonObject>();
         if(uid.equals(stimValue["uid"].as<char*>())) {
-          Serial.println(stimValue["label"].as<char*>());
+          result = stimValue;
         }
       }
     }
     
     // Close the file (File's destructor doesn't close the file)
     file.close();
+
+    return result;
   }
   
   
