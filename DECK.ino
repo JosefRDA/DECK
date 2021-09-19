@@ -1,24 +1,3 @@
-/**************************************************************************/
-/*! 
-    This example will wait for any ISO14443A card or tag, and
-    depending on the size of the UID will attempt to read from it.
-   
-    If the card has a 4-byte UID it is probably a Mifare
-    Classic card, and the following steps are taken:
-   
-    - Authenticate block 4 (the first block of Sector 1) using
-      the default KEYA of 0XFF 0XFF 0XFF 0XFF 0XFF 0XFF
-    - If authentication succeeds, we can then read any of the
-      4 blocks in that sector (though only block 4 is read here)
-	 
-    If the card has a 7-byte UID it is probably a Mifare
-    Ultralight card, and the 4 byte pages can be read directly.
-    Page 4 is read by default since this is the first 'general-
-    purpose' page on the tags.
-
-    To enable debug message, define DEBUG in PN532/PN532_debug.h
-*/
-/**************************************************************************/
 
 #include <SPI.h>
 #include <Wire.h>
@@ -60,9 +39,16 @@ int lastButtonOkState = LOW;
 unsigned long lastButtonOkDebounceTime = 0;
 #define BUTTON_OK_DEBOUNCE_DELAY 50
 
+#include "ClusterLogo.h"
+
 void setup(void) {
   setupInputs();
   setupOled();
+
+  display_oled.drawBitmap(0, 0, clusterLogo_data, clusterLogo_width, clusterLogo_height, 1);
+  display_oled.display();
+
+  delay(2000);
   
   Serial.begin(115200);
   Serial.println("Hello!");
