@@ -39,16 +39,20 @@ int lastButtonOkState = LOW;
 unsigned long lastButtonOkDebounceTime = 0;
 #define BUTTON_OK_DEBOUNCE_DELAY 50
 
+#define PIN_VIBRATION_MOTOR D5
+
 #include "ClusterLogo.h"
 
 void setup(void) {
   setupInputs();
   setupOled();
 
-  display_oled.drawBitmap(0, 0, clusterLogo_data, clusterLogo_width, clusterLogo_height, 1);
-  display_oled.display();
+  displayClusterSplashScreen();
 
-  delay(2000);
+  vibrationMotorVibrate(2000);
+
+  display_oled.clearDisplay();
+  display_oled.display();
   
   Serial.begin(115200);
   Serial.println("Hello!");
@@ -76,16 +80,25 @@ void setup(void) {
   
     uint32_t versiondata = nfc.getFirmwareVersion();
   }
-
-  //RFID INFO FOR DEBUG
-  //printRfidReaderInfo(versiondata)
-
-  // configure board to read RFID tags
   nfc.SAMConfig();
+}
+
+//blocking
+void vibrationMotorVibrate(unsigned long pDelay) {
+  digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
+  delay(pDelay);
+  digitalWrite(PIN_VIBRATION_MOTOR, LOW);
+}
+
+void displayClusterSplashScreen(void) {
+  display_oled.drawBitmap(0, 0, clusterLogo_data, clusterLogo_width, clusterLogo_height, 1);
+  display_oled.display();
 }
 
 void setupInputs(void) {
   pinMode(PIN_BUTTON_OK, INPUT_PULLUP);
+  pinMode(PIN_VIBRATION_MOTOR, OUTPUT);
+  digitalWrite(PIN_VIBRATION_MOTOR, LOW);
 }
 
 void setupOled(void) {
@@ -159,6 +172,8 @@ void pn532ReadRfidLoop(void) {
     display_oled.println(stimLabel);
     display_oled.display();
     Serial.println("");
+
+    vibrationMotorVibrate(500);
     
   }
 }
