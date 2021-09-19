@@ -93,9 +93,24 @@ void pn532ReadRfidLoop(void) {
     // Display some basic information about the card
 
     Serial.print("UID Fct String Value: ");
-    Serial.println(rfidUidBufferToString(uid));
+    Serial.println(rfidGetLabelToDisplayFromKey(rfidUidBufferToString(uid)));
     
     Serial.println("");
     
   }
+}
+
+
+String rfidGetLabelToDisplayFromKey(String key) {
+  String result;
+
+  if(key.equals("C09FC249")) {
+    result = "Carte Blanche";
+  } else if(key.equals("CE74D83F")) {
+    result = "Tag Bleu";
+  } else {
+    result = "Inconnu";
+  }
+
+  return result;
 }
