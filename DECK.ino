@@ -20,12 +20,31 @@
 */
 /**************************************************************************/
 
-
+#include <SPI.h>
 #include <Wire.h>
 #include <PN532_I2C.h>
 #include <PN532.h>
 PN532_I2C pn532i2c(Wire);
 PN532 nfc(pn532i2c);	
+
+//OLED
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define OLED_RESET 1  // GPIO0
+ 
+#define NUMFLAKES 10
+#define XPOS 0
+#define YPOS 0
+#define DELTAY 2
+ 
+ 
+#define LOGO16_GLCD_HEIGHT 16
+#define LOGO16_GLCD_WIDTH  16
+
+#define SCREEN_WIDTH 64 // OLED display width, in pixels
+#define SCREEN_HEIGHT 48 // OLED display height, in pixels
+Adafruit_SSD1306 display_oled(OLED_RESET);
 
 // CONFIG
 #include "DeckDatabase.h"
@@ -43,6 +62,7 @@ unsigned long lastButtonOkDebounceTime = 0;
 
 void setup(void) {
   setupInputs();
+  setupOled();
   
   Serial.begin(115200);
   Serial.println("Hello!");
@@ -58,10 +78,14 @@ void setup(void) {
   uint32_t versiondata = nfc.getFirmwareVersion();
 
   while(! versiondata){
+    display_oled.clearDisplay();
     Serial.println("Didn't find PN53x board");
+    display_oled.println("Didn't find PN53x board");
+    display_oled.display();
     delay(1000);
     Serial.println("Retrying ...");
-
+    display_oled.println("Retrying ...");
+    display_oled.display();
     nfc.begin();
   
     uint32_t versiondata = nfc.getFirmwareVersion();
@@ -76,6 +100,18 @@ void setup(void) {
 
 void setupInputs(void) {
   pinMode(PIN_BUTTON_OK, INPUT_PULLUP);
+}
+
+void setupOled(void) {
+  // by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
+  display_oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3C (for the 64x48)
+
+  display_oled.clearDisplay();
+
+  display_oled.setTextColor(WHITE);
+  display_oled.setTextSize(1);
+  display_oled.setCursor(0,0);
+  display_oled.display();
 }
 
 void printRfidReaderInfo(uint32_t versiondata) {
@@ -129,8 +165,13 @@ void pn532ReadRfidLoop(void) {
     // Display some basic information about the card
 
     Serial.print("Label from JSON: ");
-    Serial.println(deckDatabase.getLabelByUid("/stim.json", rfidUidBufferToString(uid)));
-    
+    String stimLabel = deckDatabase.getLabelByUid("/stim.json", rfidUidBufferToString(uid));
+    Serial.println(stimLabel);
+
+    display_oled.clearDisplay();
+    display_oled.setCursor(0,0);
+    display_oled.println(stimLabel);
+    display_oled.display();
     Serial.println("");
     
   }
