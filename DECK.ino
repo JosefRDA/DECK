@@ -21,11 +21,11 @@
 /**************************************************************************/
 
 
-  #include <Wire.h>
-  #include <PN532_I2C.h>
-  #include <PN532.h>
-  PN532_I2C pn532i2c(Wire);
-  PN532 nfc(pn532i2c);	
+#include <Wire.h>
+#include <PN532_I2C.h>
+#include <PN532.h>
+PN532_I2C pn532i2c(Wire);
+PN532 nfc(pn532i2c);	
 
 void setup(void) {
   Serial.begin(115200);
