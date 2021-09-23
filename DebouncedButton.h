@@ -29,13 +29,15 @@ class DebouncedButton {
 private:
 
     // PRIVATE PROPERTIES
+    uint8_t pin;
+   
     // TODO : check init https://stackoverflow.com/a/3127603
     
-    int buttonOkState = LOW;
+    uint8_t buttonOkState = LOW;
 
     // the current and previous readings from the input pin
-    int thisButtonOkState = LOW;
-    int lastButtonOkState = LOW;
+    uint8_t thisButtonOkState = LOW;
+    uint8_t lastButtonOkState = LOW;
 
     unsigned long lastButtonOkDebounceTime = 0;
 
