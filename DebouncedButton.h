@@ -33,13 +33,13 @@ private:
    
     // TODO : check init https://stackoverflow.com/a/3127603 - Define Only in Body : https://stackoverflow.com/a/15335287
     
-    uint8_t state = LOW;
+    uint8_t state;
 
     // the current and previous readings from the input pin
-    uint8_t currentState = LOW;
-    uint8_t lastState = LOW;
+    uint8_t currentState;
+    uint8_t lastState;
 
-    unsigned long lastDebounceTime = 0;
+    unsigned long lastDebounceTime;
 
 };
 
