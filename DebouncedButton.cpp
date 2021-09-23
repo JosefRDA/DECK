@@ -2,7 +2,7 @@
 
 // CONSTRUCTORS ------------------------------------------------------------
 
-DebouncedButton::DebouncedButton(uint8_t pin){
+DebouncedButton::DebouncedButton(uint8_t pin) : {
   this->pin = pin;
   pinMode(pin, INPUT_PULLUP);
 }
@@ -11,18 +11,18 @@ DebouncedButton::DebouncedButton(uint8_t pin){
 
 bool DebouncedButton::hasBeenPushed(void){
   bool result = false;
-  this->thisButtonOkState = digitalRead(this->pin);
-  if(this->thisButtonOkState != this->lastButtonOkState) {
-    this->lastButtonOkDebounceTime = millis();
+  this->currentState = digitalRead(this->pin);
+  if(this->currentState != this->lastState) {
+    this->lastDebounceTime = millis();
   }
-  if((millis() - this->lastButtonOkDebounceTime) > BUTTON_OK_DEBOUNCE_DELAY) {
-    if (this->thisButtonOkState != this->buttonOkState) {
-      this->buttonOkState = this->thisButtonOkState;
-      if (this->buttonOkState == HIGH) {
+  if((millis() - this->lastDebounceTime) > BUTTON_DEBOUNCE_DELAY) {
+    if (this->currentState != this->state) {
+      this->state = this->currentState;
+      if (this->state == HIGH) {
        result = true;
       }
     }
   }
-  this->lastButtonOkState = this->thisButtonOkState;
+  this->lastState = this->currentState;
   return result;
 }
