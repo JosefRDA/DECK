@@ -2,7 +2,7 @@
 
 // CONSTRUCTORS ------------------------------------------------------------
 
-DebouncedButton::DebouncedButton(uint8_t pin) : {
+DebouncedButton::DebouncedButton(uint8_t pin) : state(LOW), currentState(LOW), lastState(LOW), lastDebounceTime(0) {
   this->pin = pin;
   pinMode(pin, INPUT_PULLUP);
 }
