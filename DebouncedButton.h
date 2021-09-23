@@ -31,7 +31,7 @@ private:
     // PRIVATE PROPERTIES
     uint8_t pin;
    
-    // TODO : check init https://stackoverflow.com/a/3127603
+    // TODO : check init https://stackoverflow.com/a/3127603 - Define Only in Body : https://stackoverflow.com/a/15335287
     
     uint8_t buttonOkState = LOW;
 
