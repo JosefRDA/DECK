@@ -1,5 +1,8 @@
 #include "DeckDatabase.h"
 
+#include <LittleFS.h>
+#include <ArduinoJson.h> 
+
 // CONSTRUCTORS ------------------------------------------------------------
 
 DeckDatabase::DeckDatabase() { }
