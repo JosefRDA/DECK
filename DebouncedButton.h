@@ -13,7 +13,7 @@
 #ifndef _DEBOUNCEDBUTTON_H_
 #define _DEBOUNCEDBUTTON_H_
 
-#define BUTTON_OK_DEBOUNCE_DELAY 50
+#define BUTTON_DEBOUNCE_DELAY 50
 
 class DebouncedButton {
   public:
@@ -33,13 +33,13 @@ private:
    
     // TODO : check init https://stackoverflow.com/a/3127603 - Define Only in Body : https://stackoverflow.com/a/15335287
     
-    uint8_t buttonOkState = LOW;
+    uint8_t state = LOW;
 
     // the current and previous readings from the input pin
-    uint8_t thisButtonOkState = LOW;
-    uint8_t lastButtonOkState = LOW;
+    uint8_t currentState = LOW;
+    uint8_t lastState = LOW;
 
-    unsigned long lastButtonOkDebounceTime = 0;
+    unsigned long lastDebounceTime = 0;
 
 };
 
