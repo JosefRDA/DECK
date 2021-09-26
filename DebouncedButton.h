@@ -13,6 +13,8 @@
 #ifndef _DEBOUNCEDBUTTON_H_
 #define _DEBOUNCEDBUTTON_H_
 
+#include <Arduino.h>
+
 #define BUTTON_DEBOUNCE_DELAY 50
 
 class DebouncedButton {
