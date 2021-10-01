@@ -39,6 +39,10 @@ int lastButtonOkState = LOW;
 unsigned long lastButtonOkDebounceTime = 0;
 #define BUTTON_OK_DEBOUNCE_DELAY 50
 
+
+unsigned long lastDisplayOledTime = 0;
+#define OLED_CLS_DELAY 2000
+
 #include "ClusterLogo.h"
 
 void setup(void) {
@@ -49,6 +53,9 @@ void setup(void) {
   display_oled.display();
 
   delay(2000);
+
+  display_oled.clearDisplay();
+  display_oled.display();
   
   Serial.begin(115200);
   Serial.println("Hello!");
@@ -109,6 +116,7 @@ void printRfidReaderInfo(uint32_t versiondata) {
 
 void loop(void) {
   loopInput();
+  loopCleanOled();
 }
 
 void loopInput(void) {
@@ -122,11 +130,19 @@ void loopInput(void) {
       if (buttonOkState == HIGH) {
         Serial.println("START SCAN");
         pn532ReadRfidLoop();
+        lastDisplayOledTime = millis();
         Serial.println("END SCAN");
       }
     }
   }
   lastButtonOkState = thisButtonOkState;
+}
+
+void loopCleanOled(void) {
+  if(lastDisplayOledTime != 0 && millis() > lastDisplayOledTime + OLED_CLS_DELAY) {
+    display_oled.clearDisplay();
+    display_oled.display();
+  }
 }
 
 String rfidUidBufferToString(uint8_t uid[]) {
