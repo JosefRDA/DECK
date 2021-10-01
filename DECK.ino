@@ -39,9 +39,12 @@ int lastButtonOkState = LOW;
 unsigned long lastButtonOkDebounceTime = 0;
 #define BUTTON_OK_DEBOUNCE_DELAY 50
 
-
 unsigned long lastDisplayOledTime = 0;
-#define OLED_CLS_DELAY 2000
+#define OLED_CLS_DELAY 10000
+
+#define PIN_VIBRATION_MOTOR D5
+unsigned long lastVibrationMotorStartTime = 0;
+#define VIBRATION_MOTOR_DELAY 2000
 
 #include "ClusterLogo.h"
 
@@ -53,6 +56,7 @@ void setup(void) {
   display_oled.display();
 
   delay(2000);
+
 
   display_oled.clearDisplay();
   display_oled.display();
@@ -93,6 +97,8 @@ void setup(void) {
 
 void setupInputs(void) {
   pinMode(PIN_BUTTON_OK, INPUT_PULLUP);
+  pinMode(PIN_VIBRATION_MOTOR, OUTPUT);
+  digitalWrite(PIN_VIBRATION_MOTOR, LOW);
 }
 
 void setupOled(void) {
@@ -117,6 +123,7 @@ void printRfidReaderInfo(uint32_t versiondata) {
 void loop(void) {
   loopInput();
   loopCleanOled();
+  loopVibrationMotor();
 }
 
 void loopInput(void) {
@@ -130,7 +137,6 @@ void loopInput(void) {
       if (buttonOkState == HIGH) {
         Serial.println("START SCAN");
         pn532ReadRfidLoop();
-        lastDisplayOledTime = millis();
         Serial.println("END SCAN");
       }
     }
@@ -142,6 +148,14 @@ void loopCleanOled(void) {
   if(lastDisplayOledTime != 0 && millis() > lastDisplayOledTime + OLED_CLS_DELAY) {
     display_oled.clearDisplay();
     display_oled.display();
+    lastDisplayOledTime = 0;
+  }
+}
+
+void loopVibrationMotor(void) {
+  if(lastVibrationMotorStartTime != 0 && millis() > lastVibrationMotorStartTime + VIBRATION_MOTOR_DELAY) {
+    digitalWrite(PIN_VIBRATION_MOTOR, LOW);
+    lastVibrationMotorStartTime = 0;
   }
 }
 
@@ -169,13 +183,17 @@ void pn532ReadRfidLoop(void) {
     Serial.print("Label from JSON: ");
     String stimLabel = deckDatabase.getLabelByUid("/stim.json", rfidUidBufferToString(uid));
     Serial.println(stimLabel);
-
+    Serial.println("");
+    
     display_oled.clearDisplay();
     display_oled.setCursor(0,0);
     display_oled.println(stimLabel);
     display_oled.display();
-    Serial.println("");
-    
+    lastDisplayOledTime = millis();
+
+    //Vibration motor
+    digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
+    lastVibrationMotorStartTime = millis();
   }
 }
 
