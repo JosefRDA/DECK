@@ -191,6 +191,58 @@ void pn532ReadRfidLoop(void) {
     display_oled.display();
     lastDisplayOledTime = millis();
 
+    // Menu Test
+    //display_oled.clearDisplay();
+    //display_oled.setTextSize(1);
+    //display_oled.setCursor(0,0);
+    
+    /* OLD MENU
+    display_oled.println("+-[DECK]-+");
+    display_oled.print("| ");
+    display_oled.setTextColor(BLACK, WHITE);
+    display_oled.print(" SCAN ");
+    display_oled.setTextColor(WHITE, BLACK);
+    display_oled.println(" |");
+    display_oled.println("|  DTOD  |");
+    display_oled.println("|  CONF  |");
+    display_oled.println("+--------+");*/
+
+    /* MENU
+    display_oled.drawRoundRect(0, 5, 64, 43, 4, WHITE);
+    display_oled.setCursor(15,2);
+    display_oled.setTextColor(WHITE, BLACK);
+    display_oled.print(" DECK ");
+    display_oled.setCursor(15,13);
+    display_oled.setTextColor(WHITE, BLACK);
+    display_oled.print(" SCAN ");
+    display_oled.setCursor(15,24);
+    display_oled.setTextColor(BLACK, WHITE);
+    display_oled.print(" DTOD ");
+    display_oled.setCursor(15,35);
+    display_oled.setTextColor(WHITE, BLACK);
+    display_oled.print(" CONF ");
+    */
+
+    /* CONFIRMATION POP UP
+    display_oled.drawRoundRect(0, 0, 64, 48, 4, WHITE);
+    display_oled.setCursor(4,2);
+    display_oled.print("Diviser");
+    display_oled.setCursor(4,12);
+    display_oled.print("mes XP");
+    display_oled.setCursor(4,22);
+    display_oled.print("par 2 ?");
+    display_oled.setCursor(4,34);
+    display_oled.setTextColor(BLACK, WHITE);
+    display_oled.print("OUI");
+    display_oled.setTextColor(WHITE, BLACK);
+    display_oled.print("   ");
+    display_oled.print("NON");
+    */
+    
+    //display_oled.display();
+
+    //
+
     //Vibration motor
     digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
     lastVibrationMotorStartTime = millis();
