@@ -70,7 +70,7 @@ String DeckDatabase::getLabelByUid(const char * filename, String uid) {
   if(stim) {
     return stim["label"].as<char*>();
   } else {
-    return String("[NULL]");
+    return String("[UNKNOWN] :") + uid;
   }
 }
 
