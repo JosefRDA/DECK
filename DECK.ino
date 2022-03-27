@@ -29,7 +29,8 @@ Adafruit_SSD1306 display_oled(OLED_RESET);
 #include "DeckDatabase.h"
 DeckDatabase deckDatabase;
 
-#define PIN_BUTTON_OK D6
+#define PIN_BUTTON_OK D8
+//D8 VCC other GND  
 int buttonOkState = LOW;
 
 // the current and previous readings from the input pin
