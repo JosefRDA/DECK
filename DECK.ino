@@ -29,7 +29,9 @@ Adafruit_SSD1306 display_oled(OLED_RESET);
 #include "DeckDatabase.h"
 DeckDatabase deckDatabase;
 
-#define PIN_BUTTON_OK D8
+#define PIN_BUTTON_OK D6
+#define PIN_BUTTON_UP D7
+#define PIN_BUTTON_DOWN D8
 //D8 VCC other GND  
 int buttonOkState = LOW;
 
@@ -45,7 +47,8 @@ unsigned long lastDisplayOledTime = 0;
 
 #define PIN_VIBRATION_MOTOR D5
 unsigned long lastVibrationMotorStartTime = 0;
-#define VIBRATION_MOTOR_DELAY 2000
+bool longVibration = false;
+#define VIBRATION_MOTOR_DELAY 500
 
 #include "ClusterLogo.h"
 
@@ -98,6 +101,8 @@ void setup(void) {
 
 void setupInputs(void) {
   pinMode(PIN_BUTTON_OK, INPUT_PULLUP);
+  pinMode(PIN_BUTTON_UP, INPUT_PULLUP);
+  pinMode(PIN_BUTTON_DOWN, INPUT_PULLUP);
   pinMode(PIN_VIBRATION_MOTOR, OUTPUT);
   digitalWrite(PIN_VIBRATION_MOTOR, LOW);
 }
@@ -128,6 +133,13 @@ void loop(void) {
 }
 
 void loopInput(void) {
+
+  if(digitalRead(PIN_BUTTON_UP) || digitalRead(PIN_BUTTON_DOWN)) {
+    //Vibration motor
+    digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
+    lastVibrationMotorStartTime = millis();
+  }
+  
   thisButtonOkState = digitalRead(PIN_BUTTON_OK);
    if (thisButtonOkState != lastButtonOkState) {
     lastButtonOkDebounceTime = millis();
@@ -154,9 +166,16 @@ void loopCleanOled(void) {
 }
 
 void loopVibrationMotor(void) {
-  if(lastVibrationMotorStartTime != 0 && millis() > lastVibrationMotorStartTime + VIBRATION_MOTOR_DELAY) {
+  int delayToApply;
+  if(longVibration){
+    delayToApply = VIBRATION_MOTOR_DELAY * 4;
+  } else {
+    delayToApply = VIBRATION_MOTOR_DELAY;
+  }
+  if(lastVibrationMotorStartTime != 0 && millis() > lastVibrationMotorStartTime + delayToApply) {
     digitalWrite(PIN_VIBRATION_MOTOR, LOW);
     lastVibrationMotorStartTime = 0;
+    longVibration = false;
   }
 }
 
@@ -246,6 +265,7 @@ void pn532ReadRfidLoop(void) {
 
     //Vibration motor
     digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
+    longVibration = true;
     lastVibrationMotorStartTime = millis();
   }
 }
