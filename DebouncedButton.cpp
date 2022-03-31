@@ -10,15 +10,32 @@ DebouncedButton::DebouncedButton(uint8_t pin) : state(LOW), currentState(LOW), l
 // CLASS MEMBER FUNCTIONS --------------------------------------------------
 
 bool DebouncedButton::hasBeenPushed(void){
+  
+  /*Serial.println("DebouncedButton::hasBeenPushed");*/
+  
   bool result = false;
   this->currentState = digitalRead(this->pin);
+  
+  /*Serial.print("Current state :");
+  if(this->currentState) {
+    Serial.print("TRUE");
+  }else {
+    Serial.print("FALSE");
+  }
+  Serial.print("- Last state :");
+  if(this->lastState) {
+    Serial.print("TRUE");
+  }else {
+    Serial.print("FALSE");
+  }*/
+  
   if(this->currentState != this->lastState) {
     this->lastDebounceTime = millis();
   }
   if((millis() - this->lastDebounceTime) > BUTTON_DEBOUNCE_DELAY) {
     if (this->currentState != this->state) {
       this->state = this->currentState;
-      if (this->state == HIGH) {
+      if (this->state == LOW) {
        result = true;
       }
     }

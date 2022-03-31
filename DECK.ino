@@ -29,7 +29,8 @@ Adafruit_SSD1306 display_oled(OLED_RESET);
 #include "DeckDatabase.h"
 DeckDatabase deckDatabase;
 
-#define PIN_BUTTON_OK D8
+#define PIN_BUTTON_OK D6  
+#define PIN_BUTTON_UP D7
 //D8 VCC other GND  
 int buttonOkState = LOW;
 
@@ -39,6 +40,9 @@ int lastButtonOkState = LOW;
 
 unsigned long lastButtonOkDebounceTime = 0;
 #define BUTTON_OK_DEBOUNCE_DELAY 50
+
+#include "DebouncedButton.h"
+DebouncedButton upButton(PIN_BUTTON_UP);
 
 unsigned long lastDisplayOledTime = 0;
 #define OLED_CLS_DELAY 10000
@@ -68,8 +72,8 @@ void setup(void) {
   Serial.println(F(""));
   Serial.println(F(""));
   deckDatabase.mountFS();
-  deckDatabase.listDir("/");
-  deckDatabase.printJsonFile("/stim.json");
+  //deckDatabase.listDir("/");
+  //deckDatabase.printJsonFile("/stim.json");
 
   nfc.begin();
 
@@ -125,6 +129,13 @@ void loop(void) {
   loopInput();
   loopCleanOled();
   loopVibrationMotor();
+  loopUpButton();
+}
+
+void loopUpButton(void){
+  if(upButton.hasBeenPushed()) {
+    Serial.print("UP BUTTON");
+  }
 }
 
 void loopInput(void) {
@@ -135,7 +146,7 @@ void loopInput(void) {
   if ((millis() - lastButtonOkDebounceTime) > BUTTON_OK_DEBOUNCE_DELAY) {
     if (thisButtonOkState != buttonOkState) {
       buttonOkState = thisButtonOkState;
-      if (buttonOkState == HIGH) {
+      if (buttonOkState == LOW) {
         Serial.println("START SCAN");
         pn532ReadRfidLoop();
         Serial.println("END SCAN");

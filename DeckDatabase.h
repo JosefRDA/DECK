@@ -3,7 +3,7 @@
 
 #include <ArduinoJson.h> // arduino json v6  // https://github.com/bblanchon/ArduinoJson
 
-// to upload config dile : https://github.com/earlephilhower/arduino-esp8266littlefs-plugin/releases
+// to upload config file : https://github.com/earlephilhower/arduino-esp8266littlefs-plugin/releases
 #define SIZE_ARRAY 20
 #define MAX_SIZE_CODE 9
 
