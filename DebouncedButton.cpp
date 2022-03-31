@@ -5,13 +5,24 @@
 DebouncedButton::DebouncedButton(uint8_t pin) : state(LOW), currentState(LOW), lastState(LOW), lastDebounceTime(0) {
   this->pin = pin;
   pinMode(pin, INPUT_PULLUP);
+  this->lastPushedTime = millis();
+  this->lastHighTime = millis();
+}
+
+// CLASS PRIVATE FUNCTIONS ----------------------------------------------
+void DebouncedButton::debug(void){
+  Serial.print("DebouncedButton::hasBeenPushed not has been pushied since ");
+  Serial.print((millis() - this->lastPushedTime)/1000-(millis() - this->lastHighTime)/1000);
+  Serial.print(" s and been pressed for ");
+  Serial.print((millis() - this->lastHighTime)/1000);
+  Serial.println(" s.");
 }
 
 // CLASS MEMBER FUNCTIONS --------------------------------------------------
 
-bool DebouncedButton::hasBeenPushed(void){
+uint8_t DebouncedButton::read(void){
   
-  bool result = false;
+  uint8_t result = BUTTON_NO_EVENT;
   this->currentState = digitalRead(this->pin);
   
   if(this->currentState != this->lastState) {
@@ -21,7 +32,18 @@ bool DebouncedButton::hasBeenPushed(void){
     if (this->currentState != this->state) {
       this->state = this->currentState;
       if (this->state == LOW) {
-       result = true;
+        
+        //this->debug()
+        
+        if((millis() - this->lastHighTime) < BUTTON_LONG_PRESS_DELAY) {
+          result = BUTTON_SHORT_PRESS;
+        } else {
+          result = BUTTON_LONG_PRESS;
+        }
+       
+        this->lastPushedTime = millis();
+      } else {
+        this->lastHighTime = millis();
       }
     }
   }

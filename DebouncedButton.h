@@ -16,6 +16,16 @@
 #include <Arduino.h>
 
 #define BUTTON_DEBOUNCE_DELAY 50
+#define BUTTON_LONG_PRESS_DELAY 3000
+
+// Read return value
+//TODO : Move to struct/enum
+#define BUTTON_NO_EVENT     0
+#define BUTTON_SHORT_PRESS  1
+#define BUTTON_LONG_PRESS   2
+
+
+
 
 class DebouncedButton {
   public:
@@ -26,11 +36,12 @@ class DebouncedButton {
   
     // CLASS MEMBER FUNCTIONS ----------------------------------------------
     
-    bool hasBeenPushed(void);
+    uint8_t read(void);
+
   
 private:
 
-    // PRIVATE PROPERTIES
+    // PRIVATE PROPERTIES ----------------------------------------------
     uint8_t pin;
    
     // TODO : check init https://stackoverflow.com/a/3127603 - Define Only in Body : https://stackoverflow.com/a/15335287
@@ -42,6 +53,11 @@ private:
     uint8_t lastState;
 
     unsigned long lastDebounceTime;
+    unsigned long lastPushedTime; //For future use like double press
+    unsigned long lastHighTime;
+
+    // CLASS PRIVATE FUNCTIONS ----------------------------------------------
+    void debug(void);
 
 };
 

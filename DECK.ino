@@ -133,7 +133,7 @@ void loop(void) {
 }
 
 void loopOkButton(void){
-  if(okButton.hasBeenPushed()) {
+  if(okButton.read() == BUTTON_SHORT_PRESS) {
     Serial.println("START SCAN");
     pn532ReadRfidLoop();
     Serial.println("END SCAN");
@@ -141,15 +141,20 @@ void loopOkButton(void){
 }
 
 void loopUpButton(void){
-  if(upButton.hasBeenPushed()) {
+  if(upButton.read() == BUTTON_SHORT_PRESS) {
     //Serial.println("UP BUTTON");
     pocScanWifi();
   }
 }
 
 void loopDownButton(void){
-  if(downButton.hasBeenPushed()) {
-    Serial.println("DOWN BUTTON");
+  uint8_t buttonValue = downButton.read();
+  if(buttonValue == BUTTON_SHORT_PRESS) {
+    Serial.println("SHORT DOWN BUTTON");
+  } else { 
+    if(buttonValue == BUTTON_LONG_PRESS) {
+      Serial.println("LONG DOWN BUTTON");
+    } 
   }
 }
 
