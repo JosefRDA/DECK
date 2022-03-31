@@ -1,8 +1,8 @@
-
 #include <SPI.h>
 #include <Wire.h>
 #include <PN532_I2C.h>
 #include <PN532.h>
+#include "ESP8266WiFi.h"
 PN532_I2C pn532i2c(Wire);
 PN532 nfc(pn532i2c);	
 
@@ -50,6 +50,8 @@ unsigned long lastDisplayOledTime = 0;
 #define PIN_VIBRATION_MOTOR D5
 unsigned long lastVibrationMotorStartTime = 0;
 #define VIBRATION_MOTOR_DELAY 2000
+
+#define SSID_PREFIX "Bbox"
 
 #include "ClusterLogo.h"
 
@@ -134,8 +136,55 @@ void loop(void) {
 
 void loopUpButton(void){
   if(upButton.hasBeenPushed()) {
-    Serial.print("UP BUTTON");
+    //Serial.println("UP BUTTON");
+    pocScanWifi();
   }
+}
+
+void pocScanWifi(void) {
+  //INIT
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+
+  // WiFi.scanNetworks will return the number of networks found
+  int n = WiFi.scanNetworks();
+  if (n == 0) {
+    //TODO : HANDLE CASE WHERE NO WIFI IS FOUND
+  } else {
+    int maxForce = -999;
+    String closestDeckName = ""; 
+    for (int i = 0; i < n; ++i) {
+
+      //TODO ajouter ici le filtre par seuil minimum de force
+      if(WiFi.SSID(i).substring(0, 4) == SSID_PREFIX) {
+        Serial.println("DECK FOUND :");
+        Serial.print("NAME : ");
+        Serial.println(WiFi.SSID(i).substring(4));
+        Serial.print("FORCE : ");
+        Serial.println(WiFi.RSSI(i));
+
+        int force = WiFi.RSSI(i);
+        if(force > maxForce) {
+          maxForce = force;
+          closestDeckName = WiFi.SSID(i).substring(4);
+        }
+      }
+    }
+    display_oled.clearDisplay();
+    display_oled.setCursor(0,0);
+    
+    String dtodLabel = deckDatabase.getLabelByUid("/dtod.json", closestDeckName);
+    display_oled.println(dtodLabel);
+    
+    display_oled.display();
+    lastDisplayOledTime = millis();
+    //Vibration motor
+    digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
+    lastVibrationMotorStartTime = millis();
+  }
+  WiFi.disconnect();
+  
 }
 
 void loopInput(void) {
