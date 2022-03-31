@@ -40,6 +40,8 @@ DebouncedButton okButton(PIN_BUTTON_OK);
 DebouncedButton upButton(PIN_BUTTON_UP);
 DebouncedButton downButton(PIN_BUTTON_DOWN);
 
+#include "DeckMenu.h"
+
 unsigned long lastDisplayOledTime = 0;
 #define OLED_CLS_DELAY 10000
 
@@ -53,7 +55,7 @@ unsigned long lastVibrationMotorStartTime = 0;
 #include "ClusterLogo.h"
 
 void setup(void) {
-  setupInputs();
+  setupVibrationMotor();
   setupOled();
 
   display_oled.drawBitmap(0, 0, clusterLogo_data, clusterLogo_width, clusterLogo_height, 1);
@@ -99,8 +101,7 @@ void setup(void) {
   nfc.SAMConfig();
 }
 
-void setupInputs(void) {
-  pinMode(PIN_BUTTON_OK, INPUT_PULLUP);
+void setupVibrationMotor(void) {
   pinMode(PIN_VIBRATION_MOTOR, OUTPUT);
   digitalWrite(PIN_VIBRATION_MOTOR, LOW);
 }
@@ -151,6 +152,66 @@ void loopDownButton(void){
   uint8_t buttonValue = downButton.read();
   if(buttonValue == BUTTON_SHORT_PRESS) {
     Serial.println("SHORT DOWN BUTTON");
+
+    DeckMenuItem mainMenuItems[] = { 
+        { .label = "SCAN", .value = "SCAN", .selected = true },
+        { .label = "STIM", .value = "STIM", .selected = false },
+        { .label = "DTOD", .value = "DTOD", .selected = false }
+      };
+    
+    DeckMenu mainMenu(mainMenuItems, 3);
+
+    Serial.println(mainMenu.getSelected().label);
+    
+    // Menu Test
+    display_oled.clearDisplay();
+    display_oled.setTextSize(1);
+    display_oled.setCursor(0,0);
+    
+    /* OLD MENU
+    display_oled.println("+-[DECK]-+");
+    display_oled.print("| ");
+    display_oled.setTextColor(BLACK, WHITE);
+    display_oled.print(" SCAN ");
+    display_oled.setTextColor(WHITE, BLACK);
+    display_oled.println(" |");
+    display_oled.println("|  DTOD  |");
+    display_oled.println("|  CONF  |");
+    display_oled.println("+--------+");*/
+
+    //MENU
+    display_oled.drawRoundRect(0, 5, 64, 43, 4, WHITE);
+    display_oled.setCursor(15,2);
+    display_oled.setTextColor(WHITE, BLACK);
+    display_oled.print(" DECK ");
+    display_oled.setCursor(15,13);
+    display_oled.setTextColor(WHITE, BLACK);
+    display_oled.print(" SCAN ");
+    display_oled.setCursor(15,24);
+    display_oled.setTextColor(BLACK, WHITE);
+    display_oled.print(" DTOD ");
+    display_oled.setCursor(15,35);
+    display_oled.setTextColor(WHITE, BLACK);
+    display_oled.print(" CONF ");
+    
+
+    /* CONFIRMATION POP UP
+    display_oled.drawRoundRect(0, 0, 64, 48, 4, WHITE);
+    display_oled.setCursor(4,2);
+    display_oled.print("Diviser");
+    display_oled.setCursor(4,12);
+    display_oled.print("mes XP");
+    display_oled.setCursor(4,22);
+    display_oled.print("par 2 ?");
+    display_oled.setCursor(4,34);
+    display_oled.setTextColor(BLACK, WHITE);
+    display_oled.print("OUI");
+    display_oled.setTextColor(WHITE, BLACK);
+    display_oled.print("   ");
+    display_oled.print("NON");
+    */
+    
+    display_oled.display();
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
       Serial.println("LONG DOWN BUTTON");
@@ -260,55 +321,7 @@ void pn532ReadRfidLoop(void) {
     display_oled.display();
     lastDisplayOledTime = millis();
 
-    // Menu Test
-    //display_oled.clearDisplay();
-    //display_oled.setTextSize(1);
-    //display_oled.setCursor(0,0);
     
-    /* OLD MENU
-    display_oled.println("+-[DECK]-+");
-    display_oled.print("| ");
-    display_oled.setTextColor(BLACK, WHITE);
-    display_oled.print(" SCAN ");
-    display_oled.setTextColor(WHITE, BLACK);
-    display_oled.println(" |");
-    display_oled.println("|  DTOD  |");
-    display_oled.println("|  CONF  |");
-    display_oled.println("+--------+");*/
-
-    /* MENU
-    display_oled.drawRoundRect(0, 5, 64, 43, 4, WHITE);
-    display_oled.setCursor(15,2);
-    display_oled.setTextColor(WHITE, BLACK);
-    display_oled.print(" DECK ");
-    display_oled.setCursor(15,13);
-    display_oled.setTextColor(WHITE, BLACK);
-    display_oled.print(" SCAN ");
-    display_oled.setCursor(15,24);
-    display_oled.setTextColor(BLACK, WHITE);
-    display_oled.print(" DTOD ");
-    display_oled.setCursor(15,35);
-    display_oled.setTextColor(WHITE, BLACK);
-    display_oled.print(" CONF ");
-    */
-
-    /* CONFIRMATION POP UP
-    display_oled.drawRoundRect(0, 0, 64, 48, 4, WHITE);
-    display_oled.setCursor(4,2);
-    display_oled.print("Diviser");
-    display_oled.setCursor(4,12);
-    display_oled.print("mes XP");
-    display_oled.setCursor(4,22);
-    display_oled.print("par 2 ?");
-    display_oled.setCursor(4,34);
-    display_oled.setTextColor(BLACK, WHITE);
-    display_oled.print("OUI");
-    display_oled.setTextColor(WHITE, BLACK);
-    display_oled.print("   ");
-    display_oled.print("NON");
-    */
-    
-    //display_oled.display();
 
     //
 
