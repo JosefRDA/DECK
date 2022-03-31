@@ -41,6 +41,7 @@ DebouncedButton upButton(PIN_BUTTON_UP);
 DebouncedButton downButton(PIN_BUTTON_DOWN);
 
 #include "DeckMenu.h"
+DeckMenu* mainMenu;
 
 unsigned long lastDisplayOledTime = 0;
 #define OLED_CLS_DELAY 10000
@@ -99,6 +100,23 @@ void setup(void) {
 
   // configure board to read RFID tags
   nfc.SAMConfig();
+
+  setUpMainMenu();
+  mainMenu->render();
+}
+
+void setUpMainMenu(void) {
+  DeckMenuItem mainMenuItems[] = { 
+        { .label = "SCAN", .value = "SCAN", .selected = true },
+        { .label = "STIM", .value = "STIM", .selected = false },
+        { .label = "DTOD", .value = "DTOD", .selected = false }
+      };
+    
+  mainMenu = new DeckMenu(mainMenuItems, 3, display_oled);
+  mainMenu->render();
+  delay(4000);
+  mainMenu->select(DECKMENU_DIRECTION_DOWN);
+  mainMenu->render();
 }
 
 void setupVibrationMotor(void) {
@@ -134,17 +152,30 @@ void loop(void) {
 }
 
 void loopOkButton(void){
-  if(okButton.read() == BUTTON_SHORT_PRESS) {
-    Serial.println("START SCAN");
-    pn532ReadRfidLoop();
-    Serial.println("END SCAN");
+  uint8_t buttonValue = okButton.read();
+  if(buttonValue == BUTTON_SHORT_PRESS) {
+    Serial.println("SHORT OK BUTTON");
+  } else { 
+    if(buttonValue == BUTTON_LONG_PRESS) {
+      Serial.println("LONG OK BUTTON : SCAN");
+      Serial.println("START SCAN");
+      pn532ReadRfidLoop();
+      Serial.println("END SCAN");
+    } 
   }
 }
 
 void loopUpButton(void){
-  if(upButton.read() == BUTTON_SHORT_PRESS) {
-    //Serial.println("UP BUTTON");
-    pocScanWifi();
+  uint8_t buttonValue = upButton.read();
+  if(buttonValue == BUTTON_SHORT_PRESS) {
+    Serial.println("SHORT UP BUTTON");
+    mainMenu->select(DECKMENU_DIRECTION_UP);
+    mainMenu->render();
+  } else { 
+    if(buttonValue == BUTTON_LONG_PRESS) {
+      Serial.println("LONG UP BUTTON : WIFI");
+      pocScanWifi();
+    } 
   }
 }
 
@@ -152,69 +183,9 @@ void loopDownButton(void){
   uint8_t buttonValue = downButton.read();
   if(buttonValue == BUTTON_SHORT_PRESS) {
     Serial.println("SHORT DOWN BUTTON");
-
-    DeckMenuItem mainMenuItems[] = { 
-        { .label = "SCAN", .value = "SCAN", .selected = true },
-        { .label = "STIM", .value = "STIM", .selected = false },
-        { .label = "DTOD", .value = "DTOD", .selected = false }
-      };
-    
-    DeckMenu mainMenu(mainMenuItems, 3, display_oled);
-
-    mainMenu.render();
-    delay(4000);
-    mainMenu.select(DECKMENU_DIRECTION_DOWN);
-    mainMenu.render();
-    
-    // Menu Test
-    /*display_oled.clearDisplay();
-    display_oled.setTextSize(1);
-    display_oled.setCursor(0,0);*/
-    
-    /* OLD MENU
-    display_oled.println("+-[DECK]-+");
-    display_oled.print("| ");
-    display_oled.setTextColor(BLACK, WHITE);
-    display_oled.print(" SCAN ");
-    display_oled.setTextColor(WHITE, BLACK);
-    display_oled.println(" |");
-    display_oled.println("|  DTOD  |");
-    display_oled.println("|  CONF  |");
-    display_oled.println("+--------+");*/
-
-    //MENU
-   /* display_oled.drawRoundRect(0, 5, 64, 43, 4, WHITE);
-    display_oled.setCursor(15,2);
-    display_oled.setTextColor(WHITE, BLACK);
-    display_oled.print(" DECK ");
-    display_oled.setCursor(15,13);
-    display_oled.setTextColor(WHITE, BLACK);
-    display_oled.print(" SCAN ");
-    display_oled.setCursor(15,24);
-    display_oled.setTextColor(BLACK, WHITE);
-    display_oled.print(" DTOD ");
-    display_oled.setCursor(15,35);
-    display_oled.setTextColor(WHITE, BLACK);
-    display_oled.print(" CONF ");*/
-    
-
-    /* CONFIRMATION POP UP
-    display_oled.drawRoundRect(0, 0, 64, 48, 4, WHITE);
-    display_oled.setCursor(4,2);
-    display_oled.print("Diviser");
-    display_oled.setCursor(4,12);
-    display_oled.print("mes XP");
-    display_oled.setCursor(4,22);
-    display_oled.print("par 2 ?");
-    display_oled.setCursor(4,34);
-    display_oled.setTextColor(BLACK, WHITE);
-    display_oled.print("OUI");
-    display_oled.setTextColor(WHITE, BLACK);
-    display_oled.print("   ");
-    display_oled.print("NON");
-    */
-    
-    /*display_oled.display();*/
+    //TODO : IF IN MAIN MENU 
+    mainMenu->select(DECKMENU_DIRECTION_DOWN);
+    mainMenu->render();
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
       Serial.println("LONG DOWN BUTTON");
