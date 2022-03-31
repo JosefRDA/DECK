@@ -159,14 +159,17 @@ void loopDownButton(void){
         { .label = "DTOD", .value = "DTOD", .selected = false }
       };
     
-    DeckMenu mainMenu(mainMenuItems, 3);
+    DeckMenu mainMenu(mainMenuItems, 3, display_oled);
 
-    Serial.println(mainMenu.getSelected().label);
+    mainMenu.render();
+    delay(4000);
+    mainMenu.select(DECKMENU_DIRECTION_DOWN);
+    mainMenu.render();
     
     // Menu Test
-    display_oled.clearDisplay();
+    /*display_oled.clearDisplay();
     display_oled.setTextSize(1);
-    display_oled.setCursor(0,0);
+    display_oled.setCursor(0,0);*/
     
     /* OLD MENU
     display_oled.println("+-[DECK]-+");
@@ -180,7 +183,7 @@ void loopDownButton(void){
     display_oled.println("+--------+");*/
 
     //MENU
-    display_oled.drawRoundRect(0, 5, 64, 43, 4, WHITE);
+   /* display_oled.drawRoundRect(0, 5, 64, 43, 4, WHITE);
     display_oled.setCursor(15,2);
     display_oled.setTextColor(WHITE, BLACK);
     display_oled.print(" DECK ");
@@ -192,7 +195,7 @@ void loopDownButton(void){
     display_oled.print(" DTOD ");
     display_oled.setCursor(15,35);
     display_oled.setTextColor(WHITE, BLACK);
-    display_oled.print(" CONF ");
+    display_oled.print(" CONF ");*/
     
 
     /* CONFIRMATION POP UP
@@ -211,7 +214,7 @@ void loopDownButton(void){
     display_oled.print("NON");
     */
     
-    display_oled.display();
+    /*display_oled.display();*/
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
       Serial.println("LONG DOWN BUTTON");
