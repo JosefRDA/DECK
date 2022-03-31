@@ -2,11 +2,14 @@
 
 // CONSTRUCTORS ------------------------------------------------------------
 
-DebouncedButton::DebouncedButton(uint8_t pin) : state(LOW), currentState(LOW), lastState(LOW), lastDebounceTime(0) {
+DebouncedButton::DebouncedButton(uint8_t pin, uint8_t pressedState) : state(LOW), currentState(LOW), lastState(LOW), lastDebounceTime(0) {
   this->pin = pin;
   pinMode(pin, INPUT_PULLUP);
+
+  this->_pressedState = pressedState;
+  
   this->lastPushedTime = millis();
-  this->lastHighTime = millis();
+  this->lastHighTime = 0;
 }
 
 // CLASS PRIVATE FUNCTIONS ----------------------------------------------
@@ -21,29 +24,31 @@ void DebouncedButton::debug(void){
 // CLASS MEMBER FUNCTIONS --------------------------------------------------
 
 uint8_t DebouncedButton::read(void){
+  unsigned long currentTime = millis();
   
   uint8_t result = BUTTON_NO_EVENT;
+
   this->currentState = digitalRead(this->pin);
   
   if(this->currentState != this->lastState) {
-    this->lastDebounceTime = millis();
+    this->lastDebounceTime = currentTime;
   }
-  if((millis() - this->lastDebounceTime) > BUTTON_DEBOUNCE_DELAY) {
+  if((currentTime - this->lastDebounceTime) > BUTTON_DEBOUNCE_DELAY) {
     if (this->currentState != this->state) {
       this->state = this->currentState;
-      if (this->state == LOW) {
+      if (this->lastHighTime != 0 && this->state == this->_pressedState) {
         
-        //this->debug()
+        this->debug();
         
-        if((millis() - this->lastHighTime) < BUTTON_LONG_PRESS_DELAY) {
+        if((currentTime - this->lastHighTime) < BUTTON_LONG_PRESS_DELAY) {
           result = BUTTON_SHORT_PRESS;
         } else {
           result = BUTTON_LONG_PRESS;
         }
        
-        this->lastPushedTime = millis();
+        this->lastPushedTime = currentTime;
       } else {
-        this->lastHighTime = millis();
+        this->lastHighTime = currentTime;
       }
     }
   }

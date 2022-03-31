@@ -36,9 +36,9 @@ DeckDatabase deckDatabase;
 //D8 VCC other GND  
 
 #include "DebouncedButton.h"
-DebouncedButton okButton(PIN_BUTTON_OK);
-DebouncedButton upButton(PIN_BUTTON_UP);
-DebouncedButton downButton(PIN_BUTTON_DOWN);
+DebouncedButton okButton(PIN_BUTTON_OK, HIGH);
+DebouncedButton upButton(PIN_BUTTON_UP, HIGH);
+DebouncedButton downButton(PIN_BUTTON_DOWN, LOW);
 
 #include "DeckMenu.h"
 DeckMenu* mainMenu;

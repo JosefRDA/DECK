@@ -15,8 +15,8 @@
 
 #include <Arduino.h>
 
-#define BUTTON_DEBOUNCE_DELAY 50
-#define BUTTON_LONG_PRESS_DELAY 3000
+#define BUTTON_DEBOUNCE_DELAY         50
+#define BUTTON_LONG_PRESS_DELAY       3000
 
 // Read return value
 //TODO : Move to struct/enum
@@ -32,7 +32,7 @@ class DebouncedButton {
   
     // CONSTRUCTORS ------------------------------------------------------------
   
-    DebouncedButton(uint8_t pin);
+    DebouncedButton(uint8_t pin, uint8_t pressedState);
   
     // CLASS MEMBER FUNCTIONS ----------------------------------------------
     
@@ -55,6 +55,8 @@ private:
     unsigned long lastDebounceTime;
     unsigned long lastPushedTime; //For future use like double press
     unsigned long lastHighTime;
+
+    uint8_t _pressedState;
 
     // CLASS PRIVATE FUNCTIONS ----------------------------------------------
     void debug(void);
