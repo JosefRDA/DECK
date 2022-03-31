@@ -32,18 +32,13 @@ DeckDatabase deckDatabase;
 
 #define PIN_BUTTON_OK D6  
 #define PIN_BUTTON_UP D7
+#define PIN_BUTTON_DOWN D8
 //D8 VCC other GND  
-int buttonOkState = LOW;
-
-// the current and previous readings from the input pin
-int thisButtonOkState = LOW;
-int lastButtonOkState = LOW;
-
-unsigned long lastButtonOkDebounceTime = 0;
-#define BUTTON_OK_DEBOUNCE_DELAY 50
 
 #include "DebouncedButton.h"
+DebouncedButton okButton(PIN_BUTTON_OK);
 DebouncedButton upButton(PIN_BUTTON_UP);
+DebouncedButton downButton(PIN_BUTTON_DOWN);
 
 unsigned long lastDisplayOledTime = 0;
 #define OLED_CLS_DELAY 10000
@@ -130,16 +125,31 @@ void printRfidReaderInfo(uint32_t versiondata) {
 }
 
 void loop(void) {
-  loopInput();
+  loopOkButton();
+  loopUpButton();
+  loopDownButton();
   loopCleanOled();
   loopVibrationMotor();
-  loopUpButton();
+}
+
+void loopOkButton(void){
+  if(okButton.hasBeenPushed()) {
+    Serial.println("START SCAN");
+    pn532ReadRfidLoop();
+    Serial.println("END SCAN");
+  }
 }
 
 void loopUpButton(void){
   if(upButton.hasBeenPushed()) {
     //Serial.println("UP BUTTON");
     pocScanWifi();
+  }
+}
+
+void loopDownButton(void){
+  if(downButton.hasBeenPushed()) {
+    Serial.println("DOWN BUTTON");
   }
 }
 
@@ -196,24 +206,6 @@ void pocScanWifi(void) {
   }
   WiFi.disconnect();
   
-}
-
-void loopInput(void) {
-  thisButtonOkState = digitalRead(PIN_BUTTON_OK);
-   if (thisButtonOkState != lastButtonOkState) {
-    lastButtonOkDebounceTime = millis();
-  }
-  if ((millis() - lastButtonOkDebounceTime) > BUTTON_OK_DEBOUNCE_DELAY) {
-    if (thisButtonOkState != buttonOkState) {
-      buttonOkState = thisButtonOkState;
-      if (buttonOkState == LOW) {
-        Serial.println("START SCAN");
-        pn532ReadRfidLoop();
-        Serial.println("END SCAN");
-      }
-    }
-  }
-  lastButtonOkState = thisButtonOkState;
 }
 
 void loopCleanOled(void) {
