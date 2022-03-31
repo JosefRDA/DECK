@@ -1,3 +1,4 @@
+
 #include <SPI.h>
 #include <Wire.h>
 #include <PN532_I2C.h>
@@ -52,6 +53,7 @@ unsigned long lastVibrationMotorStartTime = 0;
 #define VIBRATION_MOTOR_DELAY 2000
 
 #define SSID_PREFIX "Bbox"
+//#define SSID_PREFIX "TOTO"
 
 #include "ClusterLogo.h"
 
@@ -150,7 +152,11 @@ void pocScanWifi(void) {
   // WiFi.scanNetworks will return the number of networks found
   int n = WiFi.scanNetworks();
   if (n == 0) {
-    //TODO : HANDLE CASE WHERE NO WIFI IS FOUND
+    display_oled.clearDisplay();
+    display_oled.setCursor(0,0);
+    display_oled.println("Aucun DECK a scanner");
+    display_oled.display();
+    lastDisplayOledTime = millis();
   } else {
     int maxForce = -999;
     String closestDeckName = ""; 
@@ -174,14 +180,19 @@ void pocScanWifi(void) {
     display_oled.clearDisplay();
     display_oled.setCursor(0,0);
     
-    String dtodLabel = deckDatabase.getLabelByUid("/dtod.json", closestDeckName);
+    String dtodLabel = "Aucun DECK a scanner";
+    if(maxForce >  -999) {
+      dtodLabel = deckDatabase.getLabelByUid("/dtod.json", closestDeckName);
+    }
     display_oled.println(dtodLabel);
     
     display_oled.display();
     lastDisplayOledTime = millis();
-    //Vibration motor
-    digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
-    lastVibrationMotorStartTime = millis();
+    if(maxForce >  -999) {
+      //Vibration motor
+      digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
+      lastVibrationMotorStartTime = millis();
+    }
   }
   WiFi.disconnect();
   
