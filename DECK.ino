@@ -53,17 +53,19 @@ unsigned long lastVibrationMotorStartTime = 0;
 #define SSID_PREFIX "Bbox"
 //#define SSID_PREFIX "TOTO"
 
+#define PIN_VIBRATION_MOTOR D5
+
 #include "ClusterLogo.h"
 
 void setup(void) {
   setupVibrationMotor();
   setupOled();
 
-  display_oled.drawBitmap(0, 0, clusterLogo_data, clusterLogo_width, clusterLogo_height, 1);
-  display_oled.display();
+  displayClusterSplashScreen();
+
+  vibrationMotorVibrate(2000);
 
   delay(2000);
-
 
   display_oled.clearDisplay();
   display_oled.display();
@@ -94,9 +96,15 @@ void setup(void) {
   
     uint32_t versiondata = nfc.getFirmwareVersion();
   }
+  nfc.SAMConfig();
+}
 
-  //RFID INFO FOR DEBUG
-  //printRfidReaderInfo(versiondata)
+//blocking
+void vibrationMotorVibrate(unsigned long pDelay) {
+  digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
+  delay(pDelay);
+  digitalWrite(PIN_VIBRATION_MOTOR, LOW);
+}
 
   // configure board to read RFID tags
   nfc.SAMConfig();
@@ -318,7 +326,6 @@ void pn532ReadRfidLoop(void) {
     display_oled.display();
     lastDisplayOledTime = millis();
 
-    
 
     //
 
