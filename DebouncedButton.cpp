@@ -38,7 +38,7 @@ uint8_t DebouncedButton::read(void){
       this->state = this->currentState;
       if (this->lastHighTime != 0 && this->state == this->_pressedState) {
         
-        this->debug();
+        //this->debug();
         
         if((currentTime - this->lastHighTime) < BUTTON_LONG_PRESS_DELAY) {
           result = BUTTON_SHORT_PRESS;

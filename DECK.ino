@@ -107,9 +107,9 @@ void setup(void) {
 
 void setUpMainMenu(void) {
   DeckMenuItem mainMenuItems[] = { 
-        { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &actionOkButton },
+        { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan },
         { .label = "STIM", .value = "STIM", .selected = false },
-        { .label = "DTOD", .value = "DTOD", .selected = false }
+        { .label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod }
       };
     
   mainMenu = new DeckMenu(mainMenuItems, 3, display_oled);
@@ -150,36 +150,33 @@ void loop(void) {
 
 void loopOkButton(void){
   uint8_t buttonValue = okButton.read();
-  if(buttonValue == BUTTON_SHORT_PRESS) {
+  if(buttonValue != BUTTON_NO_EVENT) {
     DeckMenuItem selectedMenuItem = mainMenu->getSelected();
-    Serial.println("SHORT OK BUTTON");
-    Serial.print("Selected menu = ");
-    Serial.println(selectedMenuItem.value);
-    selectedMenuItem.shortPressAction();
-  } else { 
-    if(buttonValue == BUTTON_LONG_PRESS) {
-      actionOkButton();
-    } 
+    
+    switch(buttonValue) {
+      case BUTTON_SHORT_PRESS:
+        if(*selectedMenuItem.shortPressAction != NULL) {
+          selectedMenuItem.shortPressAction();
+        }
+        break;
+      case BUTTON_LONG_PRESS:
+        if(*selectedMenuItem.longPressAction != NULL) {
+          selectedMenuItem.longPressAction();
+        }
+        break;
+    }
   }
-}
-
-void actionOkButton(void) {
-  Serial.println("LONG OK BUTTON : SCAN");
-  Serial.println("START SCAN");
-  pn532ReadRfidLoop();
-  Serial.println("END SCAN");
 }
 
 void loopUpButton(void){
   uint8_t buttonValue = upButton.read();
   if(buttonValue == BUTTON_SHORT_PRESS) {
-    Serial.println("SHORT UP BUTTON");
+    //Serial.println("SHORT UP BUTTON");
     mainMenu->select(DECKMENU_DIRECTION_UP);
     mainMenu->render();
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
-      Serial.println("LONG UP BUTTON : WIFI");
-      pocScanWifi();
+      //Serial.println("LONG UP BUTTON : WIFI");
     } 
   }
 }
@@ -187,22 +184,44 @@ void loopUpButton(void){
 void loopDownButton(void){
   uint8_t buttonValue = downButton.read();
   if(buttonValue == BUTTON_SHORT_PRESS) {
-    Serial.println("SHORT DOWN BUTTON");
+    //Serial.println("SHORT DOWN BUTTON");
     //TODO : IF IN MAIN MENU 
     mainMenu->select(DECKMENU_DIRECTION_DOWN);
     mainMenu->render();
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
-      Serial.println("LONG DOWN BUTTON");
+      //Serial.println("LONG DOWN BUTTON");
     } 
   }
 }
 
-void pocScanWifi(void) {
+// ACTIONS ----------------------------------------------
+
+void mainMenuActionScan(void) {
+  Serial.println("START SCAN");
+  pn532ReadRfidLoop();
+  Serial.println("END SCAN");
+}
+
+void mainMenuActionDtod(void) {
+  display_oled.clearDisplay();
+  display_oled.setCursor(0,0);
+  display_oled.println("Scan des deck à portée en cours .");
+  display_oled.display();
+  lastDisplayOledTime = millis();
+
+  
   //INIT
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   delay(100);
+
+  
+  display_oled.clearDisplay();
+  display_oled.setCursor(0,0);
+  display_oled.println("Scan des deck à portée en cours ...");
+  display_oled.display();
+  lastDisplayOledTime = millis();
 
   // WiFi.scanNetworks will return the number of networks found
   int n = WiFi.scanNetworks();
@@ -250,7 +269,6 @@ void pocScanWifi(void) {
     }
   }
   WiFi.disconnect();
-  
 }
 
 void loopCleanOled(void) {
