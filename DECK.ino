@@ -107,15 +107,12 @@ void setup(void) {
 
 void setUpMainMenu(void) {
   DeckMenuItem mainMenuItems[] = { 
-        { .label = "SCAN", .value = "SCAN", .selected = true },
+        { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &actionOkButton },
         { .label = "STIM", .value = "STIM", .selected = false },
         { .label = "DTOD", .value = "DTOD", .selected = false }
       };
     
   mainMenu = new DeckMenu(mainMenuItems, 3, display_oled);
-  mainMenu->render();
-  delay(4000);
-  mainMenu->select(DECKMENU_DIRECTION_DOWN);
   mainMenu->render();
 }
 
@@ -154,15 +151,23 @@ void loop(void) {
 void loopOkButton(void){
   uint8_t buttonValue = okButton.read();
   if(buttonValue == BUTTON_SHORT_PRESS) {
+    DeckMenuItem selectedMenuItem = mainMenu->getSelected();
     Serial.println("SHORT OK BUTTON");
+    Serial.print("Selected menu = ");
+    Serial.println(selectedMenuItem.value);
+    selectedMenuItem.shortPressAction();
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
-      Serial.println("LONG OK BUTTON : SCAN");
-      Serial.println("START SCAN");
-      pn532ReadRfidLoop();
-      Serial.println("END SCAN");
+      actionOkButton();
     } 
   }
+}
+
+void actionOkButton(void) {
+  Serial.println("LONG OK BUTTON : SCAN");
+  Serial.println("START SCAN");
+  pn532ReadRfidLoop();
+  Serial.println("END SCAN");
 }
 
 void loopUpButton(void){
