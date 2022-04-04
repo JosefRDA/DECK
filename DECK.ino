@@ -5,7 +5,7 @@
 #include <PN532.h>
 #include "ESP8266WiFi.h"
 PN532_I2C pn532i2c(Wire);
-PN532 nfc(pn532i2c);	
+PN532 nfc(pn532i2c);  
 
 //OLED
 #include <Adafruit_GFX.h>
@@ -53,19 +53,17 @@ unsigned long lastVibrationMotorStartTime = 0;
 #define SSID_PREFIX "Bbox"
 //#define SSID_PREFIX "TOTO"
 
-#define PIN_VIBRATION_MOTOR D5
-
 #include "ClusterLogo.h"
 
 void setup(void) {
   setupVibrationMotor();
   setupOled();
 
-  displayClusterSplashScreen();
-
-  vibrationMotorVibrate(2000);
+  display_oled.drawBitmap(0, 0, clusterLogo_data, clusterLogo_width, clusterLogo_height, 1);
+  display_oled.display();
 
   delay(2000);
+
 
   display_oled.clearDisplay();
   display_oled.display();
@@ -96,15 +94,9 @@ void setup(void) {
   
     uint32_t versiondata = nfc.getFirmwareVersion();
   }
-  nfc.SAMConfig();
-}
 
-//blocking
-void vibrationMotorVibrate(unsigned long pDelay) {
-  digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
-  delay(pDelay);
-  digitalWrite(PIN_VIBRATION_MOTOR, LOW);
-}
+  //RFID INFO FOR DEBUG
+  //printRfidReaderInfo(versiondata)
 
   // configure board to read RFID tags
   nfc.SAMConfig();
@@ -326,6 +318,7 @@ void pn532ReadRfidLoop(void) {
     display_oled.display();
     lastDisplayOledTime = millis();
 
+    
 
     //
 
