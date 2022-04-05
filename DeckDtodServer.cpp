@@ -2,7 +2,11 @@
 
 // CONSTRUCTORS ------------------------------------------------------------
 
-DeckDtodServer::DeckDtodServer() { 
+DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled) { 
+
+  _oled = oled;
+
+  
   // Set your Static IP address
   IPAddress local_IP(192, 168, 1, 184);
   // Set your Gateway IP address
@@ -34,10 +38,11 @@ DeckDtodServer::DeckDtodServer() {
   IPAddress myIP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(myIP);
-  std::function<void(void)> f = std::bind(&DeckDtodServer::handleRoot, this);
-  _webServer->on("/", f);
+  std::function<void(void)> handleRootFunction = std::bind(&DeckDtodServer::handleRoot, this);
+  _webServer->on("/", handleRootFunction);
   _webServer->begin();
   Serial.println("HTTP server started");
+
   
 }
 
@@ -48,5 +53,27 @@ void DeckDtodServer::handleClient(void) {
 }
 
 void DeckDtodServer::handleRoot(void) {
-  this->_webServer->send(200, "text/html", "<h1>You are connected</h1>");
+  _oled.clearDisplay();
+  _oled.setTextSize(1);
+  _oled.setCursor(0,0);
+
+  _oled.drawRoundRect(0, 5, 64, 43, 4, WHITE);
+
+  //_oled.setCursor(4,2);
+  //_oled.print("");
+  _oled.setCursor(4,12);
+  _oled.print("Accepter");
+  _oled.setCursor(4,22);
+  _oled.print("DTOD ?");
+  _oled.setCursor(4,34);
+  _oled.setTextColor(BLACK, WHITE);
+  _oled.print("OUI");
+  _oled.setTextColor(WHITE, BLACK);
+  _oled.print("   ");
+  _oled.print("NON");
+  _oled.display();
+
+  delay(5000);
+  
+  this->_webServer->send(200, "application/json", "<h1>You are connected</h1>");
 }

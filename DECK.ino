@@ -209,7 +209,7 @@ void loopDownButton(void){
 // ACTIONS ----------------------------------------------
 
 void mainMenuActionStim(void) {
-  dtodServer = new DeckDtodServer();
+  dtodServer = new DeckDtodServer(display_oled);
 }
 
 void mainMenuActionScan(void) {
