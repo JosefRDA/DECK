@@ -43,6 +43,9 @@ DebouncedButton downButton(PIN_BUTTON_DOWN, LOW);
 #include "DeckMenu.h"
 DeckMenu* mainMenu;
 
+#include "DeckDtodServer.h"
+DeckDtodServer* dtodServer;
+
 unsigned long lastDisplayOledTime = 0;
 #define OLED_CLS_DELAY 10000
 
@@ -103,17 +106,18 @@ void setup(void) {
 
   setUpMainMenu();
   mainMenu->render();
+
+  dtodServer = NULL;
 }
 
 void setUpMainMenu(void) {
   DeckMenuItem mainMenuItems[] = { 
         { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan },
-        { .label = "STIM", .value = "STIM", .selected = false },
+        { .label = "STIM", .value = "STIM", .selected = false, .shortPressAction = &mainMenuActionStim },
         { .label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod }
       };
     
   mainMenu = new DeckMenu(mainMenuItems, 3, display_oled);
-  mainMenu->render();
 }
 
 void setupVibrationMotor(void) {
@@ -146,6 +150,13 @@ void loop(void) {
   loopDownButton();
   loopCleanOled();
   loopVibrationMotor();
+  loopDtodServer();
+}
+
+void loopDtodServer() {
+  if(dtodServer != NULL) {
+    dtodServer->handleClient();
+  }
 }
 
 void loopOkButton(void){
@@ -196,6 +207,10 @@ void loopDownButton(void){
 }
 
 // ACTIONS ----------------------------------------------
+
+void mainMenuActionStim(void) {
+  dtodServer = new DeckDtodServer();
+}
 
 void mainMenuActionScan(void) {
   Serial.println("START SCAN");
