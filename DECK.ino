@@ -46,6 +46,9 @@ DeckMenu* mainMenu;
 #include "DeckDtodServer.h"
 DeckDtodServer* dtodServer;
 
+#include "DeckPaginableText.h"
+DeckPaginableText* paginableText;
+
 unsigned long lastDisplayOledTime = 0;
 #define OLED_CLS_DELAY 10000
 
@@ -108,6 +111,7 @@ void setup(void) {
   mainMenu->render();
 
   dtodServer = NULL;
+  paginableText = NULL;
 }
 
 void setUpMainMenu(void) {
@@ -326,11 +330,9 @@ void pn532ReadRfidLoop(void) {
     String stimLabel = deckDatabase.getLabelByUid("/stim.json", rfidUidBufferToString(uid));
     Serial.println(stimLabel);
     Serial.println("");
-    
-    display_oled.clearDisplay();
-    display_oled.setCursor(0,0);
-    display_oled.println(stimLabel);
-    display_oled.display();
+
+    paginableText = new DeckPaginableText(stimLabel, display_oled);
+    paginableText->render();
     lastDisplayOledTime = millis();
 
     

@@ -1,5 +1,5 @@
 #ifndef _DECKINPUTMANAGER_H_
-#define _DECKINPUTMANAGE_H_
+#define _DECKINPUTMANAGER_H_
 
 #include <Arduino.h>
 
@@ -17,4 +17,4 @@ class DeckInputManager {
   
 };
 
-#endif // end _DECKINPUTMANAGE_H_
+#endif // end _DECKINPUTMANAGER_H_
