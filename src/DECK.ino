@@ -46,6 +46,9 @@ DeckMenu* mainMenu;
 #include "DeckConfirmationPopUp.h"
 DeckConfirmationPopUp* confirmationPopUp;
 
+#include "DeckChoiceNumberPopUp.h"
+DeckChoiceNumberPopUp* choiceNumberPopUp;
+
 #include "DeckDtodServer.h"
 DeckDtodServer* dtodServer;
 
@@ -418,8 +421,10 @@ void confirmBeforeEnterCharacterNumberAction() {
 }
 
 void enterCharacterNumberAction() {
-  paginableText = new DeckPaginableText("Enter Character", display_oled);
-  paginableText->render();
+
+  choiceNumberPopUp = new DeckChoiceNumberPopUp(display_oled);
+  //paginableText = new DeckPaginableText("Enter Character", display_oled);
+  choiceNumberPopUp->render();
 
 }
 

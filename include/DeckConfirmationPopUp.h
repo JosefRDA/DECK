@@ -7,11 +7,13 @@
 #include <Adafruit_SSD1306.h>
 
 //RENDER
-#define DECKCONFIRMATIONPOPUP_RENDER_X_POS         15
-#define DECKCONFIRMATIONPOPUP_RENDER_Y_HEADER_POS  2
-#define DECKCONFIRMATIONPOPUP_RENDER_Y_FIRST_POS   13
-#define DECKCONFIRMATIONPOPUP_RENDER_Y_POS_OFSET   11
-#define DECKCONFIRMATIONPOPUP_RENDER_QUESTION_LABEL_LINE_LENGTH  9
+#define DECKCONFIRMATIONPOPUP_RENDER_X_POS                        4
+#define DECKCONFIRMATIONPOPUP_RENDER_Y_FIRST_POS                  2
+#define DECKCONFIRMATIONPOPUP_RENDER_Y_POS_OFSET                  10
+#define DECKCONFIRMATIONPOPUP_RENDER_QUESTION_LABEL_LINE_LENGTH   9
+#define DECKCONFIRMATIONPOPUP_RENDER_BUTTON_LABELS_MAX_LENGTH     3
+#define DECKCONFIRMATIONPOPUP_LABELS_OK_DEFAULT                   "Oui"
+#define DECKCONFIRMATIONPOPUP_LABELS_KO_DEFAULT                   "Non"
 
 class DeckConfirmationPopUp {
   public:
@@ -19,7 +21,7 @@ class DeckConfirmationPopUp {
     // CONSTRUCTORS ------------------------------------------------------------
     
     DeckConfirmationPopUp(String questionLabel, String okLabel, String koLabel, Adafruit_SSD1306 oled);
-    DeckConfirmationPopUp(String questionLabel, Adafruit_SSD1306 oled) : DeckConfirmationPopUp(questionLabel, "Oui", "Non", oled){};
+    DeckConfirmationPopUp(String questionLabel, Adafruit_SSD1306 oled) : DeckConfirmationPopUp(questionLabel, DECKCONFIRMATIONPOPUP_LABELS_OK_DEFAULT, DECKCONFIRMATIONPOPUP_LABELS_KO_DEFAULT, oled){};
     
     // CLASS MEMBER FUNCTIONS ----------------------------------------------
 
@@ -37,4 +39,4 @@ class DeckConfirmationPopUp {
     Adafruit_SSD1306 _oled;
 };
 
-#endif // end _DECKMENU_H_
+#endif // end _DECKCONFIRMATIONPOPUP_
