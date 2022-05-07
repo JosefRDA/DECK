@@ -43,6 +43,9 @@ DebouncedButton downButton(PIN_BUTTON_DOWN, LOW);
 #include "DeckMenu.h"
 DeckMenu* mainMenu;
 
+#include "DeckConfirmationPopUp.h"
+DeckConfirmationPopUp* confirmationPopUp;
+
 #include "DeckDtodServer.h"
 DeckDtodServer* dtodServer;
 
@@ -65,11 +68,16 @@ unsigned long lastVibrationMotorStartTime = 0;
 #include <StateMachine.h>
 const int STATE_DELAY = 1000;
 
-StateMachine machine = StateMachine();
-State* StateMainMenu = machine.addState(&loopStateMainMenu);
-State* StateScan = machine.addState(&loopStateScan);
+StateMachine navigationMachine = StateMachine();
+State* StateMainMenu = navigationMachine.addState(&loopStateMainMenu);
+State* StateScan = navigationMachine.addState(&loopStateScan);
+State* StateConfirmBeforeEnterCharacterNumber = navigationMachine.addState(&loopStateConfirmBeforeEnterCharacterNumber);
+State* StateEnterCharacterNumber = navigationMachine.addState(&loopStateEnterCharacterNumber);
 
 bool scanHasBeenPressed = false;
+bool confirmBeforeEnterCharacterNumberHasBeenPressed = false;
+bool enterCharacterNumberHasBeenPressed = false;
+bool returnToMainMenuHasBeenPressed = false;
 unsigned long lastStateChange = 0L;
 
 void setup(void) {
@@ -122,13 +130,17 @@ void setup(void) {
   paginableText = NULL;
 
   
-  StateMainMenu->addTransition(&transitionStateMainMenuToStateScan,StateScan);
-  StateScan->addTransition(&transitionStateScanToStateMainMenu,StateMainMenu);
+  StateMainMenu->addTransition(&transitionStateMainMenuToStateScan, StateScan);
+  StateMainMenu->addTransition(&transitionStateMainMenuToConfirmBeforeEnterCharacterNumber, StateConfirmBeforeEnterCharacterNumber);
+  StateScan->addTransition(&transitionStateScanToStateMainMenu, StateMainMenu);
+  StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToEnterCharacterNumber, StateEnterCharacterNumber);
+  StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToStateMainMenu, StateMainMenu); 
+  StateEnterCharacterNumber->addTransition(&transitionStateEnterCharacterNumberToStateMainMenu, StateMainMenu);
 }
 
 void setUpMainMenu(void) {
   DeckMenuItem mainMenuItems[] = { 
-        { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan },
+        { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber },
         { .label = "STIM", .value = "STIM", .selected = false, .shortPressAction = &mainMenuActionStim },
         { .label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod }
       };
@@ -164,7 +176,7 @@ void loop(void) {
   loopCleanOled();
   loopVibrationMotor();
   loopDtodServer();
-  machine.run();
+  navigationMachine.run();
 }
 
 void loopDtodServer() {
@@ -220,10 +232,52 @@ void loopMainMenuDownButton(void){
   }
 }
 
+void loopConfirmOkButton(void){
+  uint8_t buttonValue = okButton.read();
+  if(buttonValue != BUTTON_NO_EVENT) {
+    if(confirmationPopUp->isOkSelected()) {
+      enterCharacterNumberHasBeenPressed = true;
+    } else {
+      returnToMainMenuHasBeenPressed = true;
+    }
+  }
+}
+
+void loopConfirmUpButton(void){
+  uint8_t buttonValue = upButton.read();
+  if(buttonValue == BUTTON_SHORT_PRESS) {
+    //Serial.println("SHORT UP BUTTON");
+    confirmationPopUp->toggleSelection();
+    confirmationPopUp->render();
+  } else { 
+    if(buttonValue == BUTTON_LONG_PRESS) {
+      //Serial.println("LONG UP BUTTON : WIFI");
+    } 
+  }
+}
+
+void loopConfirmDownButton(void){
+  uint8_t buttonValue = downButton.read();
+  if(buttonValue == BUTTON_SHORT_PRESS) {
+    //Serial.println("SHORT DOWN BUTTON");
+    //TODO : IF IN MAIN MENU 
+    confirmationPopUp->toggleSelection();
+    confirmationPopUp->render();
+  } else { 
+    if(buttonValue == BUTTON_LONG_PRESS) {
+      //Serial.println("LONG DOWN BUTTON");
+    } 
+  }
+}
+
 // ACTIONS ----------------------------------------------
 
 void mainMenuActionStim(void) {
   dtodServer = new DeckDtodServer(display_oled);
+}
+
+void mainMenuActionEnterCharacterNumber(void) {
+  confirmBeforeEnterCharacterNumberHasBeenPressed = true;
 }
 
 void mainMenuActionScan(void) {
@@ -358,10 +412,21 @@ void pn532ReadRfidLoop(void) {
   }
 }
 
+void confirmBeforeEnterCharacterNumberAction() {
+  confirmationPopUp = new DeckConfirmationPopUp("Definir id personnage ?", display_oled);
+  confirmationPopUp->render();
+}
+
+void enterCharacterNumberAction() {
+  paginableText = new DeckPaginableText("Enter Character", display_oled);
+  paginableText->render();
+
+}
+
 //-------------------------
 
 void loopStateMainMenu(){
-  if(machine.executeOnce) {
+  if(navigationMachine.executeOnce) {
     lastStateChange = millis();
     setUpMainMenu();
     mainMenu->render();
@@ -372,9 +437,26 @@ void loopStateMainMenu(){
 }
 
 void loopStateScan(){
-  if(machine.executeOnce) {
+  if(navigationMachine.executeOnce) {
     lastStateChange = millis();
     pn532ReadRfidLoop();
+  }
+}
+
+void loopStateConfirmBeforeEnterCharacterNumber() {
+  if(navigationMachine.executeOnce) {
+    lastStateChange = millis();
+    confirmBeforeEnterCharacterNumberAction();
+  }
+  loopConfirmOkButton();
+  loopConfirmUpButton();
+  loopConfirmDownButton();
+}
+
+void loopStateEnterCharacterNumber() {
+  if(navigationMachine.executeOnce) {
+    lastStateChange = millis();
+    enterCharacterNumberAction();
   }
 }
 
@@ -386,6 +468,46 @@ bool transitionStateMainMenuToStateScan(){
   return false;
 }
 
+bool transitionStateMainMenuToConfirmBeforeEnterCharacterNumber(){
+  if(confirmBeforeEnterCharacterNumberHasBeenPressed) {
+    confirmBeforeEnterCharacterNumberHasBeenPressed = false;
+    return true;
+  } 
+  return false;
+}
+
+bool transitionStateConfirmBeforeEnterCharacterNumberToEnterCharacterNumber() {
+  if(enterCharacterNumberHasBeenPressed) {
+    enterCharacterNumberHasBeenPressed = false;
+    return true;
+  } 
+  return false;
+}
+
+bool transitionStateConfirmBeforeEnterCharacterNumberToStateMainMenu() {
+  return transitionGenericReturnToMainMenu();
+}
+
+bool transitionGenericSecond(long second){
+  return millis() - lastStateChange > 1000 * second;
+}
+
+bool transitionGeneric10Seconds(){
+  return transitionGenericSecond(10);
+}
+
 bool transitionStateScanToStateMainMenu(){
-  return millis() - lastStateChange > 10000;
+  return transitionGeneric10Seconds();
+}
+
+bool transitionStateEnterCharacterNumberToStateMainMenu(){
+  return transitionGeneric10Seconds();
+}
+
+bool transitionGenericReturnToMainMenu(){
+  if(returnToMainMenuHasBeenPressed) {
+    returnToMainMenuHasBeenPressed = false;
+    return true;
+  } 
+  return false;
 }
