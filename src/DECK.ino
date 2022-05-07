@@ -70,6 +70,7 @@ State* StateMainMenu = machine.addState(&loopStateMainMenu);
 State* StateScan = machine.addState(&loopStateScan);
 
 bool scanHasBeenPressed = false;
+unsigned long lastStateChange = 0L;
 
 void setup(void) {
   setupVibrationMotor();
@@ -117,9 +118,6 @@ void setup(void) {
   // configure board to read RFID tags
   nfc.SAMConfig();
 
-  setUpMainMenu();
-  mainMenu->render();
-
   dtodServer = NULL;
   paginableText = NULL;
 
@@ -163,9 +161,6 @@ void printRfidReaderInfo(uint32_t versiondata) {
 }
 
 void loop(void) {
-  loopOkButton();
-  loopUpButton();
-  loopDownButton();
   loopCleanOled();
   loopVibrationMotor();
   loopDtodServer();
@@ -178,7 +173,7 @@ void loopDtodServer() {
   }
 }
 
-void loopOkButton(void){
+void loopMainMenuOkButton(void){
   uint8_t buttonValue = okButton.read();
   if(buttonValue != BUTTON_NO_EVENT) {
     DeckMenuItem selectedMenuItem = mainMenu->getSelected();
@@ -198,7 +193,7 @@ void loopOkButton(void){
   }
 }
 
-void loopUpButton(void){
+void loopMainMenuUpButton(void){
   uint8_t buttonValue = upButton.read();
   if(buttonValue == BUTTON_SHORT_PRESS) {
     //Serial.println("SHORT UP BUTTON");
@@ -211,7 +206,7 @@ void loopUpButton(void){
   }
 }
 
-void loopDownButton(void){
+void loopMainMenuDownButton(void){
   uint8_t buttonValue = downButton.read();
   if(buttonValue == BUTTON_SHORT_PRESS) {
     //Serial.println("SHORT DOWN BUTTON");
@@ -363,27 +358,22 @@ void pn532ReadRfidLoop(void) {
   }
 }
 
-//deprecated
-String rfidGetLabelToDisplayFromKey(String key) {
-  String result;
-
-  if(key.equals("C09FC249")) {
-    result = "Carte Blanche";
-  } else if(key.equals("CE74D83F")) {
-    result = "Tag Bleu";
-  } else {
-    result = "Inconnu";
-  }
-
-  return result;
-}
+//-------------------------
 
 void loopStateMainMenu(){
+  if(machine.executeOnce) {
+    lastStateChange = millis();
+    setUpMainMenu();
+    mainMenu->render();
+  }
+  loopMainMenuOkButton();
+  loopMainMenuUpButton();
+  loopMainMenuDownButton();
 }
 
-//-------------------------
 void loopStateScan(){
   if(machine.executeOnce) {
+    lastStateChange = millis();
     pn532ReadRfidLoop();
   }
 }
@@ -397,5 +387,5 @@ bool transitionStateMainMenuToStateScan(){
 }
 
 bool transitionStateScanToStateMainMenu(){
-  return false;
+  return millis() - lastStateChange > 10000;
 }
