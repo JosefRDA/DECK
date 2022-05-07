@@ -139,6 +139,14 @@ void setup(void) {
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToEnterCharacterNumber, StateEnterCharacterNumber);
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToStateMainMenu, StateMainMenu); 
   StateEnterCharacterNumber->addTransition(&transitionStateEnterCharacterNumberToStateMainMenu, StateMainMenu);
+
+  Serial.println("BeforeChange");
+  deckDatabase.printJsonFile("/config.json");
+
+  deckDatabase.persistFirstLevelDataByKeyValue("/config.json", "player_id", "010");
+
+  Serial.println("AfterChange");
+  deckDatabase.printJsonFile("/config.json");
 }
 
 void setUpMainMenu(void) {

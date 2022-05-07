@@ -132,3 +132,39 @@ JsonObject DeckDatabase::getStimByUid(const char * filename, String uid) {
 
   return result;
 }
+
+void DeckDatabase::persistFirstLevelDataByKeyValue(const char * filename, String fieldKey, String fieldValue) {
+  JsonObject result;
+
+  // Open file for reading
+  File file = LittleFS.open(filename, "r");
+  if (!file) 
+  {
+    Serial.println(F("Failed to open file for reading"));
+  }
+
+  StaticJsonDocument<1024> doc;
+
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(doc, file);
+  if (error)
+  {
+    Serial.println(F("Failed to deserialize file"));
+    Serial.println(error.c_str());
+  }
+  else
+  {
+    JsonObject configArray = doc.as<JsonObject>();
+    configArray[fieldKey] = fieldValue;
+
+    file.close();
+    file = LittleFS.open(filename, "w");
+
+    String targetJson;
+    serializeJson(configArray, targetJson);
+    file.print(targetJson.c_str());
+
+  }
+
+  file.close();
+}
