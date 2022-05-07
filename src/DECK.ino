@@ -63,6 +63,13 @@ unsigned long lastVibrationMotorStartTime = 0;
 #include "DeckScanResult.h"
 
 #include <StateMachine.h>
+const int STATE_DELAY = 1000;
+
+StateMachine machine = StateMachine();
+State* StateMainMenu = machine.addState(&loopStateMainMenu);
+State* StateScan = machine.addState(&loopStateScan);
+
+bool scanHasBeenPressed = false;
 
 void setup(void) {
   setupVibrationMotor();
@@ -115,6 +122,10 @@ void setup(void) {
 
   dtodServer = NULL;
   paginableText = NULL;
+
+  
+  StateMainMenu->addTransition(&transitionStateMainMenuToStateScan,StateScan);
+  StateScan->addTransition(&transitionStateScanToStateMainMenu,StateMainMenu);
 }
 
 void setUpMainMenu(void) {
@@ -158,6 +169,7 @@ void loop(void) {
   loopCleanOled();
   loopVibrationMotor();
   loopDtodServer();
+  machine.run();
 }
 
 void loopDtodServer() {
@@ -221,7 +233,7 @@ void mainMenuActionStim(void) {
 
 void mainMenuActionScan(void) {
   Serial.println("START SCAN");
-  pn532ReadRfidLoop();
+  scanHasBeenPressed = true;
   Serial.println("END SCAN");
 }
 
@@ -364,4 +376,26 @@ String rfidGetLabelToDisplayFromKey(String key) {
   }
 
   return result;
+}
+
+void loopStateMainMenu(){
+}
+
+//-------------------------
+void loopStateScan(){
+  if(machine.executeOnce) {
+    pn532ReadRfidLoop();
+  }
+}
+
+bool transitionStateMainMenuToStateScan(){
+  if(scanHasBeenPressed) {
+    scanHasBeenPressed = false;
+    return true;
+  } 
+  return false;
+}
+
+bool transitionStateScanToStateMainMenu(){
+  return false;
 }
