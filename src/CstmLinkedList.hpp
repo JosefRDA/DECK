@@ -1,16 +1,16 @@
-#ifndef _LINKEDLIST_HPP_
-#define _LINKEDLIST_HPP_
+#ifndef _CSTMLINKEDLIST_HPP_
+#define _CSTMLINKEDLIST_HPP_
 
 
 
 template <class T>
-class ListNode {
+class CstmListNode {
   public:
     T element;
-    ListNode* next;
-    ListNode* prev;
+    CstmListNode* next;
+    CstmListNode* prev;
 
-    ListNode(T element, ListNode* prev, ListNode* next) : element(element)
+    CstmListNode(T element, CstmListNode* prev, CstmListNode* next) : element(element)
     {
       this->next = next;
       this->prev = prev;
@@ -18,16 +18,16 @@ class ListNode {
 };
 
 template <class T>
-class LinkedList  {
+class CstmLinkedList  {
   private:
     int length;
-    ListNode<T>* head;
-    ListNode<T>* tail;
-    ListNode<T>* curr;
+    CstmListNode<T>* head;
+    CstmListNode<T>* tail;
+    CstmListNode<T>* curr;
   public:
-    LinkedList();
-    LinkedList(const LinkedList<T>&);
-    ~LinkedList();
+    CstmLinkedList();
+    CstmLinkedList(const CstmLinkedList<T>&);
+    ~CstmLinkedList();
     T& getCurrent();
     T& First() const;
     T& Last() const;
@@ -44,11 +44,11 @@ class LinkedList  {
     void Clear();
     void PutFirstToLast();
     void Update(T elem);
-    LinkedList& operator = (const LinkedList<T>&);
+    CstmLinkedList& operator = (const CstmLinkedList<T>&);
 };
 
 template <class T>
-LinkedList<T>::LinkedList() {
+CstmLinkedList<T>::CstmLinkedList() {
     length = 0;
     head = nullptr;
     tail = nullptr;
@@ -56,13 +56,13 @@ LinkedList<T>::LinkedList() {
 }
 
 template <class T>
-LinkedList<T>::LinkedList(const LinkedList<T> & list) {
+CstmLinkedList<T>::CstmLinkedList(const CstmLinkedList<T> & list) {
     length = 0;
     head = nullptr;
     tail = nullptr;
     curr = nullptr;
 
-    ListNode<T> * temp = list.head;
+    CstmListNode<T> * temp = list.head;
 
     while(temp != nullptr)
     {
@@ -72,11 +72,11 @@ LinkedList<T>::LinkedList(const LinkedList<T> & list) {
 }
 
 template <class T>
-LinkedList<T> & LinkedList<T>::operator=(const LinkedList<T> & list)
+CstmLinkedList<T> & CstmLinkedList<T>::operator=(const CstmLinkedList<T> & list)
 {
     Clear();
 
-    ListNode<T> * temp = list.head;
+    CstmListNode<T> * temp = list.head;
 
     while(temp != nullptr)
     {
@@ -88,38 +88,38 @@ LinkedList<T> & LinkedList<T>::operator=(const LinkedList<T> & list)
 }
 
 template <class T>
-LinkedList<T>::~LinkedList() {
+CstmLinkedList<T>::~CstmLinkedList() {
     Clear();
 }
 
 template<class T>
-T& LinkedList<T>::getCurrent()
+T& CstmLinkedList<T>::getCurrent()
 {
   return curr->element;
 }
 
 template<class T>
-T& LinkedList<T>::First() const
+T& CstmLinkedList<T>::First() const
 {
   return head->element;
 }
 
 template<class T>
-T& LinkedList<T>::Last() const
+T& CstmLinkedList<T>::Last() const
 {
   return tail->element;
 }
 
 template<class T>
-int LinkedList<T>::getLength()
+int CstmLinkedList<T>::getLength()
 {
   return length;
 }
 
 template <class T>
-void LinkedList<T>::Append(T element)
+void CstmLinkedList<T>::Append(T element)
 {
-    ListNode<T> * node = new ListNode<T>(element, tail, nullptr);
+    CstmListNode<T> * node = new CstmListNode<T>(element, tail, nullptr);
 
     if(length == 0)
         curr = tail = head = node;
@@ -133,7 +133,7 @@ void LinkedList<T>::Append(T element)
 }
 
 template <class T>
-void LinkedList<T>::DeleteLast()
+void CstmLinkedList<T>::DeleteLast()
 {
     if(length == 0)
       return;
@@ -142,7 +142,7 @@ void LinkedList<T>::DeleteLast()
 }
 
 template <class T>
-void LinkedList<T>::DeleteFirst()
+void CstmLinkedList<T>::DeleteFirst()
 {
     if(length == 0)
       return;
@@ -151,7 +151,7 @@ void LinkedList<T>::DeleteFirst()
 }
 
 template <class T>
-bool LinkedList<T>::next()
+bool CstmLinkedList<T>::next()
 {
     if(length == 0)
         return false;
@@ -164,14 +164,14 @@ bool LinkedList<T>::next()
 }
 
 template <class T>
-bool LinkedList<T>::moveToStart()
+bool CstmLinkedList<T>::moveToStart()
 {
     curr = head;
     return length != 0;
 }
 
 template<class T>
-bool LinkedList<T>::prev()
+bool CstmLinkedList<T>::prev()
 {
     if(length == 0)
         return false;
@@ -184,19 +184,19 @@ bool LinkedList<T>::prev()
 }
 
 template <class T>
-void LinkedList<T>::Delete(T & elem)
+void CstmLinkedList<T>::Delete(T & elem)
 {
     if(Search(elem))
         DeleteCurrent();
 }
 
 template <class T>
-void LinkedList<T>::DeleteCurrent()
+void CstmLinkedList<T>::DeleteCurrent()
 {
     if(length == 0)
         return;
     length--;
-    ListNode<T> * temp = curr;
+    CstmListNode<T> * temp = curr;
 
     if(temp->prev != nullptr)
         temp->prev->next = temp->next;
@@ -216,7 +216,7 @@ void LinkedList<T>::DeleteCurrent()
 }
 
 template <class T>
-bool LinkedList<T>::Search(T elem)
+bool CstmLinkedList<T>::Search(T elem)
 {
     if(length == 0)
         return false;
@@ -229,11 +229,11 @@ bool LinkedList<T>::Search(T elem)
 }
 
 template <class T>
-void LinkedList<T>::PutFirstToLast()
+void CstmLinkedList<T>::PutFirstToLast()
 {
   if(length < 2)
     return;
-  ListNode<T>* temp = head->next;
+  CstmListNode<T>* temp = head->next;
   head->next->prev = nullptr;
   head->next = nullptr;
   head->prev = tail;
@@ -243,18 +243,18 @@ void LinkedList<T>::PutFirstToLast()
 }
 
 template <class T>
-void LinkedList<T>::Update(T elem)
+void CstmLinkedList<T>::Update(T elem)
 {
     if(Search(elem))
         curr->element = elem;
 }
 
 template <class T>
-void LinkedList<T>::Clear()
+void CstmLinkedList<T>::Clear()
 {
     if(length == 0)
         return;
-    ListNode<T> * temp = head;
+    CstmListNode<T> * temp = head;
 
     while(temp != nullptr)
     {
@@ -269,4 +269,4 @@ void LinkedList<T>::Clear()
 
 }
 
-#endif // end _LINKEDLIST_HPP_
+#endif // end _CSTMLINKEDLIST_HPP_

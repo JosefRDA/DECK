@@ -2,7 +2,7 @@
 #define _DECKPAGINABLETEXT_H_
 
 #include <Arduino.h>
-#include "LinkedList.hpp"
+#include "CstmLinkedList.hpp"
 
 //OLED
 #include <Adafruit_GFX.h>
@@ -25,7 +25,7 @@ class DeckPaginableText {
 
     // PRIVATE PROPERTIES ----------------------------------------------
     Adafruit_SSD1306 _oled;
-    LinkedList<String> _text;
+    CstmLinkedList<String> _text;
 
     // CLASS PRIVATE FUNCTIONS ----------------------------------------------
 

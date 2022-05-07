@@ -62,6 +62,8 @@ unsigned long lastVibrationMotorStartTime = 0;
 #include "ClusterLogo.h"
 #include "DeckScanResult.h"
 
+#include <StateMachine.h>
+
 void setup(void) {
   setupVibrationMotor();
   setupOled();
