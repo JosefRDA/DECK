@@ -24,6 +24,7 @@
 
 #define DECKCHOICENUMBERPOPUP_BUTTON_NUMBER                     1
 #define DECKCHOICENUMBERPOPUP_CONTROLS_NUMBER                   DECKCHOICENUMBERPOPUP_FIELD_NUMBER + DECKCHOICENUMBERPOPUP_BUTTON_NUMBER
+#define DECKCHOICENUMBERPOPUP_CONTROLS_MAX_ID                   DECKCHOICENUMBERPOPUP_CONTROLS_NUMBER - 1
 
 
 class DeckChoiceNumberPopUp {
@@ -35,17 +36,21 @@ class DeckChoiceNumberPopUp {
     
     // CLASS MEMBER FUNCTIONS ----------------------------------------------
 
-    void increaseSelectedField();
-    void decreaseSelectedField();
-    void goToNextField();
-    void goToPrevField();
-    void enterEditField();
-    void leaveEditField();
+    void increaseSelectedField(void);
+    void decreaseSelectedField(void);
+    void goToNextControl(void);
+    void goToPrevControl(void);
+    void toggleEditField(void);
+
+    bool getEditField(void);
+    bool isCurrentControlButton(void);
+    uint8_t getFinalValue(void);
 
     void render(void);
     
   private:
     void renderField(int id);
+    void renderButton(void);
     uint8_t _values[DECKCHOICENUMBERPOPUP_FIELD_NUMBER];
     uint8_t _selectedField;
     bool _editField;

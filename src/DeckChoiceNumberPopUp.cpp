@@ -10,7 +10,7 @@ DeckChoiceNumberPopUp::DeckChoiceNumberPopUp(Adafruit_SSD1306 oled) {
     //this->_values[0] = 0;
     //this->_values[1] = 0;
     //this->_values[2] = 0;
-    this->_selectedField = 0;
+    this->_selectedField = 3;
     this->_editField = false;
 }
 
@@ -45,6 +45,17 @@ void DeckChoiceNumberPopUp::renderField(int id) {
     }
 }
 
+void DeckChoiceNumberPopUp::renderButton(void) {
+    this->_oled.setCursor(DECKCHOICENUMBERPOPUP_RENDER_X_POS + DECKCHOICENUMBERPOPUP_RENDER_X_POS_OFSET*4, DECKCHOICENUMBERPOPUP_RENDER_Y_FIRST_POS + DECKCHOICENUMBERPOPUP_RENDER_Y_POS_OFSET);
+    if(this->_selectedField == 3) {
+        this->_oled.setTextColor(BLACK, WHITE);
+    }
+    this->_oled.print("OK");
+    if(this->_selectedField == 3) {
+        this->_oled.setTextColor(WHITE, BLACK);
+    }
+}
+
 // CLASS MEMBER FUNCTIONS --------------------------------------------------
 void DeckChoiceNumberPopUp::increaseSelectedField(void) {
     if(this->_selectedField < DECKCHOICENUMBERPOPUP_FIELD_NUMBER) {
@@ -60,6 +71,7 @@ void DeckChoiceNumberPopUp::increaseSelectedField(void) {
         }
     } //Si le focus n'est pas sur un champ il ne fait pas sens de le modifier
 }
+
 void DeckChoiceNumberPopUp::decreaseSelectedField(void) {
     if(this->_selectedField < DECKCHOICENUMBERPOPUP_FIELD_NUMBER) {
         uint8_t currentValue = this->_values[this->_selectedField];
@@ -74,8 +86,9 @@ void DeckChoiceNumberPopUp::decreaseSelectedField(void) {
         }
     } //Si le focus n'est pas sur un champ il ne fait pas sens de le modifier
 }
-void DeckChoiceNumberPopUp::goToNextField(void) {
-    if(this->_selectedField + 1 > DECKCHOICENUMBERPOPUP_CONTROLS_NUMBER-1) {
+
+void DeckChoiceNumberPopUp::goToNextControl(void) {
+    if(this->_selectedField + 1 > DECKCHOICENUMBERPOPUP_CONTROLS_MAX_ID) {
         if(DECKCHOICENUMBERPOPUP_FIELD_CIRCULAR_SELECT) { 
             this->_selectedField = 0;
         } else {
@@ -85,10 +98,11 @@ void DeckChoiceNumberPopUp::goToNextField(void) {
         this->_selectedField = this->_selectedField + 1;
     }
 }
-void DeckChoiceNumberPopUp::goToPrevField(void) {
+
+void DeckChoiceNumberPopUp::goToPrevControl(void) {
     if(this->_selectedField - 1 < 0) {
         if(DECKCHOICENUMBERPOPUP_FIELD_CIRCULAR_SELECT) { 
-            this->_selectedField = DECKCHOICENUMBERPOPUP_CONTROLS_NUMBER - 1;
+            this->_selectedField = DECKCHOICENUMBERPOPUP_CONTROLS_MAX_ID;
         } else {
             //DO nothing
         }
@@ -96,11 +110,21 @@ void DeckChoiceNumberPopUp::goToPrevField(void) {
         this->_selectedField = this->_selectedField - 1;
     }
 }
-void DeckChoiceNumberPopUp::enterEditField(void) {
-    this->_editField = true;
+
+void DeckChoiceNumberPopUp::toggleEditField(void) {
+    this->_editField = !this->_editField;
 }
-void DeckChoiceNumberPopUp::leaveEditField(void) {
-    this->_editField = false;
+
+bool DeckChoiceNumberPopUp::getEditField(void) {
+    return this->_editField;
+}
+
+bool DeckChoiceNumberPopUp::isCurrentControlButton(void) {
+    return this->_selectedField == DECKCHOICENUMBERPOPUP_CONTROLS_MAX_ID;
+}
+
+uint8_t DeckChoiceNumberPopUp::getFinalValue(void) {
+    return this->_values[0] * 100 + this->_values[1] * 10 + this->_values[2];
 }
 
 void DeckChoiceNumberPopUp::render(void) {
@@ -119,6 +143,7 @@ void DeckChoiceNumberPopUp::render(void) {
     this->renderField(0);
     this->renderField(1);
     this->renderField(2);
+    this->renderButton();
 
     this->_oled.display();
 }

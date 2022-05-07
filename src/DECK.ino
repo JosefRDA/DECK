@@ -273,6 +273,56 @@ void loopConfirmDownButton(void){
   }
 }
 
+void loopEnterCharacterNumberOkButton(void){
+  uint8_t buttonValue = okButton.read();
+  if(buttonValue != BUTTON_NO_EVENT) {
+    if(choiceNumberPopUp->isCurrentControlButton()) {
+
+      //Pour l'instant on affiche l'id
+      //TODO : Enregistrer dans le JSON Joueur
+      paginableText = new DeckPaginableText(String(choiceNumberPopUp->getFinalValue()), display_oled );
+      paginableText->render();
+      delay(3000);
+      returnToMainMenuHasBeenPressed = true;
+    } else {
+      choiceNumberPopUp->toggleEditField();
+      choiceNumberPopUp->render();
+    }
+  }
+}
+
+void loopEnterCharacterNumberUpButton(void){
+  uint8_t buttonValue = upButton.read();
+  if(buttonValue == BUTTON_SHORT_PRESS) {
+    if(choiceNumberPopUp->getEditField()) {
+      choiceNumberPopUp->increaseSelectedField();
+    } else {
+      choiceNumberPopUp->goToNextControl();
+    }
+    choiceNumberPopUp->render();
+  } else { 
+    if(buttonValue == BUTTON_LONG_PRESS) {
+
+    } 
+  }
+}
+
+void loopEnterCharacterNumberDownButton(void){
+  uint8_t buttonValue = downButton.read();
+  if(buttonValue == BUTTON_SHORT_PRESS) {
+    if(choiceNumberPopUp->getEditField()) {
+      choiceNumberPopUp->decreaseSelectedField();
+    } else {
+      choiceNumberPopUp->goToPrevControl();
+    }
+    choiceNumberPopUp->render();
+  } else { 
+    if(buttonValue == BUTTON_LONG_PRESS) {
+
+    } 
+  }
+}
+
 // ACTIONS ----------------------------------------------
 
 void mainMenuActionStim(void) {
@@ -463,6 +513,9 @@ void loopStateEnterCharacterNumber() {
     lastStateChange = millis();
     enterCharacterNumberAction();
   }
+  loopEnterCharacterNumberOkButton();
+  loopEnterCharacterNumberUpButton();
+  loopEnterCharacterNumberDownButton();
 }
 
 bool transitionStateMainMenuToStateScan(){
@@ -506,7 +559,7 @@ bool transitionStateScanToStateMainMenu(){
 }
 
 bool transitionStateEnterCharacterNumberToStateMainMenu(){
-  return transitionGeneric10Seconds();
+  return transitionGenericReturnToMainMenu();
 }
 
 bool transitionGenericReturnToMainMenu(){
