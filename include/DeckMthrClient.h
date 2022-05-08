@@ -7,6 +7,8 @@
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
 
+#define DECKMTHRCLIENT_DEBUG false
+
 struct RessourceResponse {
     int httpCode;
     String payload;
