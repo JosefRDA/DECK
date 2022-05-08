@@ -1,7 +1,7 @@
 #ifndef _DECKPAGINABLETEXT_H_
 #define _DECKPAGINABLETEXT_H_
 
-#define DECKPAGINABLETEXT_DEBUG false
+#define DECKPAGINABLETEXT_DEBUG true
 
 #include <Arduino.h>
 #include "CstmLinkedList.hpp"
@@ -20,6 +20,8 @@ class DeckPaginableText {
   
     DeckPaginableText(String text, Adafruit_SSD1306 oled);
     void render(void);
+    void next(void);
+    void prev(void);
   
   // CLASS MEMBER FUNCTIONS ----------------------------------------------
 

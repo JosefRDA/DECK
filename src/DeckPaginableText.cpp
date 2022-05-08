@@ -3,26 +3,26 @@
 // CONSTRUCTORS ------------------------------------------------------------
 
 DeckPaginableText::DeckPaginableText(String text, Adafruit_SSD1306 oled) {
-  _oled = oled;
+  this->_oled = oled;
 
   if(text.length() <= DECKPAGINABLETEXT_TEXT_MAX_LENGTH) {
-    _text.Append(text);
+    this->_text.Append(text);
   } else {
     this->initMultiScreenText(text);
   }
+  
+  this->_text.moveToStart();
 }
 
 // CLASS PRIVATE FUNCTIONS ----------------------------------------------
 
 void DeckPaginableText::initMultiScreenText(String text) {
   #if DECKPAGINABLETEXT_DEBUG
-  Serial.print("[DECKPAGINABLETEXT][initMultiScreenText] BEGIN\n");
+  Serial.print("[DECKPAGINABLETEXT][initMultiScreenText] BEGIN text=" +  + "\n");
   #endif
   String processingText = text;
   
-  
-  
-  while(processingText.length() > DECKPAGINABLETEXT_TEXT_MAX_LENGTH) {
+  while(processingText.length() >= DECKPAGINABLETEXT_TEXT_MAX_LENGTH) {
 
     #if DECKPAGINABLETEXT_DEBUG
     Serial.print("[DECKPAGINABLETEXT][initMultiScreenText] processingText.length() =" + String(processingText.length()) + "\n");
@@ -38,10 +38,22 @@ void DeckPaginableText::initMultiScreenText(String text) {
       break; //Never suppose to happend
     }
 
-    _text.Append(processingText.substring(0, nextWordEndClosestToScreenEnd)); //(nextWordEndClosestToScreenEnd-1) ?
+    this->_text.Append(processingText.substring(0, nextWordEndClosestToScreenEnd)); //(nextWordEndClosestToScreenEnd-1) ?
     processingText = processingText.substring(nextWordEndClosestToScreenEnd, processingText.length());   //(nextWordEndClosestToScreenEnd+1) ?
+    #if DECKPAGINABLETEXT_DEBUG
+    Serial.print("[DECKPAGINABLETEXT][initMultiScreenText] end loop =" + String(nextWordEndClosestToScreenEnd) + "\n");
+    #endif
   }
   #if DECKPAGINABLETEXT_DEBUG
+  Serial.print("[DECKPAGINABLETEXT][initMultiScreenText] all lines : \n");
+  this->_text.moveToStart();
+  int cpt = 1;
+  while (this->_text.hasNext())
+  {
+    Serial.print("SCREEN " + String(cpt++) + ":" + this->_text.getCurrent() + "\n");
+    this->_text.next();
+  }
+  
   Serial.print("[DECKPAGINABLETEXT][initMultiScreenText] END\n");
   #endif
 }
@@ -66,9 +78,32 @@ int DeckPaginableText::findNextWordEndClosestToScreenEnd(String text) {
 // CLASS MEMBER FUNCTIONS --------------------------------------------------
 
 void DeckPaginableText::render(void) {
-  _oled.clearDisplay();
-  _oled.setCursor(0,0);
-  _text.moveToStart();
-  _oled.println(_text.getCurrent());
-  _oled.display();
+  this->_oled.clearDisplay();
+  this->_oled.setCursor(0,0);
+  this->_oled.println(_text.getCurrent());
+  if(this->_text.hasPrev()) {
+    this->_oled.setCursor(55,0);
+    this->_oled.setTextColor(BLACK, WHITE);
+    this->_oled.println("A");
+    this->_oled.setTextColor(WHITE, BLACK);
+  }
+  if(this->_text.hasNext()) {
+    this->_oled.setCursor(55,40);
+    this->_oled.setTextColor(BLACK, WHITE);
+    this->_oled.println("V");
+    this->_oled.setTextColor(WHITE, BLACK);
+  }
+  this->_oled.display();
+}
+
+void DeckPaginableText::next() {
+  if(this->_text.hasNext()) {
+    this->_text.next();
+  }
+}
+
+void DeckPaginableText::prev() {
+  if(this->_text.hasPrev()) {
+    bool retval = this->_text.prev();
+  }
 }

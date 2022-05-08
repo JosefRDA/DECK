@@ -74,10 +74,13 @@ const int STATE_DELAY = 1000;
 
 StateMachine navigationMachine = StateMachine();
 State* StateMainMenu = navigationMachine.addState(&loopStateMainMenu);
+
 State* StateScan = navigationMachine.addState(&loopStateScan);
+
 State* StateConfirmBeforeEnterCharacterNumber = navigationMachine.addState(&loopStateConfirmBeforeEnterCharacterNumber);
 State* StateEnterCharacterNumber = navigationMachine.addState(&loopStateEnterCharacterNumber);
 State* StateTryToUpdateStim = navigationMachine.addState(&loopStateTryToUpdateStim);
+
 
 bool scanHasBeenPressed = false;
 bool confirmBeforeEnterCharacterNumberHasBeenPressed = false;
@@ -138,7 +141,9 @@ void setup(void) {
   
   StateMainMenu->addTransition(&transitionStateMainMenuToStateScan, StateScan);
   StateMainMenu->addTransition(&transitionStateMainMenuToConfirmBeforeEnterCharacterNumber, StateConfirmBeforeEnterCharacterNumber);
+  
   StateScan->addTransition(&transitionStateScanToStateMainMenu, StateMainMenu);
+  
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToEnterCharacterNumber, StateEnterCharacterNumber);
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToStateMainMenu, StateMainMenu); 
   StateEnterCharacterNumber->addTransition(&transitionStateEnterCharacterNumberToTryToUpdateStim, StateTryToUpdateStim);
@@ -239,6 +244,44 @@ void loopMainMenuDownButton(void){
     //TODO : IF IN MAIN MENU 
     mainMenu->select(DECKMENU_DIRECTION_DOWN);
     mainMenu->render();
+  } else { 
+    if(buttonValue == BUTTON_LONG_PRESS) {
+      //Serial.println("LONG DOWN BUTTON");
+    } 
+  }
+}
+
+void loopScanOkButton(void){
+  uint8_t buttonValue = okButton.read();
+  if(buttonValue != BUTTON_NO_EVENT) {    
+    switch(buttonValue) {
+      case BUTTON_SHORT_PRESS:
+        returnToMainMenuHasBeenPressed = true;
+        break;
+      case BUTTON_LONG_PRESS:
+
+        break;
+    }
+  }
+}
+
+void loopScanUpButton(void){
+  uint8_t buttonValue = upButton.read();
+  if(buttonValue == BUTTON_SHORT_PRESS) {
+    paginableText->prev();
+    paginableText->render();
+  } else { 
+    if(buttonValue == BUTTON_LONG_PRESS) {
+      //Serial.println("LONG UP BUTTON : WIFI");
+    } 
+  }
+}
+
+void loopScanDownButton(void){
+  uint8_t buttonValue = downButton.read();
+  if(buttonValue == BUTTON_SHORT_PRESS) {
+    paginableText->next();
+    paginableText->render();
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
       //Serial.println("LONG DOWN BUTTON");
@@ -470,17 +513,14 @@ void pn532ReadRfidLoop(void) {
     Serial.println(scanResult.label);
     Serial.println("");
 
-    paginableText = new DeckPaginableText(scanResult.label, display_oled);
-    paginableText->render();
-    lastDisplayOledTime = millis();
-
     
-
-    //
-
     //Vibration motor
     digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
     lastVibrationMotorStartTime = millis();
+
+    paginableText = new DeckPaginableText(scanResult.label, display_oled);
+    paginableText->render();
+    //lastDisplayOledTime = millis();
   }
 }
 
@@ -539,6 +579,9 @@ void loopStateScan(){
     lastStateChange = millis();
     pn532ReadRfidLoop();
   }
+  loopScanOkButton();
+  loopScanUpButton();
+  loopScanDownButton();
 }
 
 void loopStateConfirmBeforeEnterCharacterNumber() {
@@ -606,7 +649,7 @@ bool transitionGeneric10Seconds(){
 }
 
 bool transitionStateScanToStateMainMenu(){
-  return transitionGeneric10Seconds();
+  return transitionGenericReturnToMainMenu();
 }
 
 bool transitionStateEnterCharacterNumberToTryToUpdateStim(){

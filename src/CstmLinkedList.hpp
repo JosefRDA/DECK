@@ -29,6 +29,7 @@ class CstmLinkedList  {
     CstmLinkedList(const CstmLinkedList<T>&);
     ~CstmLinkedList();
     T& getCurrent();
+    T& getPrev();
     T& First() const;
     T& Last() const;
     int getLength();
@@ -36,6 +37,8 @@ class CstmLinkedList  {
     void DeleteLast();
     void DeleteFirst();
     void DeleteCurrent();
+    bool hasNext();
+    bool hasPrev();
     bool next();
     bool moveToStart();
     bool prev();
@@ -99,6 +102,24 @@ T& CstmLinkedList<T>::getCurrent()
 }
 
 template<class T>
+T& CstmLinkedList<T>::getPrev()
+{
+  return curr->prev->element;
+}
+
+template<class T>
+bool CstmLinkedList<T>::hasNext()
+{
+  return curr->element != tail->element;
+}
+
+template<class T>
+bool CstmLinkedList<T>::hasPrev()
+{
+  return curr->element != head->element;
+}
+
+template<class T>
 T& CstmLinkedList<T>::First() const
 {
   return head->element;
@@ -124,6 +145,7 @@ void CstmLinkedList<T>::Append(T element)
     if(length == 0)
         curr = tail = head = node;
     else {
+        node->prev = tail;//
         tail->next = node;
         tail = node;
     }
@@ -176,7 +198,7 @@ bool CstmLinkedList<T>::prev()
     if(length == 0)
         return false;
 
-    if(curr->prev != nullptr)
+    if(curr->prev == nullptr)
         return false;
 
     curr = curr->prev;
