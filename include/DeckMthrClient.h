@@ -7,12 +7,10 @@
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
 
-#ifndef DECK_DTOD_SERVER_SSID
-#define DECK_DTOD_SERVER_SSID "DECK"
-//#define DECK_DTOD_SERVER_PASSWORD  "987L6NU2"
-#define DECK_DTOD_SERVER_PASSWORD  "aaaaaaaa"
-#endif
-
+struct RessourceResponse {
+    int httpCode;
+    String payload;
+};
 
 class DeckMthrClient {
   public:
@@ -23,7 +21,7 @@ class DeckMthrClient {
     
     // CLASS MEMBER FUNCTIONS ----------------------------------------------
 
-    String DownloadRessource(String relativePath);
+    RessourceResponse DownloadRessource(String relativePath);
 
   private:
 

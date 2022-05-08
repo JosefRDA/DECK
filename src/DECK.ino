@@ -77,11 +77,13 @@ State* StateMainMenu = navigationMachine.addState(&loopStateMainMenu);
 State* StateScan = navigationMachine.addState(&loopStateScan);
 State* StateConfirmBeforeEnterCharacterNumber = navigationMachine.addState(&loopStateConfirmBeforeEnterCharacterNumber);
 State* StateEnterCharacterNumber = navigationMachine.addState(&loopStateEnterCharacterNumber);
+State* StateTryToUpdateStim = navigationMachine.addState(&loopStateTryToUpdateStim);
 
 bool scanHasBeenPressed = false;
 bool confirmBeforeEnterCharacterNumberHasBeenPressed = false;
 bool enterCharacterNumberHasBeenPressed = false;
 bool returnToMainMenuHasBeenPressed = false;
+bool confirmHasBeenPressed = false;
 unsigned long lastStateChange = 0L;
 
 void setup(void) {
@@ -139,7 +141,8 @@ void setup(void) {
   StateScan->addTransition(&transitionStateScanToStateMainMenu, StateMainMenu);
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToEnterCharacterNumber, StateEnterCharacterNumber);
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToStateMainMenu, StateMainMenu); 
-  StateEnterCharacterNumber->addTransition(&transitionStateEnterCharacterNumberToStateMainMenu, StateMainMenu);
+  StateEnterCharacterNumber->addTransition(&transitionStateEnterCharacterNumberToTryToUpdateStim, StateTryToUpdateStim);
+  StateTryToUpdateStim->addTransition(&transitionStateTryToUpdateStimToMainMenu, StateMainMenu);
 
   deckDatabase.printJsonFile("/config.json");
 }
@@ -280,24 +283,8 @@ void loopEnterCharacterNumberOkButton(void){
   uint8_t buttonValue = okButton.read();
   if(buttonValue != BUTTON_NO_EVENT) {
     if(choiceNumberPopUp->isCurrentControlButton()) {
-
-      //Pour l'instant on affiche l'id
-      //TODO : Enregistrer dans le JSON Joueur
       
-      
-      //paginableText = new DeckPaginableText(String(choiceNumberPopUp->getFinalValue()), display_oled );
-      //paginableText->render();
-
-      deckDatabase.persistFirstLevelDataByKeyValue("/config.json", "player_id", String(choiceNumberPopUp->getFinalValue()));
-
-      DeckMthrClient* mthrClient = new DeckMthrClient(deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_ssid"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_password"), "http://192.168.0.8:8080");
-
-      Serial.println(mthrClient->DownloadRessource("/HTTP/JSON/" + utilZeroPadPlayerId(deckDatabase.getFirstLevelDataByKey("/config.json", "player_id")) +  "/STIM.JSON"));
-
-
-
-      delay(3000);
-      returnToMainMenuHasBeenPressed = true;
+      confirmHasBeenPressed = true;
     } else {
       choiceNumberPopUp->toggleEditField();
       choiceNumberPopUp->render();
@@ -340,6 +327,13 @@ void loopEnterCharacterNumberDownButton(void){
     if(buttonValue == BUTTON_LONG_PRESS) {
 
     } 
+  }
+}
+
+void loopTryToUpdateStimOkButton(void) {
+  uint8_t buttonValue = okButton.read();
+  if(buttonValue != BUTTON_NO_EVENT) {
+    returnToMainMenuHasBeenPressed = true;
   }
 }
 
@@ -485,17 +479,44 @@ void pn532ReadRfidLoop(void) {
   }
 }
 
-void confirmBeforeEnterCharacterNumberAction() {
+void confirmBeforeEnterCharacterNumberAction(void) {
   confirmationPopUp = new DeckConfirmationPopUp("Definir id personnage ?", display_oled);
   confirmationPopUp->render();
 }
 
-void enterCharacterNumberAction() {
+void enterCharacterNumberAction(void) {
 
   choiceNumberPopUp = new DeckChoiceNumberPopUp(display_oled, deckDatabase.getFirstLevelDataByKey("/config.json", "player_id").toInt() );
   
   choiceNumberPopUp->render();
 
+}
+
+void tryToUpdateStimOkButtonAction(void) {
+  deckDatabase.persistFirstLevelDataByKeyValue("/config.json", "player_id", String(choiceNumberPopUp->getFinalValue()));
+
+  String paddedPlayerId = utilZeroPadPlayerId(deckDatabase.getFirstLevelDataByKey("/config.json", "player_id"));
+
+  paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...", display_oled);
+  paginableText->render();
+
+  DeckMthrClient* mthrClient = new DeckMthrClient(deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_ssid"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_password"), "http://192.168.0.8:8080");
+  RessourceResponse motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId +  "/STIM.JSON");
+
+  String userDisplayMessage = "";
+  if(motherResponse.httpCode == 404) {
+    userDisplayMessage = "PERSONNAGE NOT FOUND";
+  } else if(motherResponse.httpCode != 200) {
+    userDisplayMessage = "NETWORK ERROR : " + String(motherResponse.httpCode);
+  } else {
+    userDisplayMessage = "DATA UPDATED";
+  }
+  paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...\n" + userDisplayMessage, display_oled);
+  paginableText->render();
+
+
+
+  Serial.println(motherResponse.payload);
 }
 
 //-------------------------
@@ -538,6 +559,14 @@ void loopStateEnterCharacterNumber() {
   loopEnterCharacterNumberDownButton();
 }
 
+void loopStateTryToUpdateStim() {
+  if(navigationMachine.executeOnce) {
+    lastStateChange = millis();
+    tryToUpdateStimOkButtonAction();
+  }
+  loopTryToUpdateStimOkButton();
+}
+
 bool transitionStateMainMenuToStateScan(){
   if(scanHasBeenPressed) {
     scanHasBeenPressed = false;
@@ -578,7 +607,15 @@ bool transitionStateScanToStateMainMenu(){
   return transitionGeneric10Seconds();
 }
 
-bool transitionStateEnterCharacterNumberToStateMainMenu(){
+bool transitionStateEnterCharacterNumberToTryToUpdateStim(){
+  if(confirmHasBeenPressed) {
+    confirmHasBeenPressed = false;
+    return true;
+  } 
+  return false;
+}
+
+bool transitionStateTryToUpdateStimToMainMenu(){
   return transitionGenericReturnToMainMenu();
 }
 
