@@ -93,6 +93,7 @@ void setup(void) {
   setupVibrationMotor();
   setupOled();
 
+  display_oled.begin(SSD1306_SWITCHCAPVCC);
   display_oled.drawBitmap(0, 0, clusterLogo_data, clusterLogo_width, clusterLogo_height, 1);
   display_oled.display();
 

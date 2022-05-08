@@ -4,6 +4,11 @@
 
 DeckPaginableText::DeckPaginableText(String text, Adafruit_SSD1306 oled) {
   this->_oled = oled;
+  this->_oledU8g2.begin(this->_oled);
+
+  this->_oledU8g2.setFontMode(1);                                   // use u8g2 transparent mode (this is default)
+  this->_oledU8g2.setFontDirection(0);                              // left to right (this is default)
+  this->_oledU8g2.setFont(DECKPAGINABLETEXT_U8G2SCREEN_BASE_FONT);  // select u8g2 font
 
   if(text.length() <= DECKPAGINABLETEXT_TEXT_MAX_LENGTH) {
     this->_text.Append(text);
@@ -77,24 +82,55 @@ int DeckPaginableText::findNextWordEndClosestToScreenEnd(String text) {
   }
 }
 
+//deprecated
+String DeckPaginableText::splitTextToDisplay(String text) {
+  String result;
+  if(text.length() > DECKPAGINABLETEXT_U8G2SCREEN_LINE_LENGTH_MAX) {
+    result = text.substring(0, DECKPAGINABLETEXT_U8G2SCREEN_LINE_LENGTH_MAX) + "\n" + this->splitTextToDisplay(text.substring(DECKPAGINABLETEXT_U8G2SCREEN_LINE_LENGTH_MAX));
+  } else {
+    result = text;
+  }
+  result.trim();
+  return result;
+}
+
+void DeckPaginableText::printTextScreen(String text) {
+
+
+  String remainingText = text;
+  int yOffset = DECKPAGINABLETEXT_U8G2SCREEN_Y_OFSET;
+  do {
+    this->_oledU8g2.setCursor(DECKPAGINABLETEXT_U8G2SCREEN_X_OFSET, yOffset);
+    String textToPrint = remainingText.substring(0, DECKPAGINABLETEXT_U8G2SCREEN_LINE_LENGTH_MAX);
+    textToPrint.trim();
+    this->_oledU8g2.print(textToPrint);
+    
+    remainingText = remainingText.substring(min((unsigned int)DECKPAGINABLETEXT_U8G2SCREEN_LINE_LENGTH_MAX, remainingText.length()));
+
+    yOffset += DECKPAGINABLETEXT_U8G2SCREEN_LINE_HIGH;
+  } while(remainingText.length() > 0);
+};
 
 // CLASS MEMBER FUNCTIONS --------------------------------------------------
 
 void DeckPaginableText::render(void) {
   this->_oled.clearDisplay();
-  this->_oled.setCursor(0,0);
-  this->_oled.println(_text.getCurrent());
+  this->_oledU8g2.setForegroundColor(WHITE); 
+  this->_oledU8g2.setBackgroundColor(BLACK); 
+
+  //this->_oledU8g2.println(this->splitTextToDisplay(this->_text.getCurrent()));
+  this->printTextScreen(this->_text.getCurrent());
   if(this->_text.hasPrev()) {
-    this->_oled.setCursor(55,0);
-    this->_oled.setTextColor(BLACK, WHITE);
-    this->_oled.println("A");
-    this->_oled.setTextColor(WHITE, BLACK);
+    this->_oledU8g2.setCursor(DECKPAGINABLETEXT_U8G2SCREEN_CURSORS_X_OFSET, DECKPAGINABLETEXT_U8G2SCREEN_Y_OFSET);
+    this->_oledU8g2.setFont(DECKPAGINABLETEXT_U8G2SCREEN_CURSORS_FONT);
+    this->_oledU8g2.println(DECKPAGINABLETEXT_U8G2SCREEN_CURSOR_PREV_CHAR);
+    this->_oledU8g2.setFont(DECKPAGINABLETEXT_U8G2SCREEN_BASE_FONT);
   }
   if(this->_text.hasNext()) {
-    this->_oled.setCursor(55,40);
-    this->_oled.setTextColor(BLACK, WHITE);
-    this->_oled.println("V");
-    this->_oled.setTextColor(WHITE, BLACK);
+    this->_oledU8g2.setCursor(DECKPAGINABLETEXT_U8G2SCREEN_CURSORS_X_OFSET, DECKPAGINABLETEXT_U8G2SCREEN_CURSOR_NEXT_Y_OFSET);
+    this->_oledU8g2.setFont(DECKPAGINABLETEXT_U8G2SCREEN_CURSORS_FONT);
+    this->_oledU8g2.println(DECKPAGINABLETEXT_U8G2SCREEN_CURSOR_NEXT_CHAR);
+    this->_oledU8g2.setFont(DECKPAGINABLETEXT_U8G2SCREEN_BASE_FONT);
   }
   this->_oled.display();
 }
