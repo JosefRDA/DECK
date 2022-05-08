@@ -18,7 +18,7 @@ DeckPaginableText::DeckPaginableText(String text, Adafruit_SSD1306 oled) {
 
 void DeckPaginableText::initMultiScreenText(String text) {
   #if DECKPAGINABLETEXT_DEBUG
-  Serial.print("[DECKPAGINABLETEXT][initMultiScreenText] BEGIN text=" +  + "\n");
+  Serial.print("[DECKPAGINABLETEXT][initMultiScreenText] BEGIN text(" + String(text.length()) + ")=" + text + "\n");
   #endif
   String processingText = text;
   
@@ -44,6 +44,8 @@ void DeckPaginableText::initMultiScreenText(String text) {
     Serial.print("[DECKPAGINABLETEXT][initMultiScreenText] end loop =" + String(nextWordEndClosestToScreenEnd) + "\n");
     #endif
   }
+  this->_text.Append(processingText); //Reliquat de texte
+
   #if DECKPAGINABLETEXT_DEBUG
   Serial.print("[DECKPAGINABLETEXT][initMultiScreenText] all lines : \n");
   this->_text.moveToStart();
@@ -53,6 +55,7 @@ void DeckPaginableText::initMultiScreenText(String text) {
     Serial.print("SCREEN " + String(cpt++) + ":" + this->_text.getCurrent() + "\n");
     this->_text.next();
   }
+  Serial.print("SCREEN " + String(cpt++) + ":" + this->_text.getCurrent() + "\n");
   
   Serial.print("[DECKPAGINABLETEXT][initMultiScreenText] END\n");
   #endif
