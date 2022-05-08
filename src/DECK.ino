@@ -290,9 +290,11 @@ void loopEnterCharacterNumberOkButton(void){
 
       deckDatabase.persistFirstLevelDataByKeyValue("/config.json", "player_id", String(choiceNumberPopUp->getFinalValue()));
 
-      
-      //DeckMthrClient* mthrClient = new DeckMthrClient("WIFI_SSID", "WIFI_PASSWD", "http://192.168.0.8:8080");
-      //Serial.println(mthrClient->DownloadRessource("/HTTP/JSON/003/STIM.JSON"));
+      DeckMthrClient* mthrClient = new DeckMthrClient(deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_ssid"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_password"), "http://192.168.0.8:8080");
+
+      Serial.println(mthrClient->DownloadRessource("/HTTP/JSON/" + utilZeroPadPlayerId(deckDatabase.getFirstLevelDataByKey("/config.json", "player_id")) +  "/STIM.JSON"));
+
+
 
       delay(3000);
       returnToMainMenuHasBeenPressed = true;
@@ -301,6 +303,12 @@ void loopEnterCharacterNumberOkButton(void){
       choiceNumberPopUp->render();
     }
   }
+}
+
+String utilZeroPadPlayerId(String inputPlayerId) {
+  char playerIdBuffer[3];
+  sprintf(playerIdBuffer, "%03d", inputPlayerId.toInt());
+  return String(playerIdBuffer);
 }
 
 void loopEnterCharacterNumberUpButton(void){
@@ -485,7 +493,7 @@ void confirmBeforeEnterCharacterNumberAction() {
 void enterCharacterNumberAction() {
 
   choiceNumberPopUp = new DeckChoiceNumberPopUp(display_oled, deckDatabase.getFirstLevelDataByKey("/config.json", "player_id").toInt() );
-  //paginableText = new DeckPaginableText("Enter Character", display_oled);
+  
   choiceNumberPopUp->render();
 
 }
