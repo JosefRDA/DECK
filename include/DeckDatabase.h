@@ -35,6 +35,7 @@ class DeckDatabase {
 
   String getFirstLevelDataByKey(const char * filename, String fieldKey);
   
+  void persistFullFile(const char * filename, String fileContent);
   
 };
 

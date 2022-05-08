@@ -509,14 +509,11 @@ void tryToUpdateStimOkButtonAction(void) {
   } else if(motherResponse.httpCode != 200) {
     userDisplayMessage = "NETWORK ERROR : " + String(motherResponse.httpCode);
   } else {
+    deckDatabase.persistFullFile("/stim.json", motherResponse.payload);
     userDisplayMessage = "DATA UPDATED";
   }
   paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...\n" + userDisplayMessage, display_oled);
   paginableText->render();
-
-
-
-  Serial.println(motherResponse.payload);
 }
 
 //-------------------------

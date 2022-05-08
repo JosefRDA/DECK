@@ -190,11 +190,29 @@ void DeckDatabase::persistFirstLevelDataByKeyValue(const char * filename, String
     file.close();
     file = LittleFS.open(filename, "w");
 
+    if (!file) 
+    {
+      Serial.println(F("Failed to open file for writing"));
+    }
+
     String targetJson;
     serializeJson(configArray, targetJson);
     file.print(targetJson.c_str());
 
   }
+
+  file.close();
+}
+
+void DeckDatabase::persistFullFile(const char * filename, String fileContent) {
+  // Open file for reading
+  File file = LittleFS.open(filename, "w");
+  if (!file) 
+  {
+    Serial.println(F("Failed to open file for writing"));
+  }
+
+  file.print(fileContent.c_str());
 
   file.close();
 }
