@@ -1,6 +1,8 @@
 #ifndef _DECKPAGINABLETEXT_H_
 #define _DECKPAGINABLETEXT_H_
 
+#define DECKPAGINABLETEXT_DEBUG false
+
 #include <Arduino.h>
 #include "CstmLinkedList.hpp"
 
