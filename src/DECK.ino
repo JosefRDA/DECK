@@ -141,12 +141,6 @@ void setup(void) {
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToStateMainMenu, StateMainMenu); 
   StateEnterCharacterNumber->addTransition(&transitionStateEnterCharacterNumberToStateMainMenu, StateMainMenu);
 
-  Serial.println("BeforeChange");
-  deckDatabase.printJsonFile("/config.json");
-
-  deckDatabase.persistFirstLevelDataByKeyValue("/config.json", "player_id", "010");
-
-  Serial.println("AfterChange");
   deckDatabase.printJsonFile("/config.json");
 }
 
@@ -291,12 +285,14 @@ void loopEnterCharacterNumberOkButton(void){
       //TODO : Enregistrer dans le JSON Joueur
       
       
-      paginableText = new DeckPaginableText(String(choiceNumberPopUp->getFinalValue()), display_oled );
-      paginableText->render();
+      //paginableText = new DeckPaginableText(String(choiceNumberPopUp->getFinalValue()), display_oled );
+      //paginableText->render();
+
+      deckDatabase.persistFirstLevelDataByKeyValue("/config.json", "player_id", String(choiceNumberPopUp->getFinalValue()));
 
       
-      DeckMthrClient* mthrClient = new DeckMthrClient("WIFI_SSID", "WIFI_PASSWD", "http://192.168.0.8:8080");
-      Serial.println(mthrClient->DownloadRessource("/HTTP/JSON/003/STIM.JSON"));
+      //DeckMthrClient* mthrClient = new DeckMthrClient("WIFI_SSID", "WIFI_PASSWD", "http://192.168.0.8:8080");
+      //Serial.println(mthrClient->DownloadRessource("/HTTP/JSON/003/STIM.JSON"));
 
       delay(3000);
       returnToMainMenuHasBeenPressed = true;
@@ -488,7 +484,7 @@ void confirmBeforeEnterCharacterNumberAction() {
 
 void enterCharacterNumberAction() {
 
-  choiceNumberPopUp = new DeckChoiceNumberPopUp(display_oled);
+  choiceNumberPopUp = new DeckChoiceNumberPopUp(display_oled, deckDatabase.getFirstLevelDataByKey("/config.json", "player_id").toInt() );
   //paginableText = new DeckPaginableText("Enter Character", display_oled);
   choiceNumberPopUp->render();
 

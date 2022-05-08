@@ -2,11 +2,11 @@
 
 // CONSTRUCTORS ------------------------------------------------------------
 
-DeckChoiceNumberPopUp::DeckChoiceNumberPopUp(Adafruit_SSD1306 oled) { 
+DeckChoiceNumberPopUp::DeckChoiceNumberPopUp(Adafruit_SSD1306 oled, uint8_t presentValue) { 
     this->_oled = oled;
-    this->_values[0] = 0;
-    this->_values[1] = 9;
-    this->_values[2] = 7;
+    this->_values[0] = presentValue/100;
+    this->_values[1] = presentValue%100/10;
+    this->_values[2] = presentValue%10;
     //this->_values[0] = 0;
     //this->_values[1] = 0;
     //this->_values[2] = 0;

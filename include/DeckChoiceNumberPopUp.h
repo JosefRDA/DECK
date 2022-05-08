@@ -32,7 +32,7 @@ class DeckChoiceNumberPopUp {
   
     // CONSTRUCTORS ------------------------------------------------------------
     
-    DeckChoiceNumberPopUp(Adafruit_SSD1306 oled);
+    DeckChoiceNumberPopUp(Adafruit_SSD1306 oled, uint8_t presentValue);
     
     // CLASS MEMBER FUNCTIONS ----------------------------------------------
 

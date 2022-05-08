@@ -32,6 +32,8 @@ class DeckDatabase {
   JsonObject getStimByUid(const char * filename, String uid);
 
   void persistFirstLevelDataByKeyValue(const char * filename, String fieldKey, String fieldValue);
+
+  String getFirstLevelDataByKey(const char * filename, String fieldKey);
   
   
 };
