@@ -67,6 +67,7 @@ unsigned long lastVibrationMotorStartTime = 0;
 
 #include "ClusterLogo.h"
 #include "DeckScanResult.h"
+#include "DeckMthrClient.h"
 
 #include <StateMachine.h>
 const int STATE_DELAY = 1000;
@@ -288,8 +289,15 @@ void loopEnterCharacterNumberOkButton(void){
 
       //Pour l'instant on affiche l'id
       //TODO : Enregistrer dans le JSON Joueur
+      
+      
       paginableText = new DeckPaginableText(String(choiceNumberPopUp->getFinalValue()), display_oled );
       paginableText->render();
+
+      
+      DeckMthrClient* mthrClient = new DeckMthrClient("WIFI_SSID", "WIFI_PASSWD", "http://192.168.0.8:8080");
+      Serial.println(mthrClient->DownloadRessource("/HTTP/JSON/003/STIM.JSON"));
+
       delay(3000);
       returnToMainMenuHasBeenPressed = true;
     } else {
