@@ -216,3 +216,37 @@ void DeckDatabase::persistFullFile(const char * filename, String fileContent) {
 
   file.close();
 }
+
+void DeckDatabase::appendUsedStimLog(const char * filename, String usableStimCode) {
+  DynamicJsonDocument doc(8192);
+
+  // Open file for reading
+  File file = LittleFS.open(filename, "r");
+  if (!file) 
+  {
+    Serial.println(F("Failed to open file for reading"));
+  }
+  deserializeJson(doc, file);
+  file.close();
+
+  // Append new element
+  JsonObject obj = doc.createNestedObject();
+  char dateString[80]; //enough ?
+  sprintf(dateString,"%lu",millis());
+  obj["timestamp"] = dateString;
+  obj["stim"] = usableStimCode.c_str();
+
+
+  file = LittleFS.open(filename, "w");
+
+  if (!file) 
+  {
+    Serial.println(F("Failed to open file for writing"));
+  }
+  
+  String targetJson;
+  serializeJson(doc, targetJson);
+  file.print(targetJson.c_str());
+  serializeJson(doc, file);
+  file.close();
+}

@@ -2,16 +2,17 @@
    {
       "uid":"C09FC249",
       "label":"Carte Blanche (depuis JSON)",
-	   "value": "false"
+	   "usable": "false"
    },
    {
       "uid":"CE74D83F",
       "label":"Tag Bleu (depuis JSON)",
-	   "value": "true"
+	   "usable": "true",
+      "stim_code": "BLUE"
    },
    {
       "uid":"04256BDA",
       "label":"Boite de nesquik",
-	   "value": "false"
+	   "usable": "false"
    }
 ]

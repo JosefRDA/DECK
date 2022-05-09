@@ -120,6 +120,8 @@ bool oledRequestOff = false;
 unsigned long lastOledStateChange = 0L;
 //END REGION oledMachine
 
+String rfidUidBufferToStringLastValue = "";
+
 void setup(void) {
   setupVibrationMotor();
   setupOled();
@@ -208,7 +210,7 @@ void setup(void) {
   OledStateAlwaysOn->addTransition(&transitionOledStateAlwaysOnToOledStateOff, OledStateOff);
   //oledMachine transitions end
 
-  //deckDatabase.printJsonFile("/config.json");
+  deckDatabase.printJsonFile("/used_stim_log.json");
   
   oledRequestSmall = true;
 }
@@ -577,8 +579,8 @@ void pn532ReadRfidLoop(void) {
     Serial.print("Label from JSON: ");
     #endif
 
-    DeckScanResult scanResult = deckDatabase.getLabelByUid("/stim.json", rfidUidBufferToString(uid));
-    if(deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToString(uid), "value") == "true") {
+    DeckScanResult scanResult = deckDatabase.getLabelByUid("/stim.json",rfidUidBufferToString(uid));
+    if(deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToString(uid), "usable") == "true") {
       isScanUsable = true;
     }else{
       isScanUsable = false;
@@ -596,6 +598,10 @@ void pn532ReadRfidLoop(void) {
     paginableText = new DeckPaginableText(scanResult.label, display_oled);
     paginableText->render();
     oledRequestSmall = true;
+
+    
+    rfidUidBufferToStringLastValue =  rfidUidBufferToString(uid);
+
   }
 }
 
@@ -603,6 +609,10 @@ void useScanAction(void){
   //Vibration motor
   digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
   lastVibrationMotorStartTime = millis();
+
+  deckDatabase.appendUsedStimLog("/used_stim_log.json", deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "stim_code"));
+
+  rfidUidBufferToStringLastValue = "";
 
   paginableText = new DeckPaginableText("Objet utilisé !", display_oled);
   paginableText->render();
