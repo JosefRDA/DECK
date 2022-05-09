@@ -1,3 +1,6 @@
+//TODO : Refactor debug via services
+#define DECKINO_DEBUG_SERIAL  true
+#define DECKINO_DEBUG_OLED    true
 
 #include <SPI.h>
 #include <Wire.h>
@@ -12,12 +15,12 @@ PN532 nfc(pn532i2c);
 #include <Adafruit_SSD1306.h>
 
 #define OLED_RESET 1  // GPIO0
- 
+
+//Usage ?
 #define NUMFLAKES 10
 #define XPOS 0
 #define YPOS 0
 #define DELTAY 2
- 
  
 #define LOGO16_GLCD_HEIGHT 16
 #define LOGO16_GLCD_WIDTH  16
@@ -55,6 +58,7 @@ DeckDtodServer* dtodServer;
 #include "DeckPaginableText.h"
 DeckPaginableText* paginableText;
 
+//Todo : Moove vibration motor to StateMachine
 #define PIN_VIBRATION_MOTOR D5
 unsigned long lastVibrationMotorStartTime = 0;
 #define VIBRATION_MOTOR_DELAY 2000
@@ -67,12 +71,15 @@ unsigned long lastVibrationMotorStartTime = 0;
 #include "DeckMthrClient.h"
 
 #include <StateMachine.h>
-const int STATE_DELAY = 1000; //Useless ?
 
+//BEGIN REGION navigationMachine
+//TODO/REFACTOR : Move this StateMachine to it's own class
 StateMachine navigationMachine = StateMachine();
 State* StateMainMenu = navigationMachine.addState(&loopStateMainMenu);
 
 State* StateScan = navigationMachine.addState(&loopStateScan);
+State* StateConfirmBeforeUseScan = navigationMachine.addState(&loopStateConfirmBeforeUseScan);
+State* StateUseScan = navigationMachine.addState(&loopStateUseScan);
 
 State* StateConfirmBeforeEnterCharacterNumber = navigationMachine.addState(&loopStateConfirmBeforeEnterCharacterNumber);
 State* StateEnterCharacterNumber = navigationMachine.addState(&loopStateEnterCharacterNumber);
@@ -81,11 +88,19 @@ State* StateTryToUpdateStim = navigationMachine.addState(&loopStateTryToUpdateSt
 bool scanHasBeenPressed = false;
 bool confirmBeforeEnterCharacterNumberHasBeenPressed = false;
 bool enterCharacterNumberHasBeenPressed = false;
+bool enterUseScanHasBeenPressed = false;
 bool returnToMainMenuHasBeenPressed = false;
 bool confirmHasBeenPressed = false;
+bool isScanUsable = false;
 unsigned long lastNavigationStateChange = 0L;
 
+//debug
+int debugLastNavigationMachineState = -1;
 
+//END REGION navigationMachine
+
+//BEGIN REGION oledMachine
+//TODO/REFACTOR : Move this StateMachine to it's own class
 #define OLED_SMALL_DELAY  10L
 #define OLED_MEDIUM_DELAY 30L
 #define OLED_LONG_DELAY   60L
@@ -103,7 +118,7 @@ bool oledRequestSmall = false;
 bool oledRequestAlways = false;
 bool oledRequestOff = false;
 unsigned long lastOledStateChange = 0L;
-
+//END REGION oledMachine
 
 void setup(void) {
   setupVibrationMotor();
@@ -120,27 +135,35 @@ void setup(void) {
   display_oled.display();
   
   Serial.begin(115200);
-  Serial.println("Hello!");
 
-  Serial.println(F(""));
-  Serial.println(F(""));
+  #if DECKINO_DEBUG_SERIAL
+  Serial.println("Hello!");
+  #endif
+
   deckDatabase.mountFS();
-  //deckDatabase.listDir("/");
-  //deckDatabase.printJsonFile("/stim.json");
 
   nfc.begin();
 
   uint32_t versiondata = nfc.getFirmwareVersion();
 
   while(! versiondata){
-    display_oled.clearDisplay();
+    #if DECKINO_DEBUG_SERIAL
     Serial.println("Didn't find PN53x board");
+    #endif
+    #if DECKINO_DEBUG_OLED
+    display_oled.clearDisplay();
     display_oled.println("Didn't find PN53x board");
     display_oled.display();
+    #endif
     delay(1000);
+    
+    #if DECKINO_DEBUG_SERIAL
     Serial.println("Retrying ...");
+    #endif
+    #if DECKINO_DEBUG_OLED
     display_oled.println("Retrying ...");
     display_oled.display();
+    #endif
     nfc.begin();
   
     uint32_t versiondata = nfc.getFirmwareVersion();
@@ -159,7 +182,11 @@ void setup(void) {
   StateMainMenu->addTransition(&transitionStateMainMenuToStateScan, StateScan);
   StateMainMenu->addTransition(&transitionStateMainMenuToConfirmBeforeEnterCharacterNumber, StateConfirmBeforeEnterCharacterNumber);
   
-  StateScan->addTransition(&transitionStateScanToStateMainMenu, StateMainMenu);
+  StateScan->addTransition(&transitionStateScanToStateMainMenu, StateMainMenu);//TODO : To modify
+  StateScan->addTransition(&transitionStateScanToConfirmBeforeUseScan, StateConfirmBeforeUseScan);
+  StateConfirmBeforeUseScan->addTransition(&transitionStateConfirmBeforeUseScanToStateMainMenu, StateMainMenu);
+  StateConfirmBeforeUseScan->addTransition(&transitionStateConfirmBeforeUseScanToUseScan, StateUseScan);
+  StateUseScan->addTransition(&transitionStateUseScanToStateMainMenu, StateMainMenu);
   
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToEnterCharacterNumber, StateEnterCharacterNumber);
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToStateMainMenu, StateMainMenu); 
@@ -218,6 +245,8 @@ void setupOled(void) {
   display_oled.display();
 }
 
+//Obselete : Keept for debug purpose only
+//TODO : Refactor : Add in a RFID util class 
 void printRfidReaderInfo(uint32_t versiondata) {
   // Got ok data, print it out!
   Serial.print("Found chip PN5"); Serial.println((versiondata>>24) & 0xFF, HEX); 
@@ -229,6 +258,14 @@ void loop(void) {
   loopVibrationMotor();
   loopDtodServer();
   navigationMachine.run();
+  if(navigationMachine.currentState != NULL) {
+    if(debugLastNavigationMachineState != navigationMachine.currentState) {
+      #if DECKINO_DEBUG_SERIAL
+      Serial.println("[STATE CHANGE] OLD:" + String(debugLastNavigationMachineState) + " NEW:" + String(navigationMachine.currentState));
+      #endif
+      debugLastNavigationMachineState = navigationMachine.currentState;
+    }
+  }
   oledMachine.run();
 }
 
@@ -261,13 +298,11 @@ void loopMainMenuOkButton(void){
 void loopMainMenuUpButton(void){
   uint8_t buttonValue = upButton.read();
   if(buttonValue == BUTTON_SHORT_PRESS) {
-    //Serial.println("SHORT UP BUTTON");
     mainMenu->select(DECKMENU_DIRECTION_UP);
     mainMenu->render();
     oledRequestSmall = true;
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
-      //Serial.println("LONG UP BUTTON : WIFI");
     } 
   }
 }
@@ -275,14 +310,12 @@ void loopMainMenuUpButton(void){
 void loopMainMenuDownButton(void){
   uint8_t buttonValue = downButton.read();
   if(buttonValue == BUTTON_SHORT_PRESS) {
-    //Serial.println("SHORT DOWN BUTTON");
-    //TODO : IF IN MAIN MENU 
+    //TODO : IF IN MAIN MENU // Still relevent ?
     mainMenu->select(DECKMENU_DIRECTION_DOWN);
     mainMenu->render();
     oledRequestSmall = true;
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
-      //Serial.println("LONG DOWN BUTTON");
     } 
   }
 }
@@ -309,7 +342,6 @@ void loopScanUpButton(void){
     oledRequestSmall = true;
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
-      //Serial.println("LONG UP BUTTON : WIFI");
     } 
   }
 }
@@ -322,12 +354,22 @@ void loopScanDownButton(void){
     oledRequestSmall = true;
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
-      //Serial.println("LONG DOWN BUTTON");
     } 
   }
 }
 
-void loopConfirmOkButton(void){
+void loopConfirmBeforeUseScanOkButton(void){
+  uint8_t buttonValue = okButton.read();
+  if(buttonValue != BUTTON_NO_EVENT) {
+    if(confirmationPopUp->isOkSelected()) {
+      enterUseScanHasBeenPressed = true;
+    } else {
+      returnToMainMenuHasBeenPressed = true;
+    }
+  }
+}
+
+void loopConfirmBeforeEnterCharacterNumberOkButton(void){
   uint8_t buttonValue = okButton.read();
   if(buttonValue != BUTTON_NO_EVENT) {
     if(confirmationPopUp->isOkSelected()) {
@@ -341,12 +383,10 @@ void loopConfirmOkButton(void){
 void loopConfirmUpButton(void){
   uint8_t buttonValue = upButton.read();
   if(buttonValue == BUTTON_SHORT_PRESS) {
-    //Serial.println("SHORT UP BUTTON");
     confirmationPopUp->toggleSelection();
     confirmationPopUp->render();
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
-      //Serial.println("LONG UP BUTTON : WIFI");
     } 
   }
 }
@@ -354,13 +394,10 @@ void loopConfirmUpButton(void){
 void loopConfirmDownButton(void){
   uint8_t buttonValue = downButton.read();
   if(buttonValue == BUTTON_SHORT_PRESS) {
-    //Serial.println("SHORT DOWN BUTTON");
-    //TODO : IF IN MAIN MENU 
     confirmationPopUp->toggleSelection();
     confirmationPopUp->render();
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
-      //Serial.println("LONG DOWN BUTTON");
     } 
   }
 }
@@ -434,9 +471,7 @@ void mainMenuActionEnterCharacterNumber(void) {
 }
 
 void mainMenuActionScan(void) {
-  Serial.println("START SCAN");
   scanHasBeenPressed = true;
-  Serial.println("END SCAN");
 }
 
 void mainMenuActionDtod(void) {
@@ -474,11 +509,14 @@ void mainMenuActionDtod(void) {
 
       //TODO ajouter ici le filtre par seuil minimum de force
       if(WiFi.SSID(i).substring(0, 4) == SSID_PREFIX) {
+  
+        #if DECKINO_DEBUG_SERIAL
         Serial.println("DECK FOUND :");
         Serial.print("NAME : ");
         Serial.println(WiFi.SSID(i).substring(4));
         Serial.print("FORCE : ");
         Serial.println(WiFi.RSSI(i));
+        #endif
 
         int force = WiFi.RSSI(i);
         if(force > maxForce) {
@@ -534,15 +572,28 @@ void pn532ReadRfidLoop(void) {
   
   if (success) {
     // Display some basic information about the card
-
+    
+    #if DECKINO_DEBUG_SERIAL
     Serial.print("Label from JSON: ");
+    #endif
+
     DeckScanResult scanResult = deckDatabase.getLabelByUid("/stim.json", rfidUidBufferToString(uid));
     if(deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToString(uid), "value") == "true") {
-      Serial.println("[USABLE]");
+      isScanUsable = true;
+      #if DECKINO_DEBUG_SERIAL
+      Serial.print("[isScanUsable] TRUE");
+      #endif
+    }else{
+      isScanUsable = false;
+      #if DECKINO_DEBUG_SERIAL
+      Serial.print("[isScanUsable] FALSE");
+      #endif
     }
+
+    #if DECKINO_DEBUG_SERIAL
     Serial.println(scanResult.label);
     Serial.println("");
-
+    #endif
     
     //Vibration motor
     digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
@@ -557,7 +608,13 @@ void pn532ReadRfidLoop(void) {
 void confirmBeforeEnterCharacterNumberAction(void) {
   confirmationPopUp = new DeckConfirmationPopUp("Definir id personnage ?", display_oled);
   confirmationPopUp->render();
-  bool oledRequestAlways = false;
+  bool oledRequestAlways = true; //necessary ?
+}
+
+void confirmBeforeUseScanAction(void) {
+  confirmationPopUp = new DeckConfirmationPopUp("Utiliser l'objet ?", display_oled);
+  confirmationPopUp->render();
+  bool oledRequestAlways = true;
 }
 
 void enterCharacterNumberAction(void) {
@@ -613,12 +670,33 @@ void loopStateScan(){
   loopScanDownButton();
 }
 
+void loopStateConfirmBeforeUseScan() {
+  if(navigationMachine.executeOnce) {
+    lastNavigationStateChange = millis();
+    confirmBeforeUseScanAction();
+  }
+  loopConfirmBeforeUseScanOkButton();
+  loopConfirmUpButton();
+  loopConfirmDownButton();
+}
+
+void loopStateUseScan(){
+  if(navigationMachine.executeOnce) {
+    lastNavigationStateChange = millis();
+    //TODO
+  }
+  //TODO
+  //loopScanOkButton();
+  //loopScanUpButton();
+  //loopScanDownButton();
+}
+
 void loopStateConfirmBeforeEnterCharacterNumber() {
   if(navigationMachine.executeOnce) {
     lastNavigationStateChange = millis();
     confirmBeforeEnterCharacterNumberAction();
   }
-  loopConfirmOkButton();
+  loopConfirmBeforeEnterCharacterNumberOkButton();
   loopConfirmUpButton();
   loopConfirmDownButton();
 }
@@ -666,7 +744,19 @@ bool transitionStateConfirmBeforeEnterCharacterNumberToEnterCharacterNumber() {
   return false;
 }
 
+bool transitionStateConfirmBeforeUseScanToUseScan() {
+  if(enterUseScanHasBeenPressed) {
+    enterUseScanHasBeenPressed = false;
+    return true;
+  } 
+  return false;
+}
+
 bool transitionStateConfirmBeforeEnterCharacterNumberToStateMainMenu() {
+  return transitionGenericReturnToMainMenu();
+}
+
+bool transitionStateConfirmBeforeUseScanToStateMainMenu() {
   return transitionGenericReturnToMainMenu();
 }
 
@@ -679,6 +769,22 @@ bool transitionNavigationGeneric10Seconds(){
 }
 
 bool transitionStateScanToStateMainMenu(){
+  if(!isScanUsable) {
+    return transitionGenericReturnToMainMenu();
+  } else {
+    return false;
+  }
+}
+
+bool transitionStateScanToConfirmBeforeUseScan(){
+  if(isScanUsable) {
+    return transitionGenericReturnToMainMenu();
+  } else {
+    return false;
+  }
+}
+
+bool transitionStateUseScanToStateMainMenu(){
   return transitionGenericReturnToMainMenu();
 }
 
