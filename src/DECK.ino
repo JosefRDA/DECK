@@ -55,9 +55,6 @@ DeckDtodServer* dtodServer;
 #include "DeckPaginableText.h"
 DeckPaginableText* paginableText;
 
-unsigned long lastDisplayOledTime = 0;
-#define OLED_CLS_DELAY 10000
-
 #define PIN_VIBRATION_MOTOR D5
 unsigned long lastVibrationMotorStartTime = 0;
 #define VIBRATION_MOTOR_DELAY 2000
@@ -70,7 +67,7 @@ unsigned long lastVibrationMotorStartTime = 0;
 #include "DeckMthrClient.h"
 
 #include <StateMachine.h>
-const int STATE_DELAY = 1000;
+const int STATE_DELAY = 1000; //Useless ?
 
 StateMachine navigationMachine = StateMachine();
 State* StateMainMenu = navigationMachine.addState(&loopStateMainMenu);
@@ -81,13 +78,27 @@ State* StateConfirmBeforeEnterCharacterNumber = navigationMachine.addState(&loop
 State* StateEnterCharacterNumber = navigationMachine.addState(&loopStateEnterCharacterNumber);
 State* StateTryToUpdateStim = navigationMachine.addState(&loopStateTryToUpdateStim);
 
-
 bool scanHasBeenPressed = false;
 bool confirmBeforeEnterCharacterNumberHasBeenPressed = false;
 bool enterCharacterNumberHasBeenPressed = false;
 bool returnToMainMenuHasBeenPressed = false;
 bool confirmHasBeenPressed = false;
-unsigned long lastStateChange = 0L;
+unsigned long lastNavigationStateChange = 0L;
+
+StateMachine oledMachine = StateMachine();
+State* OledStateOff = oledMachine.addState(&loopOledStateOff);
+State* OledStateOnForLongDelay = oledMachine.addState(&loopOledStateOnForLongDelay);
+State* OledStateOnForMediumDelay = oledMachine.addState(&loopOledStateOnForMediumDelay);
+State* OledStateOnForSmallDelay = oledMachine.addState(&loopOledStateOnForSmallDelay);
+State* OledStateAlwaysOn = oledMachine.addState(&loopOledStateAlwaysOn);
+
+bool oledRequestLong = false;
+bool oledRequestMedium = false;
+bool oledRequestSmall = false;
+bool oledRequestAlways = false;
+bool oledRequestOff = false;
+unsigned long lastOledStateChange = 0L;
+
 
 void setup(void) {
   setupVibrationMotor();
@@ -139,7 +150,7 @@ void setup(void) {
   dtodServer = NULL;
   paginableText = NULL;
 
-  
+  //navigationMachine transitions begin
   StateMainMenu->addTransition(&transitionStateMainMenuToStateScan, StateScan);
   StateMainMenu->addTransition(&transitionStateMainMenuToConfirmBeforeEnterCharacterNumber, StateConfirmBeforeEnterCharacterNumber);
   
@@ -149,8 +160,25 @@ void setup(void) {
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToStateMainMenu, StateMainMenu); 
   StateEnterCharacterNumber->addTransition(&transitionStateEnterCharacterNumberToTryToUpdateStim, StateTryToUpdateStim);
   StateTryToUpdateStim->addTransition(&transitionStateTryToUpdateStimToMainMenu, StateMainMenu);
+  //navigationMachine transitions end
 
-  deckDatabase.printJsonFile("/config.json");
+  //oledMachine transitions begin
+  OledStateOff->addTransition(&transitionOledStateOffToOledStateOnForLongDelay, OledStateOnForLongDelay);
+  OledStateOnForLongDelay->addTransition(&transitionOledStateOnForLongDelayToOledStateOff, OledStateOff);
+
+  OledStateOff->addTransition(&transitionOledStateOffToOledStateOnForMediumDelay, OledStateOnForMediumDelay);
+  OledStateOnForMediumDelay->addTransition(&transitionOledStateOnForMediumDelayToOledStateOff, OledStateOff);
+
+  OledStateOff->addTransition(&transitionOledStateOffToOledStateOnForSmallDelay, OledStateOnForSmallDelay);
+  OledStateOnForSmallDelay->addTransition(&transitionOledStateOnForSmallDelayToOledStateOff, OledStateOff);
+
+  OledStateOff->addTransition(&transitionOledStateOffToOledStateAlwaysOn, OledStateAlwaysOn);
+  OledStateAlwaysOn->addTransition(&transitionOledStateAlwaysOnToOledStateOff, OledStateOff);
+  //oledMachine transitions end
+
+  //deckDatabase.printJsonFile("/config.json");
+  
+  oledRequestSmall = true;
 }
 
 void setUpMainMenu(void) {
@@ -193,10 +221,10 @@ void printRfidReaderInfo(uint32_t versiondata) {
 }
 
 void loop(void) {
-  loopCleanOled();
   loopVibrationMotor();
   loopDtodServer();
   navigationMachine.run();
+  oledMachine.run();
 }
 
 void loopDtodServer() {
@@ -231,6 +259,7 @@ void loopMainMenuUpButton(void){
     //Serial.println("SHORT UP BUTTON");
     mainMenu->select(DECKMENU_DIRECTION_UP);
     mainMenu->render();
+    oledRequestSmall = true;
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
       //Serial.println("LONG UP BUTTON : WIFI");
@@ -245,6 +274,7 @@ void loopMainMenuDownButton(void){
     //TODO : IF IN MAIN MENU 
     mainMenu->select(DECKMENU_DIRECTION_DOWN);
     mainMenu->render();
+    oledRequestSmall = true;
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
       //Serial.println("LONG DOWN BUTTON");
@@ -271,6 +301,7 @@ void loopScanUpButton(void){
   if(buttonValue == BUTTON_SHORT_PRESS) {
     paginableText->prev();
     paginableText->render();
+    oledRequestSmall = true;
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
       //Serial.println("LONG UP BUTTON : WIFI");
@@ -283,6 +314,7 @@ void loopScanDownButton(void){
   if(buttonValue == BUTTON_SHORT_PRESS) {
     paginableText->next();
     paginableText->render();
+    oledRequestSmall = true;
   } else { 
     if(buttonValue == BUTTON_LONG_PRESS) {
       //Serial.println("LONG DOWN BUTTON");
@@ -407,7 +439,7 @@ void mainMenuActionDtod(void) {
   display_oled.setCursor(0,0);
   display_oled.println("Scan des deck à portée en cours .");
   display_oled.display();
-  lastDisplayOledTime = millis();
+  oledRequestSmall = true;
 
   
   //INIT
@@ -420,7 +452,7 @@ void mainMenuActionDtod(void) {
   display_oled.setCursor(0,0);
   display_oled.println("Scan des deck à portée en cours ...");
   display_oled.display();
-  lastDisplayOledTime = millis();
+  oledRequestSmall = true;
 
   // WiFi.scanNetworks will return the number of networks found
   int n = WiFi.scanNetworks();
@@ -429,7 +461,7 @@ void mainMenuActionDtod(void) {
     display_oled.setCursor(0,0);
     display_oled.println("Aucun DECK a scanner");
     display_oled.display();
-    lastDisplayOledTime = millis();
+    oledRequestSmall = true;
   } else {
     int maxForce = -999;
     String closestDeckName = ""; 
@@ -460,7 +492,7 @@ void mainMenuActionDtod(void) {
     display_oled.println(dtodLabel);
     
     display_oled.display();
-    lastDisplayOledTime = millis();
+    oledRequestSmall = true;
     if(maxForce >  -999) {
       //Vibration motor
       digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
@@ -468,14 +500,6 @@ void mainMenuActionDtod(void) {
     }
   }
   WiFi.disconnect();
-}
-
-void loopCleanOled(void) {
-  if(lastDisplayOledTime != 0 && millis() > lastDisplayOledTime + OLED_CLS_DELAY) {
-    display_oled.clearDisplay();
-    display_oled.display();
-    lastDisplayOledTime = 0;
-  }
 }
 
 void loopVibrationMotor(void) {
@@ -521,21 +545,19 @@ void pn532ReadRfidLoop(void) {
 
     paginableText = new DeckPaginableText(scanResult.label, display_oled);
     paginableText->render();
-    //lastDisplayOledTime = millis();
+    oledRequestSmall = true;
   }
 }
 
 void confirmBeforeEnterCharacterNumberAction(void) {
   confirmationPopUp = new DeckConfirmationPopUp("Definir id personnage ?", display_oled);
   confirmationPopUp->render();
+  bool oledRequestAlways = false;
 }
 
 void enterCharacterNumberAction(void) {
-
-  choiceNumberPopUp = new DeckChoiceNumberPopUp(display_oled, deckDatabase.getFirstLevelDataByKey("/config.json", "player_id").toInt() );
-  
+  choiceNumberPopUp = new DeckChoiceNumberPopUp(display_oled, deckDatabase.getFirstLevelDataByKey("/config.json", "player_id").toInt());
   choiceNumberPopUp->render();
-
 }
 
 void tryToUpdateStimOkButtonAction(void) {
@@ -566,9 +588,10 @@ void tryToUpdateStimOkButtonAction(void) {
 
 void loopStateMainMenu(){
   if(navigationMachine.executeOnce) {
-    lastStateChange = millis();
+    lastNavigationStateChange = millis();
     setUpMainMenu();
     mainMenu->render();
+    oledRequestMedium = true;
   }
   loopMainMenuOkButton();
   loopMainMenuUpButton();
@@ -577,7 +600,7 @@ void loopStateMainMenu(){
 
 void loopStateScan(){
   if(navigationMachine.executeOnce) {
-    lastStateChange = millis();
+    lastNavigationStateChange = millis();
     pn532ReadRfidLoop();
   }
   loopScanOkButton();
@@ -587,7 +610,7 @@ void loopStateScan(){
 
 void loopStateConfirmBeforeEnterCharacterNumber() {
   if(navigationMachine.executeOnce) {
-    lastStateChange = millis();
+    lastNavigationStateChange = millis();
     confirmBeforeEnterCharacterNumberAction();
   }
   loopConfirmOkButton();
@@ -597,7 +620,7 @@ void loopStateConfirmBeforeEnterCharacterNumber() {
 
 void loopStateEnterCharacterNumber() {
   if(navigationMachine.executeOnce) {
-    lastStateChange = millis();
+    lastNavigationStateChange = millis();
     enterCharacterNumberAction();
   }
   loopEnterCharacterNumberOkButton();
@@ -607,11 +630,12 @@ void loopStateEnterCharacterNumber() {
 
 void loopStateTryToUpdateStim() {
   if(navigationMachine.executeOnce) {
-    lastStateChange = millis();
+    lastNavigationStateChange = millis();
     tryToUpdateStimOkButtonAction();
   }
   loopTryToUpdateStimOkButton();
 }
+
 
 bool transitionStateMainMenuToStateScan(){
   if(scanHasBeenPressed) {
@@ -641,12 +665,12 @@ bool transitionStateConfirmBeforeEnterCharacterNumberToStateMainMenu() {
   return transitionGenericReturnToMainMenu();
 }
 
-bool transitionGenericSecond(long second){
-  return millis() - lastStateChange > 1000 * second;
+bool transitionNavigationGenericSecond(long second){
+  return millis() - lastNavigationStateChange > 1000 * second;
 }
 
-bool transitionGeneric10Seconds(){
-  return transitionGenericSecond(10);
+bool transitionNavigationGeneric10Seconds(){
+  return transitionNavigationGenericSecond(10);
 }
 
 bool transitionStateScanToStateMainMenu(){
@@ -671,4 +695,103 @@ bool transitionGenericReturnToMainMenu(){
     return true;
   } 
   return false;
+}
+
+//--- OLED STATES LOOP
+
+void loopOledStateOnForSmallDelay(){
+  if(oledMachine.executeOnce) {
+    //TODO
+    lastOledStateChange = millis();
+  }
+  //TODO
+}
+
+void loopOledStateOnForMediumDelay(){
+  if(oledMachine.executeOnce) {
+    //TODO
+    lastOledStateChange = millis();
+  }
+  //TODO
+}
+
+void loopOledStateOnForLongDelay(){
+  if(oledMachine.executeOnce) {
+    //TODO
+    lastOledStateChange = millis();
+  }
+  //TODO
+}
+
+void loopOledStateAlwaysOn(){
+  if(oledMachine.executeOnce) {
+    //TODO
+    lastOledStateChange = millis();
+  }
+  //TODO
+}
+
+void loopOledStateOff(){
+  if(oledMachine.executeOnce) {
+    display_oled.clearDisplay();
+    display_oled.display();
+  }
+}
+
+//---
+
+bool transitionOledStateOffToOledStateOnForLongDelay() {
+  if(oledRequestLong) {
+    oledRequestLong = false;
+    return true;
+  } 
+  return false;
+}
+
+bool transitionOledStateOnForLongDelayToOledStateOff() {
+  return transitionOledGenericSecond(60L);
+}
+
+bool transitionOledStateOffToOledStateOnForMediumDelay() {
+  if(oledRequestMedium) {
+    oledRequestMedium = false;
+    return true;
+  } 
+  return false;
+}
+
+bool transitionOledStateOnForMediumDelayToOledStateOff() {
+  return transitionOledGenericSecond(30L);
+}
+
+bool transitionOledStateOffToOledStateOnForSmallDelay() {
+  if(oledRequestSmall) {
+    oledRequestSmall = false;
+    return true;
+  } 
+  return false;
+}
+
+bool transitionOledStateOnForSmallDelayToOledStateOff() {
+  return transitionOledGenericSecond(10L);
+}
+
+bool transitionOledStateOffToOledStateAlwaysOn() {
+  if(oledRequestAlways) {
+    oledRequestAlways = false;
+    return true;
+  } 
+  return false;
+}
+
+bool transitionOledStateAlwaysOnToOledStateOff() {
+  if(oledRequestOff) {
+    oledRequestOff = false;
+    return true;
+  } 
+  return false;
+}
+
+bool transitionOledGenericSecond(long second){
+  return millis() - lastOledStateChange > 1000 * second;
 }
