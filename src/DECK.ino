@@ -580,14 +580,8 @@ void pn532ReadRfidLoop(void) {
     DeckScanResult scanResult = deckDatabase.getLabelByUid("/stim.json", rfidUidBufferToString(uid));
     if(deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToString(uid), "value") == "true") {
       isScanUsable = true;
-      #if DECKINO_DEBUG_SERIAL
-      Serial.print("[isScanUsable] TRUE");
-      #endif
     }else{
       isScanUsable = false;
-      #if DECKINO_DEBUG_SERIAL
-      Serial.print("[isScanUsable] FALSE");
-      #endif
     }
 
     #if DECKINO_DEBUG_SERIAL
@@ -603,6 +597,16 @@ void pn532ReadRfidLoop(void) {
     paginableText->render();
     oledRequestSmall = true;
   }
+}
+
+void useScanAction(void){
+  //Vibration motor
+  digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
+  lastVibrationMotorStartTime = millis();
+
+  paginableText = new DeckPaginableText("Objet utilisé !", display_oled);
+  paginableText->render();
+  oledRequestSmall = true;
 }
 
 void confirmBeforeEnterCharacterNumberAction(void) {
@@ -683,12 +687,11 @@ void loopStateConfirmBeforeUseScan() {
 void loopStateUseScan(){
   if(navigationMachine.executeOnce) {
     lastNavigationStateChange = millis();
-    //TODO
+    useScanAction();
   }
-  //TODO
-  //loopScanOkButton();
-  //loopScanUpButton();
-  //loopScanDownButton();
+  loopScanOkButton();
+  loopScanUpButton();
+  loopScanDownButton();
 }
 
 void loopStateConfirmBeforeEnterCharacterNumber() {
