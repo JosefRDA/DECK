@@ -85,6 +85,11 @@ bool returnToMainMenuHasBeenPressed = false;
 bool confirmHasBeenPressed = false;
 unsigned long lastNavigationStateChange = 0L;
 
+
+#define OLED_SMALL_DELAY  10L
+#define OLED_MEDIUM_DELAY 30L
+#define OLED_LONG_DELAY   60L
+
 StateMachine oledMachine = StateMachine();
 State* OledStateOff = oledMachine.addState(&loopOledStateOff);
 State* OledStateOnForLongDelay = oledMachine.addState(&loopOledStateOnForLongDelay);
@@ -749,7 +754,7 @@ bool transitionOledStateOffToOledStateOnForLongDelay() {
 }
 
 bool transitionOledStateOnForLongDelayToOledStateOff() {
-  return transitionOledGenericSecond(60L);
+  return transitionOledGenericSecond(OLED_LONG_DELAY);
 }
 
 bool transitionOledStateOffToOledStateOnForMediumDelay() {
@@ -761,7 +766,7 @@ bool transitionOledStateOffToOledStateOnForMediumDelay() {
 }
 
 bool transitionOledStateOnForMediumDelayToOledStateOff() {
-  return transitionOledGenericSecond(30L);
+  return transitionOledGenericSecond(OLED_MEDIUM_DELAY);
 }
 
 bool transitionOledStateOffToOledStateOnForSmallDelay() {
@@ -773,7 +778,7 @@ bool transitionOledStateOffToOledStateOnForSmallDelay() {
 }
 
 bool transitionOledStateOnForSmallDelayToOledStateOff() {
-  return transitionOledGenericSecond(10L);
+  return transitionOledGenericSecond(OLED_SMALL_DELAY);
 }
 
 bool transitionOledStateOffToOledStateAlwaysOn() {
