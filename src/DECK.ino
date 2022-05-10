@@ -872,7 +872,7 @@ bool transitionStateMainMenuToDisplayDtodResult(){
     #if DECKINO_DEBUG_SERIAL
     Serial.println("[transitionStateMainMenuToDisplayDtodResult] Hello");
     #endif
-    returnToMainMenuHasBeenPressed = false; //better safe than sory
+    returnToMainMenuHasBeenPressed = false; //better safe than sorry
     return true;
   } 
   return false;
