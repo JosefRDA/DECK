@@ -227,7 +227,7 @@ void setUpMainMenu(void) {
   if(deckDatabase.getFirstLevelDataByKey("/pers.json", "can_dtod") == "true") {
       DeckMenuItem mainMenuItems[] = { 
         { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber },
-        { .label = "STIM", .value = "STIM", .selected = false, .shortPressAction = &mainMenuActionStim },
+        { .label = "SERV", .value = "SERV", .selected = false, .shortPressAction = &mainMenuActionDtodServer },
         { .label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod }
       };
       
@@ -235,7 +235,7 @@ void setUpMainMenu(void) {
     }else{
       DeckMenuItem mainMenuItems[] = { 
         { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber },
-        { .label = "STIM", .value = "STIM", .selected = false, .shortPressAction = &mainMenuActionStim }
+        { .label = "SERV", .value = "SERV", .selected = false, .shortPressAction = &mainMenuActionDtodServer }
       };
       
       mainMenu = new DeckMenu(mainMenuItems, 2, display_oled);
@@ -476,7 +476,7 @@ void loopTryToUpdateStimOkButton(void) {
 
 // ACTIONS ----------------------------------------------
 
-void mainMenuActionStim(void) {
+void mainMenuActionDtodServer(void) {
   dtodServer = new DeckDtodServer(display_oled, deckDatabase);
   oledRequestAlways = true;
   paginableText = new DeckPaginableText("SERVEUR DEMARRE", display_oled);

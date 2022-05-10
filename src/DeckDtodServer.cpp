@@ -18,7 +18,8 @@ DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled, DeckDatabase deckDatabase)
   IPAddress secondaryDNS(8, 8, 4, 4); // optional
   
   /* Set these to your desired credentials. */
-  const char *ssid = DECK_DTOD_SERVER_SSID;
+  String ssidSting =DECK_DTOD_SERVER_SSID_PREFIX +  String("_") + deckDatabase.getFirstLevelDataByKey("/config.json", "player_id");
+  const char *ssid = ssidSting.c_str();
   const char *password = DECK_DTOD_SERVER_PASSWORD;
   
   ESP8266WebServer server(80);

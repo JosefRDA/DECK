@@ -12,8 +12,8 @@
 
 #include "DeckDatabase.h"
 
-#ifndef DECK_DTOD_SERVER_SSID
-#define DECK_DTOD_SERVER_SSID "DECK"
+#ifndef DECK_DTOD_SERVER_SSID_PREFIX
+#define DECK_DTOD_SERVER_SSID_PREFIX "DECK"
 //#define DECK_DTOD_SERVER_PASSWORD  "987L6NU2"
 #define DECK_DTOD_SERVER_PASSWORD  "aaaaaaaa"
 #endif
