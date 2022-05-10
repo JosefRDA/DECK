@@ -65,7 +65,7 @@ DeckPaginableText* paginableText;
 unsigned long lastVibrationMotorStartTime = 0;
 #define VIBRATION_MOTOR_DELAY 2000
 
-#define SSID_PREFIX "Bbox"
+#define SSID_PREFIX "DECK"
 //#define SSID_PREFIX "TOTO"
 
 #include "ClusterLogo.h"
@@ -87,6 +87,8 @@ State* StateConfirmBeforeEnterCharacterNumber = navigationMachine.addState(&loop
 State* StateEnterCharacterNumber = navigationMachine.addState(&loopStateEnterCharacterNumber);
 State* StateTryToUpdateStim = navigationMachine.addState(&loopStateTryToUpdateStim);
 
+State* StateDisplayDtodResult = navigationMachine.addState(&loopStateDisplayDtodResult);
+
 bool scanHasBeenPressed = false;
 bool confirmBeforeEnterCharacterNumberHasBeenPressed = false;
 bool enterCharacterNumberHasBeenPressed = false;
@@ -95,6 +97,7 @@ bool returnToMainMenuHasBeenPressed = false;
 bool confirmHasBeenPressed = false;
 bool isScanUsable = false;
 unsigned long lastNavigationStateChange = 0L;
+bool hasDtodResultToDisplay = false;
 
 //debug
 int debugLastNavigationMachineState = -1;
@@ -185,12 +188,15 @@ void setup(void) {
   //navigationMachine transitions begin
   StateMainMenu->addTransition(&transitionStateMainMenuToStateScan, StateScan);
   StateMainMenu->addTransition(&transitionStateMainMenuToConfirmBeforeEnterCharacterNumber, StateConfirmBeforeEnterCharacterNumber);
-  
+  StateMainMenu->addTransition(&transitionStateMainMenuToDisplayDtodResult, StateDisplayDtodResult);
+
   StateScan->addTransition(&transitionStateScanToStateMainMenu, StateMainMenu);//TODO : To modify
   StateScan->addTransition(&transitionStateScanToConfirmBeforeUseScan, StateConfirmBeforeUseScan);
   StateConfirmBeforeUseScan->addTransition(&transitionStateConfirmBeforeUseScanToStateMainMenu, StateMainMenu);
   StateConfirmBeforeUseScan->addTransition(&transitionStateConfirmBeforeUseScanToUseScan, StateUseScan);
   StateUseScan->addTransition(&transitionStateUseScanToStateMainMenu, StateMainMenu);
+
+  StateDisplayDtodResult->addTransition(&transitionStateDisplayDtodResultToMainMenu, StateMainMenu);
   
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToEnterCharacterNumber, StateEnterCharacterNumber);
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToStateMainMenu, StateMainMenu); 
@@ -516,6 +522,7 @@ void mainMenuActionDtod(void) {
   } else {
     int maxForce = -999;
     String closestDeckName = ""; 
+    String closestDeckSsid = "";
     for (int i = 0; i < n; ++i) {
 
       //TODO ajouter ici le filtre par seuil minimum de force
@@ -532,6 +539,7 @@ void mainMenuActionDtod(void) {
         int force = WiFi.RSSI(i);
         if(force > maxForce) {
           maxForce = force;
+          closestDeckSsid = WiFi.SSID(i);
           closestDeckName = WiFi.SSID(i).substring(4);
         }
       }
@@ -541,12 +549,19 @@ void mainMenuActionDtod(void) {
     
     String dtodLabel = "Aucun DECK a scanner";
     if(maxForce >  -999) {
-      dtodLabel = deckDatabase.getLabelByUid("/dtod.json", closestDeckName).label;
+      //Old info from deck name
+      //dtodLabel = deckDatabase.getLabelByUid("/dtod.json", closestDeckName).label;
+      dtodLabel = mainMenuActionDtodGetRemoteData(closestDeckSsid);
+
+      deckDatabase.persistFullFile("/temp.json", dtodLabel);
+
     }
-    display_oled.println(dtodLabel);
-    
-    display_oled.display();
-    oledRequestSmall = true;
+
+    paginableText = new DeckPaginableText(dtodLabel, display_oled);
+    paginableText->render();
+    oledRequestAlways = true;
+    hasDtodResultToDisplay = true;
+
     if(maxForce >  -999) {
       //Vibration motor
       digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
@@ -554,6 +569,65 @@ void mainMenuActionDtod(void) {
     }
   }
   WiFi.disconnect();
+}
+
+String mainMenuActionDtodGetRemoteData(String closestDeckSsid) {
+  String result = "";
+
+  ESP8266WiFiMulti WiFiMulti;
+
+  WiFi.mode(WIFI_STA);
+  WiFiMulti.addAP(closestDeckSsid.c_str(), "aaaaaaaa");
+
+  WiFiClient client;
+  HTTPClient http;
+
+  while ((WiFiMulti.run() != WL_CONNECTED)) {
+    #if DECKINO_DEBUG_SERIAL
+    Serial.println("[mainMenuActionDtodGetRemoteData] Waiting for connexion on SSID:" + closestDeckSsid + " pass:" + "aaaaaaaa");
+    #endif
+  }
+
+  #if DECKINO_DEBUG_SERIAL
+  Serial.println("[mainMenuActionDtodGetRemoteData][HTTP] begin...");
+  #endif
+  if (http.begin(client, "http://192.168.4.1/")) {  // HTTP
+  
+    #if DECKINO_DEBUG_SERIAL
+    Serial.println("[mainMenuActionDtodGetRemoteData][HTTP] GET...");
+    #endif
+    // start connection and send HTTP header
+    int httpCode = http.GET();
+
+    // httpCode will be negative on error
+    if (httpCode > 0) {
+      // HTTP header has been send and Server response header has been handled
+      #if DECKINO_DEBUG_SERIAL
+      Serial.printf("[mainMenuActionDtodGetRemoteData][HTTP] GET... code: %d\n", httpCode);
+      #endif
+
+      // file found at server
+      if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+        result = http.getString();
+        #if DECKINO_DEBUG_SERIAL
+        Serial.println("[mainMenuActionDtodGetRemoteData][DATA RECIEVED]" + result);
+        #endif
+      }
+    } else {
+      #if DECKINO_DEBUG_SERIAL
+      Serial.printf("[mainMenuActionDtodGetRemoteData][HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+      #endif
+    }
+
+    http.end();
+  } else {
+    
+    #if DECKINO_DEBUG_SERIAL
+    Serial.printf("[mainMenuActionDtodGetRemoteData][HTTP] Unable to connect\n");
+    #endif
+  }
+  
+  return result;
 }
 
 void loopVibrationMotor(void) {
@@ -765,6 +839,19 @@ void loopStateTryToUpdateStim() {
   loopTryToUpdateStimOkButton();
 }
 
+void loopStateDisplayDtodResult(){
+  if(navigationMachine.executeOnce) {
+    lastNavigationStateChange = millis();
+    #if DECKINO_DEBUG_SERIAL
+    Serial.println("[loopStateDisplayDtodResult] Hello");
+    #endif
+    // Nothing ?
+  }
+  loopScanOkButton();
+  loopScanUpButton();
+  loopScanDownButton();
+}
+
 
 bool transitionStateMainMenuToStateScan(){
   if(scanHasBeenPressed) {
@@ -772,6 +859,22 @@ bool transitionStateMainMenuToStateScan(){
     return true;
   } 
   return false;
+}
+
+bool transitionStateMainMenuToDisplayDtodResult(){
+  if(hasDtodResultToDisplay) {
+    hasDtodResultToDisplay = false;
+    #if DECKINO_DEBUG_SERIAL
+    Serial.println("[transitionStateMainMenuToDisplayDtodResult] Hello");
+    #endif
+    returnToMainMenuHasBeenPressed = false; //beter safe than sory
+    return true;
+  } 
+  return false;
+}
+
+bool transitionStateDisplayDtodResultToMainMenu() {
+  return transitionGenericReturnToMainMenu();
 }
 
 bool transitionStateMainMenuToConfirmBeforeEnterCharacterNumber(){

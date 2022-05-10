@@ -76,5 +76,6 @@ void DeckDtodServer::handleRoot(void) {
 
   
   this->_webServer->send(200, "application/json", this->_deckDatabase.jsonFileToString("/used_stim_log.json"));
-  this->_deckDatabase.printJsonFile("/used_stim_log.json");
+  //this->_deckDatabase.printJsonFile("/used_stim_log.json");
+  this->_webServer->stop();
 }
