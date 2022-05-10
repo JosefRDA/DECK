@@ -220,16 +220,11 @@ void setup(void) {
 void setUpMainMenu(void) {
   DeckMenuItem mainMenuItems[] = { 
         { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber },
-        { .label = "STIM", .value = "STIM", .selected = false, .shortPressAction = &mainMenuActionStim, .longPressAction = &mainMenuActionTestPaginableText},
+        { .label = "STIM", .value = "STIM", .selected = false, .shortPressAction = &mainMenuActionStim },
         { .label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod }
       };
     
   mainMenu = new DeckMenu(mainMenuItems, 3, display_oled);
-}
-
-void mainMenuActionTestPaginableText(void) {
-  paginableText = new DeckPaginableText("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris in facilisis ante. Vestibulum est massa, laoreet at metus a, aliquam rhoncus libero. Sed rhoncus nulla ornare nisl imperdiet dignissim. Etiam sit amet tristique risus, a cursus orci. Nam non ex ac est mattis pharetra at eu orci. Etiam non quam mattis, aliquet turpis et, fermentum orci.", display_oled);
-  paginableText->render();
 }
 
 void setupVibrationMotor(void) {
