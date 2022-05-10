@@ -471,7 +471,10 @@ void loopTryToUpdateStimOkButton(void) {
 // ACTIONS ----------------------------------------------
 
 void mainMenuActionStim(void) {
-  dtodServer = new DeckDtodServer(display_oled);
+  dtodServer = new DeckDtodServer(display_oled, deckDatabase);
+  oledRequestAlways = true;
+  paginableText = new DeckPaginableText("SERVEUR DEMARRE", display_oled);
+  paginableText->render();
 }
 
 void mainMenuActionEnterCharacterNumber(void) {

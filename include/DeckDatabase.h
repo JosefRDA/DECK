@@ -21,6 +21,8 @@ class DeckDatabase {
 
   void printJsonFile(const char * filename);
 
+  String jsonFileToString(const char * filename);
+
   void listDir(const char * dirname);
 
   DeckScanResult getLabelByUid(const char * filename, String uid);

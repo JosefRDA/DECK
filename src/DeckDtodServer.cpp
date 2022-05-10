@@ -2,9 +2,10 @@
 
 // CONSTRUCTORS ------------------------------------------------------------
 
-DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled) { 
+DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled, DeckDatabase deckDatabase) { 
 
   _oled = oled;
+  this->_deckDatabase = deckDatabase;
 
   
   // Set your Static IP address
@@ -73,7 +74,7 @@ void DeckDtodServer::handleRoot(void) {
   _oled.print("NON");
   _oled.display();
 
-  delay(5000);
   
-  this->_webServer->send(200, "application/json", "<h1>You are connected</h1>");
+  this->_webServer->send(200, "application/json", this->_deckDatabase.jsonFileToString("/used_stim_log.json"));
+  this->_deckDatabase.printJsonFile("/used_stim_log.json");
 }

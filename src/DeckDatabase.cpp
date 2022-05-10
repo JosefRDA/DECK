@@ -45,6 +45,35 @@ void DeckDatabase::printJsonFile(const char * filename){
   file.close();
 }
 
+String DeckDatabase::jsonFileToString(const char * filename){
+  String result = "";
+    // Open file for reading
+  File file = LittleFS.open(filename, "r");
+  if (!file) 
+  {
+    Serial.println(F("Failed to open file for reading"));
+  }
+
+  StaticJsonDocument<1024> doc;
+
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(doc, file);
+  if (error)
+  {
+    Serial.println(F("Failed to deserialize file"));
+    Serial.println(error.c_str());
+  }
+  else
+  {
+    serializeJsonPretty(doc, result);
+  }
+
+  // Close the file (File's destructor doesn't close the file)
+  file.close();
+
+  return result;
+}
+
 void DeckDatabase::listDir(const char * dirname) {
   Serial.printf("Listing directory: %s", dirname);
   Serial.println();
@@ -223,7 +252,7 @@ void DeckDatabase::persistFullFile(const char * filename, String fileContent) {
 }
 
 void DeckDatabase::appendUsedStimLog(const char * filename, String usableStimCode) {
-  DynamicJsonDocument doc(8192);
+  DynamicJsonDocument doc(8192); //TODO : Check Size
 
   // Open file for reading
   File file = LittleFS.open(filename, "r");
