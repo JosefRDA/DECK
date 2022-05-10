@@ -29,6 +29,8 @@ PN532 nfc(pn532i2c);
 #define SCREEN_HEIGHT 48 // OLED display height, in pixels
 Adafruit_SSD1306 display_oled(OLED_RESET);
 
+#define USE_SCAN_ACTION_DEFAULT_MESSAGE "[SANS EFFET IMEDIAT]"
+
 // CONFIG
 #include "DeckDatabase.h"
 DeckDatabase deckDatabase;
@@ -612,11 +614,18 @@ void useScanAction(void){
 
   deckDatabase.appendUsedStimLog("/used_stim_log.json", deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "stim_code"));
 
-  rfidUidBufferToStringLastValue = "";
 
-  paginableText = new DeckPaginableText("Objet utilisé !", display_oled);
+  String useScanActionTextToDisplay = deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "effect");
+  if(useScanActionTextToDisplay == "") {
+    useScanActionTextToDisplay = USE_SCAN_ACTION_DEFAULT_MESSAGE;
+  }
+
+  paginableText = new DeckPaginableText(useScanActionTextToDisplay, display_oled);
   paginableText->render();
   oledRequestSmall = true;
+
+  
+  rfidUidBufferToStringLastValue = "";
 }
 
 void confirmBeforeEnterCharacterNumberAction(void) {

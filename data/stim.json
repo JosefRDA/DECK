@@ -6,13 +6,15 @@
    },
    {
       "uid":"CE74D83F",
-      "label":"Tag Bleu (depuis JSON)",
+      "label":"BURN",
 	   "usable": "true",
-      "stim_code": "BLUE"
+      "stim_code": "BURN",
+      "effect": "[EFFET] Vous vous sentez euphorique pendant quelques minutes"
    },
    {
       "uid":"04256BDA",
       "label":"Boite de nesquik",
-	   "usable": "false"
+	   "usable": "true",
+      "stim_code": "NESK"
    }
 ]

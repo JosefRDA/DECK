@@ -79,13 +79,18 @@ DeckScanResult DeckDatabase::getLabelByUid(const char * filename, String uid) {
   }
 }
 
+//TODO/Refactor : Handle return by custom return payload (struct) or exception (better !)
 String DeckDatabase::getFieldValueByUid(const char * filename, String uid, String fieldKey) {
+  String result;
+
   JsonObject stim = getStimByUid(filename, uid);
   if(stim) {
-    return stim[fieldKey].as<char*>();
+    result = stim[fieldKey].as<char*>();
   } else {
-    return String("[UNKNOWN] :") + uid;
+    result = String("[UNKNOWN] :") + uid;
   }
+
+  return result;
 }
 
 bool DeckDatabase::getUsableByUid(const char * filename, String uid) {
