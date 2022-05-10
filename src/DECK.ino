@@ -212,7 +212,7 @@ void setup(void) {
   OledStateAlwaysOn->addTransition(&transitionOledStateAlwaysOnToOledStateOff, OledStateOff);
   //oledMachine transitions end
 
-  deckDatabase.printJsonFile("/used_stim_log.json");
+  deckDatabase.printJsonFile("/pers.json");
   
   oledRequestSmall = true;
 }
@@ -648,17 +648,34 @@ void tryToUpdateStimOkButtonAction(void) {
   paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...", display_oled);
   paginableText->render();
 
+
   DeckMthrClient* mthrClient = new DeckMthrClient(deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_ssid"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_password"), "http://192.168.0.8:8080");
+  
+  //DOWNLOAD STIM.JSON
+  
   RessourceResponse motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId +  "/STIM.JSON");
 
   String userDisplayMessage = "";
   if(motherResponse.httpCode == 404) {
-    userDisplayMessage = "PERSONNAGE NOT FOUND";
+    userDisplayMessage = "STIM : PERSONNAGE NOT FOUND";
   } else if(motherResponse.httpCode != 200) {
-    userDisplayMessage = "NETWORK ERROR : " + String(motherResponse.httpCode);
+    userDisplayMessage = "STIM : NETWORK ERROR : " + String(motherResponse.httpCode);
   } else {
     deckDatabase.persistFullFile("/stim.json", motherResponse.payload);
-    userDisplayMessage = "DATA UPDATED";
+    userDisplayMessage = "STIM : DATA UPDATED";
+  }
+
+  //DOWNLOAD PERS.JSON
+  
+  motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId +  "/PERS.JSON");
+
+  if(motherResponse.httpCode == 404) {
+    userDisplayMessage += "\nPERS : PERSONNAGE NOT FOUND";
+  } else if(motherResponse.httpCode != 200) {
+    userDisplayMessage += "\nPERS : NETWORK ERROR : " + String(motherResponse.httpCode);
+  } else {
+    deckDatabase.persistFullFile("/pers.json", motherResponse.payload);
+    userDisplayMessage += "\nPERS : DATA UPDATED";
   }
   paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...\n" + userDisplayMessage, display_oled);
   paginableText->render();
