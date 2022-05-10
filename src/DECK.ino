@@ -1,3 +1,5 @@
+#define DECK_VERSION "v1.2.0"
+
 //TODO : Refactor debug via services
 #define DECKINO_DEBUG_SERIAL  true
 #define DECKINO_DEBUG_OLED    true
@@ -134,9 +136,12 @@ void setup(void) {
   display_oled.begin(SSD1306_SWITCHCAPVCC);
   display_oled.drawBitmap(0, 0, clusterLogo_data, clusterLogo_width, clusterLogo_height, 1);
   display_oled.display();
-
   delay(2000);
-
+  
+  display_oled.setCursor(27,40);
+  display_oled.println(DECK_VERSION);
+  display_oled.display();
+  delay(1000);
 
   display_oled.clearDisplay();
   display_oled.display();
