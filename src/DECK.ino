@@ -218,13 +218,22 @@ void setup(void) {
 }
 
 void setUpMainMenu(void) {
-  DeckMenuItem mainMenuItems[] = { 
+  if(deckDatabase.getFirstLevelDataByKey("/pers.json", "can_dtod") == "true") {
+      DeckMenuItem mainMenuItems[] = { 
         { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber },
         { .label = "STIM", .value = "STIM", .selected = false, .shortPressAction = &mainMenuActionStim },
         { .label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod }
       };
-    
-  mainMenu = new DeckMenu(mainMenuItems, 3, display_oled);
+      
+      mainMenu = new DeckMenu(mainMenuItems, 3, display_oled);
+    }else{
+      DeckMenuItem mainMenuItems[] = { 
+        { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber },
+        { .label = "STIM", .value = "STIM", .selected = false, .shortPressAction = &mainMenuActionStim }
+      };
+      
+      mainMenu = new DeckMenu(mainMenuItems, 2, display_oled);
+    }
 }
 
 void setupVibrationMotor(void) {
