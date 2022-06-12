@@ -650,6 +650,10 @@ String rfidUidBufferToString(uint8_t uid[]) {
 }
 
 void pn532ReadRfidLoop(void) {
+
+  paginableText = new DeckPaginableText("En attente de SCAN", display_oled);
+  paginableText->render();
+  oledRequestAlways = true;
   
   uint8_t success;
   uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };  // Buffer to store the returned UID
@@ -717,13 +721,13 @@ void useScanAction(void){
 void confirmBeforeEnterCharacterNumberAction(void) {
   confirmationPopUp = new DeckConfirmationPopUp("Definir id personnage ?", display_oled);
   confirmationPopUp->render();
-  bool oledRequestAlways = true; //necessary ?
+  oledRequestAlways = true; //necessary ?
 }
 
 void confirmBeforeUseScanAction(void) {
   confirmationPopUp = new DeckConfirmationPopUp("Utiliser l'objet ?", display_oled);
   confirmationPopUp->render();
-  bool oledRequestAlways = true;
+  oledRequestAlways = true;
 }
 
 void enterCharacterNumberAction(void) {
