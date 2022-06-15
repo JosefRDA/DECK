@@ -75,8 +75,15 @@ void DeckDtodServer::handleRoot(void) {
   _oled.print("NON");
   _oled.display();
 
-  
-  this->_webServer->send(200, "application/json", this->_deckDatabase.jsonFileToString("/used_stim_log.json"));
+  //deprecated : old behaviour
+  //this->_webServer->send(200, "application/json", this->_deckDatabase.jsonFileToString("/used_stim_log.json"));
   //this->_deckDatabase.printJsonFile("/used_stim_log.json");
+
+  //Todo : take from utilGetCurrentSporePercent
+  int sporePercentInt = round(_deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel").toInt() * 100 / _deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max").toInt());
+
+  String returnPayload = "{ \"spore_percent\" : \"" + String(sporePercentInt) + "\" }";
+  this->_webServer->send(200, "application/json", returnPayload);
+
   this->_webServer->stop();
 }
