@@ -709,7 +709,7 @@ void useScanAction(void){
   Serial.print("[SPORE](Before use) : ");
   Serial.print("- Spore Max : ");
   Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max"));
-  Serial.print("- Spore Actuel : ");
+  Serial.print(" - Spore Actuel : ");
   Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel"));
   Serial.println("");
   #endif
@@ -737,10 +737,17 @@ void useScanAction(void){
   Serial.print("[SPORE](After use) : ");
   Serial.print("- Spore Max : ");
   Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max"));
-  Serial.print("- Spore Actuel : ");
+  Serial.print(" - Spore Actuel : ");
   Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel"));
   Serial.println("");
+  Serial.print("Range Label : ");
+  Serial.print(deckDatabase.getMatchingLabelByRange("/pers.json", "spore_ranges", utilGetCurrentSporePercent()));
+  Serial.println("");
   #endif
+}
+
+int utilGetCurrentSporePercent(void) {
+  return round(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel").toInt() * 100 / deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max").toInt());
 }
 
 void confirmBeforeEnterCharacterNumberAction(void) {

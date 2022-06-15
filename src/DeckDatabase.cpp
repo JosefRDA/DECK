@@ -197,6 +197,47 @@ String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldK
   return result;
 }
 
+String DeckDatabase::getMatchingLabelByRange(const char * filename, String fieldKey, int rangeValue) {
+  String result = "[VIDE]";
+
+  // Open file for reading
+  File file = LittleFS.open(filename, "r");
+  if (!file) 
+  {
+    Serial.println(F("Failed to open file for reading"));
+  }
+
+  StaticJsonDocument<1024> doc;
+
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(doc, file);
+  if (error)
+  {
+    Serial.println(F("Failed to deserialize file"));
+    Serial.println(error.c_str());
+  }
+  else
+  {
+    JsonObject rootJson = doc.as<JsonObject>();
+    JsonArray rangesArray = rootJson[fieldKey].as<JsonArray>();
+
+    JsonObject matchingRangeJson;
+    for(JsonVariant value : rangesArray) {
+      JsonObject rangeJson = value.as<JsonObject>();
+      if(String(rangeJson["min"].as<char*>()).toInt() <  rangeValue && String(rangeJson["max"].as<char*>()).toInt() >  rangeValue) {
+        matchingRangeJson = rangeJson;
+        break;
+      }
+    }
+
+    result = String(matchingRangeJson["label"].as<char*>());
+  }
+
+  file.close();
+
+  return result;
+}
+
 void DeckDatabase::persistFirstLevelDataByKeyValue(const char * filename, String fieldKey, String fieldValue) {
   JsonObject result;
 

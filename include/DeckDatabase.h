@@ -36,6 +36,8 @@ class DeckDatabase {
   void persistFirstLevelDataByKeyValue(const char * filename, String fieldKey, String fieldValue);
 
   String getFirstLevelDataByKey(const char * filename, String fieldKey);
+
+  String getMatchingLabelByRange(const char * filename, String fieldKey, int rangeValue);
   
   void persistFullFile(const char * filename, String fileContent);
 

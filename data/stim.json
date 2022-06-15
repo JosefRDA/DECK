@@ -16,6 +16,8 @@
       "uid":"04256BDA",
       "label":"Boite de nesquik",
 	   "usable": "true",
-      "stim_code": "NESK"
+      "stim_code": "NESK",
+      "effect": "[EFFET] Vous vous sentez euphorique pendant quelques minutes",
+      "spore": "-2"
    }
 ]

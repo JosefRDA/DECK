@@ -12,7 +12,19 @@
     {
       "min" : "51",
       "max" : "99",
-      "label" : "La Personne est Infectee"
+      "label" : "La Personne est proche de la mort"
+    }
+  ],
+  "spore_ranges": [
+    {
+      "min" : "0",
+      "max" : "50",
+      "label" : "Vous toussez"
+    },
+    {
+      "min" : "51",
+      "max" : "99",
+      "label" : "Vous crachez du sang"
     }
   ]
 }
