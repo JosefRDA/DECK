@@ -84,6 +84,7 @@ State* StateMainMenu = navigationMachine.addState(&loopStateMainMenu);
 State* StateScan = navigationMachine.addState(&loopStateScan);
 State* StateConfirmBeforeUseScan = navigationMachine.addState(&loopStateConfirmBeforeUseScan);
 State* StateUseScan = navigationMachine.addState(&loopStateUseScan);
+State* StateSporulationEffectAfterUseScan = navigationMachine.addState(&loopStateSporulationEffectAfterUseScan);
 
 State* StateConfirmBeforeEnterCharacterNumber = navigationMachine.addState(&loopStateConfirmBeforeEnterCharacterNumber);
 State* StateEnterCharacterNumber = navigationMachine.addState(&loopStateEnterCharacterNumber);
@@ -128,6 +129,7 @@ unsigned long lastOledStateChange = 0L;
 //END REGION oledMachine
 
 String rfidUidBufferToStringLastValue = "";
+String sporulationEffectAfterUseScanActionText = "";
 
 void setup(void) {
   setupVibrationMotor();
@@ -200,6 +202,8 @@ void setup(void) {
   StateConfirmBeforeUseScan->addTransition(&transitionStateConfirmBeforeUseScanToStateMainMenu, StateMainMenu);
   StateConfirmBeforeUseScan->addTransition(&transitionStateConfirmBeforeUseScanToUseScan, StateUseScan);
   StateUseScan->addTransition(&transitionStateUseScanToStateMainMenu, StateMainMenu);
+  StateUseScan->addTransition(&transitionStateUseScanToStateSporulationEffectAfterUseScan, StateSporulationEffectAfterUseScan);
+  StateSporulationEffectAfterUseScan->addTransition(&transitionGenericReturnToMainMenu, StateMainMenu);
 
   StateDisplayDtodResult->addTransition(&transitionStateDisplayDtodResultToMainMenu, StateMainMenu);
   
@@ -732,6 +736,8 @@ void useScanAction(void){
 
   
   rfidUidBufferToStringLastValue = "";
+  
+  sporulationEffectAfterUseScanActionText = deckDatabase.getMatchingLabelByRange("/pers.json", "spore_ranges", utilGetCurrentSporePercent());
 
   #if DECKINO_DEBUG_SERIAL
   Serial.print("[SPORE](After use) : ");
@@ -741,13 +747,26 @@ void useScanAction(void){
   Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel"));
   Serial.println("");
   Serial.print("Range Label : ");
-  Serial.print(deckDatabase.getMatchingLabelByRange("/pers.json", "spore_ranges", utilGetCurrentSporePercent()));
+  Serial.print(sporulationEffectAfterUseScanActionText);
   Serial.println("");
   #endif
+
 }
 
 int utilGetCurrentSporePercent(void) {
   return round(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel").toInt() * 100 / deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max").toInt());
+}
+
+void sporulationEffectAfterUseScanAction(void) {
+  //Vibration motor
+  digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
+  lastVibrationMotorStartTime = millis();
+
+  paginableText = new DeckPaginableText(sporulationEffectAfterUseScanActionText, display_oled);
+  paginableText->render();
+  oledRequestSmall = true;
+
+  sporulationEffectAfterUseScanActionText = "";
 }
 
 void confirmBeforeEnterCharacterNumberAction(void) {
@@ -846,6 +865,16 @@ void loopStateUseScan(){
   if(navigationMachine.executeOnce) {
     lastNavigationStateChange = millis();
     useScanAction();
+  }
+  loopScanOkButton();
+  loopScanUpButton();
+  loopScanDownButton();
+}
+
+void loopStateSporulationEffectAfterUseScan(){
+  if(navigationMachine.executeOnce) {
+    lastNavigationStateChange = millis();
+    sporulationEffectAfterUseScanAction();
   }
   loopScanOkButton();
   loopScanUpButton();
@@ -975,7 +1004,19 @@ bool transitionStateScanToConfirmBeforeUseScan(){
 }
 
 bool transitionStateUseScanToStateMainMenu(){
-  return transitionGenericReturnToMainMenu();
+  if(sporulationEffectAfterUseScanActionText.length() == 0) {
+    return transitionGenericReturnToMainMenu();
+  } else {
+    return false;
+  }
+}
+
+bool transitionStateUseScanToStateSporulationEffectAfterUseScan(){
+  if(sporulationEffectAfterUseScanActionText.length() > 0) {
+    return transitionGenericReturnToMainMenu();
+  } else {
+    return false;
+  }
 }
 
 bool transitionStateEnterCharacterNumberToTryToUpdateStim(){

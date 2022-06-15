@@ -198,7 +198,7 @@ String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldK
 }
 
 String DeckDatabase::getMatchingLabelByRange(const char * filename, String fieldKey, int rangeValue) {
-  String result = "[VIDE]";
+  String result = "";
 
   // Open file for reading
   File file = LittleFS.open(filename, "r");
