@@ -701,9 +701,25 @@ void useScanAction(void){
   //Vibration motor
   digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
   lastVibrationMotorStartTime = millis();
+  
+  //Old behaviour. Log obselete.
+  //deckDatabase.appendUsedStimLog("/used_stim_log.json", deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "stim_code"));
 
-  deckDatabase.appendUsedStimLog("/used_stim_log.json", deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "stim_code"));
+  #if DECKINO_DEBUG_SERIAL
+  Serial.print("[SPORE](Before use) : ");
+  Serial.print("- Spore Max : ");
+  Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max"));
+  Serial.print("- Spore Actuel : ");
+  Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel"));
+  Serial.println("");
+  #endif
 
+  deckDatabase.persistFirstLevelDataByKeyValue("/pers.json", "spore_actuel", 
+    String(constrain(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel").toInt() 
+      + deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "spore").toInt(), 0,
+      deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max").toInt())
+    )
+  );
 
   String useScanActionTextToDisplay = deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "effect");
   if(useScanActionTextToDisplay == "") {
@@ -716,6 +732,15 @@ void useScanAction(void){
 
   
   rfidUidBufferToStringLastValue = "";
+
+  #if DECKINO_DEBUG_SERIAL
+  Serial.print("[SPORE](After use) : ");
+  Serial.print("- Spore Max : ");
+  Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max"));
+  Serial.print("- Spore Actuel : ");
+  Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel"));
+  Serial.println("");
+  #endif
 }
 
 void confirmBeforeEnterCharacterNumberAction(void) {

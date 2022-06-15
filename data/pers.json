@@ -1,4 +1,18 @@
 {
   "player_id":"003",
-  "can_dtod":"true"
+  "can_dtod":"true",
+  "spore_actuel" : "2",
+  "spore_max" : "10",
+  "dtod_ranges": [
+    {
+      "min" : "0",
+      "max" : "50",
+      "label" : "La Personne est Infectee"
+    },
+    {
+      "min" : "51",
+      "max" : "99",
+      "label" : "La Personne est Infectee"
+    }
+  ]
 }

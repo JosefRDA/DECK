@@ -9,7 +9,8 @@
       "label":"BURN",
 	   "usable": "true",
       "stim_code": "BURN",
-      "effect": "[EFFET] Vous vous sentez euphorique pendant quelques minutes"
+      "effect": "[EFFET] Vous vous sentez euphorique pendant quelques minutes",
+      "spore": "2"
    },
    {
       "uid":"04256BDA",
