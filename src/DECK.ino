@@ -556,28 +556,32 @@ void mainMenuActionDtod(void) {
     display_oled.clearDisplay();
     display_oled.setCursor(0,0);
     
-    String dtodLabel = "Aucun DECK a scanner";
+    String remoteDeckData = "";
     if(maxForce >  -999) {
       //Old info from deck name
-      //dtodLabel = deckDatabase.getLabelByUid("/dtod.json", closestDeckName).label;
-      dtodLabel = mainMenuActionDtodGetRemoteData(closestDeckSsid);
+      //remoteData = deckDatabase.getLabelByUid("/dtod.json", closestDeckName).label;
+      remoteDeckData = mainMenuActionDtodGetRemoteData(closestDeckSsid);
 
-      deckDatabase.persistFullFile("/temp.json", dtodLabel);
+      deckDatabase.persistFullFile("/temp.json", remoteDeckData);
 
-    }
+      String dtodLabel = getDtodLabelFromRemoteData();
 
-    paginableText = new DeckPaginableText(dtodLabel, display_oled);
-    paginableText->render();
-    oledRequestAlways = true;
-    hasDtodResultToDisplay = true;
+      paginableText = new DeckPaginableText(dtodLabel, display_oled);
+      paginableText->render();
+      oledRequestAlways = true;
+      hasDtodResultToDisplay = true;
 
-    if(maxForce >  -999) {
       //Vibration motor
       digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
       lastVibrationMotorStartTime = millis();
     }
   }
   WiFi.disconnect();
+}
+
+String getDtodLabelFromRemoteData(void) {
+  String result = deckDatabase.getMatchingLabelByRange("/pers.json", "dtod_ranges", deckDatabase.getFirstLevelDataByKey("/temp.json", "spore_percent").toInt());
+  return result;
 }
 
 String mainMenuActionDtodGetRemoteData(String closestDeckSsid) {
