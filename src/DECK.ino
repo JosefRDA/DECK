@@ -302,18 +302,23 @@ void loopMainMenuOkButton(void){
   uint8_t buttonValue = okButton.read();
   if(buttonValue != BUTTON_NO_EVENT) {
     DeckMenuItem selectedMenuItem = mainMenu->getSelected();
-    
-    switch(buttonValue) {
-      case BUTTON_SHORT_PRESS:
-        if(*selectedMenuItem.shortPressAction != NULL) {
-          selectedMenuItem.shortPressAction();
-        }
-        break;
-      case BUTTON_LONG_PRESS:
-        if(*selectedMenuItem.longPressAction != NULL) {
-          selectedMenuItem.longPressAction();
-        }
-        break;
+
+    if(oledMachine.currentState == OledStateOff->index) {
+      display_oled.display();
+      oledRequestSmall = true;
+    } else {
+      switch(buttonValue) {
+        case BUTTON_SHORT_PRESS:
+          if(*selectedMenuItem.shortPressAction != NULL) {
+            selectedMenuItem.shortPressAction();
+          }
+          break;
+        case BUTTON_LONG_PRESS:
+          if(*selectedMenuItem.longPressAction != NULL) {
+            selectedMenuItem.longPressAction();
+          }
+          break;
+      }
     }
   }
 }
@@ -345,14 +350,19 @@ void loopMainMenuDownButton(void){
 
 void loopScanOkButton(void){
   uint8_t buttonValue = okButton.read();
-  if(buttonValue != BUTTON_NO_EVENT) {    
-    switch(buttonValue) {
-      case BUTTON_SHORT_PRESS:
-        returnToMainMenuHasBeenPressed = true;
-        break;
-      case BUTTON_LONG_PRESS:
+  if(buttonValue != BUTTON_NO_EVENT) {  
+    if(oledMachine.currentState == OledStateOff->index) {
+      display_oled.display();
+      oledRequestSmall = true;
+    } else {  
+      switch(buttonValue) {
+        case BUTTON_SHORT_PRESS:
+          returnToMainMenuHasBeenPressed = true;
+          break;
+        case BUTTON_LONG_PRESS:
 
-        break;
+          break;
+      }
     }
   }
 }
@@ -384,10 +394,15 @@ void loopScanDownButton(void){
 void loopConfirmBeforeUseScanOkButton(void){
   uint8_t buttonValue = okButton.read();
   if(buttonValue != BUTTON_NO_EVENT) {
-    if(confirmationPopUp->isOkSelected()) {
-      enterUseScanHasBeenPressed = true;
+    if(oledMachine.currentState == OledStateOff->index) {
+      display_oled.display();
+      oledRequestSmall = true;
     } else {
-      returnToMainMenuHasBeenPressed = true;
+      if(confirmationPopUp->isOkSelected()) {
+        enterUseScanHasBeenPressed = true;
+      } else {
+        returnToMainMenuHasBeenPressed = true;
+      }
     }
   }
 }
@@ -395,10 +410,15 @@ void loopConfirmBeforeUseScanOkButton(void){
 void loopConfirmBeforeEnterCharacterNumberOkButton(void){
   uint8_t buttonValue = okButton.read();
   if(buttonValue != BUTTON_NO_EVENT) {
-    if(confirmationPopUp->isOkSelected()) {
-      enterCharacterNumberHasBeenPressed = true;
+    if(oledMachine.currentState == OledStateOff->index) {
+      display_oled.display();
+      oledRequestSmall = true;
     } else {
-      returnToMainMenuHasBeenPressed = true;
+      if(confirmationPopUp->isOkSelected()) {
+        enterCharacterNumberHasBeenPressed = true;
+      } else {
+        returnToMainMenuHasBeenPressed = true;
+      }
     }
   }
 }
@@ -428,12 +448,17 @@ void loopConfirmDownButton(void){
 void loopEnterCharacterNumberOkButton(void){
   uint8_t buttonValue = okButton.read();
   if(buttonValue != BUTTON_NO_EVENT) {
-    if(choiceNumberPopUp->isCurrentControlButton()) {
-      
-      confirmHasBeenPressed = true;
+    if(oledMachine.currentState == OledStateOff->index) {
+      display_oled.display();
+      oledRequestSmall = true;
     } else {
-      choiceNumberPopUp->toggleEditField();
-      choiceNumberPopUp->render();
+      if(choiceNumberPopUp->isCurrentControlButton()) {
+        
+        confirmHasBeenPressed = true;
+      } else {
+        choiceNumberPopUp->toggleEditField();
+        choiceNumberPopUp->render();
+      }
     }
   }
 }
@@ -479,7 +504,12 @@ void loopEnterCharacterNumberDownButton(void){
 void loopTryToUpdateStimOkButton(void) {
   uint8_t buttonValue = okButton.read();
   if(buttonValue != BUTTON_NO_EVENT) {
-    returnToMainMenuHasBeenPressed = true;
+    if(oledMachine.currentState == OledStateOff->index) {
+      display_oled.display();
+      oledRequestSmall = true;
+    } else {
+      returnToMainMenuHasBeenPressed = true;
+    }
   }
 }
 
