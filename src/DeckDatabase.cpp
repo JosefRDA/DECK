@@ -26,7 +26,7 @@ void DeckDatabase::printJsonFile(const char * filename){
     Serial.println(F("Failed to open file for reading"));
   }
 
-  StaticJsonDocument<1024> doc;
+  StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
 
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
@@ -54,7 +54,7 @@ String DeckDatabase::jsonFileToString(const char * filename){
     Serial.println(F("Failed to open file for reading"));
   }
 
-  StaticJsonDocument<1024> doc;
+  StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
 
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
@@ -141,7 +141,7 @@ JsonObject DeckDatabase::getStimByUid(const char * filename, String uid) {
     Serial.println(F("Failed to open file for reading"));
   }
 
-  StaticJsonDocument<1024> doc;
+  StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
 
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
@@ -177,7 +177,7 @@ String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldK
     Serial.println(F("Failed to open file for reading"));
   }
 
-  StaticJsonDocument<1024> doc;
+  StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
 
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
@@ -207,7 +207,7 @@ String DeckDatabase::getMatchingLabelByRange(const char * filename, String field
     Serial.println(F("Failed to open file for reading"));
   }
 
-  StaticJsonDocument<1024> doc;
+  StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
 
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
@@ -248,7 +248,7 @@ void DeckDatabase::persistFirstLevelDataByKeyValue(const char * filename, String
     Serial.println(F("Failed to open file for reading"));
   }
 
-  StaticJsonDocument<1024> doc;
+  StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
 
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
@@ -324,4 +324,54 @@ void DeckDatabase::appendUsedStimLog(const char * filename, String usableStimCod
   file.print(targetJson.c_str());
   serializeJson(doc, file);
   file.close();
+}
+
+String* DeckDatabase::getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName) {
+  const int maxResults = 2;
+  String result[maxResults];
+  int resultCpt = 0;
+
+  
+  // Open file for reading
+  File file = LittleFS.open(filename, "r");
+  if (!file) 
+  {
+    Serial.println(F("Failed to open file for reading"));
+  }
+
+  StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
+
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(doc, file);
+  if (error)
+  {
+    Serial.println(F("Failed to deserialize file"));
+    Serial.println(error.c_str());
+  }
+  else
+  {
+    JsonObject rootJson = doc.as<JsonObject>();
+    JsonArray nodeArray = rootJson[firstLevelNodeName].as<JsonArray>();
+    //JsonObject configArray = doc.as<JsonObject>();
+    //result = String(configArray[fieldKey].as<char*>());
+  
+    for(JsonObject nodeArrayObject : nodeArray) {
+      for(JsonPair nodeArrayPair : nodeArrayObject) {
+        Serial.print("Debug getSubNodesOfAFirstLevelNode");
+        Serial.println(nodeArrayPair.key().c_str());
+        result[resultCpt++] = nodeArrayPair.key().c_str();
+        if(resultCpt >= maxResults) {
+          break;
+        }
+      }
+      if(resultCpt >= maxResults) {
+        break;
+      }
+    }
+  }
+
+  file.close();
+
+  //result[0] = String("text");
+  return result;
 }

@@ -7,6 +7,7 @@
 // to upload config file : https://github.com/earlephilhower/arduino-esp8266littlefs-plugin/releases
 #define SIZE_ARRAY 20
 #define MAX_SIZE_CODE 9
+#define STATIC_JSON_DOCUMENT_SIZE 2048
 
 class DeckDatabase {
   public:
@@ -42,6 +43,8 @@ class DeckDatabase {
   void persistFullFile(const char * filename, String fileContent);
 
   void appendUsedStimLog(const char * filename, String contient);
+
+  String* getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName);
   
 };
 

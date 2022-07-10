@@ -26,5 +26,21 @@
       "max" : "99",
       "label" : "Vous crachez du sang"
     }
-  ]
+  ],
+  "rmt_scan":[
+     {
+        "TARO":{
+           "001":"Prédiction : Quelqu'un sera au bon endroit au bon moment, et vous aussi.",
+           "002":"Prédiction : Tu devrais déjà être mort.",
+           "default":"Prédiction : Si tu vois un grand oiseau blanc sur un lac, c'est un cygne."
+        }
+     },
+     {
+        "MEDI":{
+           "001":"Médecine : Il est en bonne santée.",
+           "002":"Médecine : Le patient est mort.",
+           "default":"Médecine : R.A.S."
+        }
+     }
+  ]  
 }

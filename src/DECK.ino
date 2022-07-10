@@ -230,6 +230,8 @@ void setup(void) {
   deckDatabase.printJsonFile("/pers.json");
   
   oledRequestSmall = true;
+
+  deckDatabase.getSubNodesOfAFirstLevelNode("/pers.json", "rmt_scan");
 }
 
 void setUpMainMenu(void) {
