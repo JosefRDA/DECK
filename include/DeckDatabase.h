@@ -2,6 +2,8 @@
 #define _DECKDATABASE_H_
 
 #include <ArduinoJson.h> // arduino json v6  // https://github.com/bblanchon/ArduinoJson
+#include <LittleFS.h>
+#include <LinkedList.h>
 #include "DeckScanResult.h"
 
 // to upload config file : https://github.com/earlephilhower/arduino-esp8266littlefs-plugin/releases
@@ -44,7 +46,7 @@ class DeckDatabase {
 
   void appendUsedStimLog(const char * filename, String contient);
 
-  String* getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName);
+  LinkedList<String> getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName);
   
 };
 

@@ -74,6 +74,7 @@ unsigned long lastVibrationMotorStartTime = 0;
 #include "DeckScanResult.h"
 #include "DeckMthrClient.h"
 
+#include <LinkedList.h>
 #include <StateMachine.h>
 
 //BEGIN REGION navigationMachine
@@ -231,26 +232,45 @@ void setup(void) {
   
   oledRequestSmall = true;
 
-  deckDatabase.getSubNodesOfAFirstLevelNode("/pers.json", "rmt_scan");
 }
 
 void setUpMainMenu(void) {
+  // if(deckDatabase.getFirstLevelDataByKey("/pers.json", "can_dtod") == "true") {
+  //   DeckMenuItem mainMenuItems[] = { 
+  //     { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber },
+  //     { .label = "SERV", .value = "SERV", .selected = false, .shortPressAction = &mainMenuActionDtodServer },
+  //     { .label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod }
+  //   };
+    
+  //   mainMenu = new DeckMenu(mainMenuItems, 3, display_oled);
+  // }else{
+  //   DeckMenuItem mainMenuItems[] = { 
+  //     { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber },
+  //     { .label = "SERV", .value = "SERV", .selected = false, .shortPressAction = &mainMenuActionDtodServer }
+  //   };
+    
+  //   mainMenu = new DeckMenu(mainMenuItems, 2, display_oled);
+  // }
+
+  const int maxMainMenuItems = 3;
+  DeckMenuItem mainMenuItems[maxMainMenuItems];
+  int currentMainMenuItem = 0;
+  mainMenuItems[currentMainMenuItem++] = { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber };
   if(deckDatabase.getFirstLevelDataByKey("/pers.json", "can_dtod") == "true") {
-      DeckMenuItem mainMenuItems[] = { 
-        { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber },
-        { .label = "SERV", .value = "SERV", .selected = false, .shortPressAction = &mainMenuActionDtodServer },
-        { .label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod }
-      };
-      
-      mainMenu = new DeckMenu(mainMenuItems, 3, display_oled);
-    }else{
-      DeckMenuItem mainMenuItems[] = { 
-        { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber },
-        { .label = "SERV", .value = "SERV", .selected = false, .shortPressAction = &mainMenuActionDtodServer }
-      };
-      
-      mainMenu = new DeckMenu(mainMenuItems, 2, display_oled);
+    mainMenuItems[currentMainMenuItem++] = { .label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod };
+  }
+  LinkedList<String> remoteScans = deckDatabase.getSubNodesOfAFirstLevelNode("/pers.json", "rmt_scan");
+
+  for (int h = 0; h < remoteScans.size(); h++) {
+    #if DECKINO_DEBUG_SERIAL
+    Serial.println("[DEBUG BUILD MAIN MENU : REMOTE SCAN LOOP] " + String(remoteScans.get(h)));
+    #endif
+    mainMenuItems[currentMainMenuItem++] = { .label = remoteScans.get(h), .value = remoteScans.get(h), .selected = false, .shortPressAction = &mainMenuActionDtod }; //Action TODO
+		if(currentMainMenuItem >=3) {
+      break;
     }
+	}
+  mainMenu = new DeckMenu(mainMenuItems, currentMainMenuItem, display_oled);
 }
 
 void setupVibrationMotor(void) {

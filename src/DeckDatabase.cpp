@@ -1,7 +1,5 @@
 #include "DeckDatabase.h"
 
-#include <LittleFS.h>
-#include <ArduinoJson.h> 
 
 // CONSTRUCTORS ------------------------------------------------------------
 
@@ -326,11 +324,10 @@ void DeckDatabase::appendUsedStimLog(const char * filename, String usableStimCod
   file.close();
 }
 
-String* DeckDatabase::getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName) {
-  const int maxResults = 2;
-  String result[maxResults];
-  int resultCpt = 0;
+LinkedList<String> DeckDatabase::getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName) {
+  const int maxResults = 2; //TODO : to delete once main menu will be abble to take more than 3 items
 
+  LinkedList<String> result = LinkedList<String>();
   
   // Open file for reading
   File file = LittleFS.open(filename, "r");
@@ -357,21 +354,17 @@ String* DeckDatabase::getSubNodesOfAFirstLevelNode(const char * filename, String
   
     for(JsonObject nodeArrayObject : nodeArray) {
       for(JsonPair nodeArrayPair : nodeArrayObject) {
-        Serial.print("Debug getSubNodesOfAFirstLevelNode");
-        Serial.println(nodeArrayPair.key().c_str());
-        result[resultCpt++] = nodeArrayPair.key().c_str();
-        if(resultCpt >= maxResults) {
+        result.add(nodeArrayPair.key().c_str());
+        if(result.size() >= maxResults) {
           break;
         }
       }
-      if(resultCpt >= maxResults) {
+      if(result.size() >= maxResults) {
         break;
       }
     }
   }
 
   file.close();
-
-  //result[0] = String("text");
   return result;
 }
