@@ -82,7 +82,8 @@ void DeckDtodServer::handleRoot(void) {
   //Todo : take from utilGetCurrentSporePercent
   int sporePercentInt = round(_deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel").toInt() * 100 / _deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max").toInt());
 
-  String returnPayload = "{ \"spore_percent\" : \"" + String(sporePercentInt) + "\" }";
+  String playerId = _deckDatabase.getFirstLevelDataByKey("/config.json", "player_id");
+  String returnPayload = "{ \"spore_percent\" : \"" + String(sporePercentInt) + "\", \"player_id\" : \"" + String(playerId) + "\" }";
   this->_webServer->send(200, "application/json", returnPayload);
 
   this->_webServer->stop();
