@@ -368,3 +368,53 @@ LinkedList<String> DeckDatabase::getSubNodesOfAFirstLevelNode(const char * filen
   file.close();
   return result;
 }
+
+String DeckDatabase::getThirdLevelDataByKeys(const char * filename, String firstLevelKey, String secondLevelKey, String thirdLevelKey) {
+
+  String result = "";
+  
+  // Open file for reading
+  File file = LittleFS.open(filename, "r");
+  if (!file) 
+  {
+    Serial.println(F("Failed to open file for reading"));
+  }
+
+  StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
+
+  // Deserialize the JSON document
+  DeserializationError error = deserializeJson(doc, file);
+  if (error)
+  {
+    Serial.println(F("Failed to deserialize file"));
+    Serial.println(error.c_str());
+  }
+  else
+  {
+    JsonObject rootJson = doc.as<JsonObject>();
+    JsonArray nodeArray = rootJson[firstLevelKey].as<JsonArray>();
+    //JsonObject configArray = doc.as<JsonObject>();
+    //result = String(configArray[fieldKey].as<char*>());
+  
+    for(JsonObject nodeArrayObject : nodeArray) {
+      for(JsonPair nodeArrayPair : nodeArrayObject) {
+        if(String(nodeArrayPair.key().c_str()) == secondLevelKey) {
+
+          JsonObject rmtScanValues = nodeArrayPair.value().as<JsonObject>();
+          if(rmtScanValues.containsKey(thirdLevelKey)) {
+            result = String(rmtScanValues[thirdLevelKey].as<char*>());
+          } else {
+            result = String(rmtScanValues["default"].as<char*>());
+          }
+          break;
+        }
+      }
+      if(result.length() > 0) {
+        break;
+      }
+    }
+  }
+
+  file.close();
+  return result;
+}

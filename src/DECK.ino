@@ -664,7 +664,7 @@ String getRemoteScanLabelFromRemoteData() {
   selectedMenuItem.value;
 
   String remotePlayerId = deckDatabase.getFirstLevelDataByKey("/temp.json", "player_id");
-  String result = "//TODO"; //TODO
+  String result = deckDatabase.getThirdLevelDataByKeys("/pers.json", "rmt_scan", selectedMenuItem.value, remotePlayerId);
   return result;
 }
 

@@ -47,6 +47,8 @@ class DeckDatabase {
   void appendUsedStimLog(const char * filename, String contient);
 
   LinkedList<String> getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName);
+
+  String getThirdLevelDataByKeys(const char * filename, String firstLevelKey, String secondLevelKey, String thirdLevelKey);
   
 };
 
