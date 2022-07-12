@@ -123,6 +123,7 @@ State *OledStateOnForLongDelay = oledMachine.addState(&loopOledStateOnForLongDel
 State *OledStateOnForMediumDelay = oledMachine.addState(&loopOledStateOnForMediumDelay);
 State *OledStateOnForSmallDelay = oledMachine.addState(&loopOledStateOnForSmallDelay);
 State *OledStateAlwaysOn = oledMachine.addState(&loopOledStateAlwaysOn);
+bool oledOn = false;
 
 bool oledRequestLong = false;
 bool oledRequestMedium = false;
@@ -132,15 +133,7 @@ bool oledRequestOff = false;
 unsigned long lastOledStateChange = 0L;
 // END REGION oledMachine
 
-// BEGIN REGION dtodServerMachine
-StateMachine DtodServerMachine = StateMachine();
-State *DtodServerStateOn = DtodServerMachine.addState(&loopDtodServerStateOn);
-State *DtodServerStateOff = DtodServerMachine.addState(&loopDtodServerStateOff);
-
-bool dtodServerRequest = false;
-
-unsigned long lastDtodServerStateChange = 0L;
-// END REGION dtodServerMachine
+unsigned long dtodServerUpSince = 0L;
 
 String rfidUidBufferToStringLastValue = "";
 String sporulationEffectAfterUseScanActionText = "";
@@ -246,15 +239,9 @@ void setup(void)
   OledStateAlwaysOn->addTransition(&transitionOledStateAlwaysOnToOledStateOff, OledStateOff);
   // oledMachine transitions end
 
-  // dtodServerMachine transitions begin
-  DtodServerStateOn->addTransition(&transitionDtodServerStateOnToDtodServerStateOff, DtodServerStateOff);
-  DtodServerStateOff->addTransition(&transitionDtodServerStateOffToDtodServerStateOn, DtodServerStateOn);
-  // dtodServerMachine transitions end
-
   deckDatabase.printJsonFile("/pers.json");
 
   oledRequestSmall = true;
-  dtodServerRequest = true;
 }
 
 void setUpMainMenu(void)
@@ -352,9 +339,13 @@ void loop(void)
 
 void loopDtodServer()
 {
-  if (dtodServer != NULL)
-  {
-    dtodServer->handleClient();
+  if (millis() - dtodServerUpSince > 1000 * 60) {
+    dtodServer->close();
+    dtodServer = NULL;
+  } else {
+    if (dtodServer != NULL){
+      dtodServer->handleClient();
+    }
   }
 }
 
@@ -363,16 +354,17 @@ void loopMainMenuOkButton(void)
   uint8_t buttonValue = okButton.read();
   if (buttonValue != BUTTON_NO_EVENT)
   {
+    actionDtodServer();
     DeckMenuItem selectedMenuItem = mainMenu->getSelected();
 
-    if (oledMachine.currentState == OledStateOff->index)
-    {
+    #if DECKINO_DEBUG_SERIAL
+    Serial.println("[oledMachine.currentState] " + String(oledOn));
+    #endif
+
+    if (!oledOn) {
       display_oled.display();
       oledRequestSmall = true;
-      dtodServerRequest = true;
-    }
-    else
-    {
+    } else {
       switch (buttonValue)
       {
       case BUTTON_SHORT_PRESS:
@@ -400,7 +392,7 @@ void loopMainMenuUpButton(void)
     mainMenu->select(DECKMENU_DIRECTION_UP);
     mainMenu->render();
     oledRequestSmall = true;
-    dtodServerRequest = true;
+    actionDtodServer();
   }
   else
   {
@@ -419,7 +411,7 @@ void loopMainMenuDownButton(void)
     mainMenu->select(DECKMENU_DIRECTION_DOWN);
     mainMenu->render();
     oledRequestSmall = true;
-    dtodServerRequest = true;
+    actionDtodServer();
   }
   else
   {
@@ -438,7 +430,6 @@ void loopScanOkButton(void)
     {
       display_oled.display();
       oledRequestSmall = true;
-      dtodServerRequest = true;
     }
     else
     {
@@ -463,7 +454,6 @@ void loopScanUpButton(void)
     paginableText->prev();
     paginableText->render();
     oledRequestSmall = true;
-    dtodServerRequest = true;
   }
   else
   {
@@ -481,7 +471,6 @@ void loopScanDownButton(void)
     paginableText->next();
     paginableText->render();
     oledRequestSmall = true;
-    dtodServerRequest = true;
   }
   else
   {
@@ -500,7 +489,6 @@ void loopConfirmBeforeUseScanOkButton(void)
     {
       display_oled.display();
       oledRequestSmall = true;
-      dtodServerRequest = true;
     }
     else
     {
@@ -525,7 +513,6 @@ void loopConfirmBeforeEnterCharacterNumberOkButton(void)
     {
       display_oled.display();
       oledRequestSmall = true;
-      dtodServerRequest = true;
     }
     else
     {
@@ -582,7 +569,6 @@ void loopEnterCharacterNumberOkButton(void)
     {
       display_oled.display();
       oledRequestSmall = true;
-      dtodServerRequest = true;
     }
     else
     {
@@ -662,7 +648,6 @@ void loopTryToUpdateStimOkButton(void)
     {
       display_oled.display();
       oledRequestSmall = true;
-      dtodServerRequest = true;
     }
     else
     {
@@ -673,13 +658,12 @@ void loopTryToUpdateStimOkButton(void)
 
 // ACTIONS ----------------------------------------------
 
-void mainMenuActionDtodServer(void)
+void actionDtodServer(void)
 {
-  dtodServer = new DeckDtodServer(display_oled, deckDatabase);
-  oledRequestAlways = true;
-  dtodServerRequest = true;
-  paginableText = new DeckPaginableText("SERVEUR DEMARRE", display_oled);
-  paginableText->render();
+  if(dtodServer == NULL) {
+    dtodServer = new DeckDtodServer(display_oled, deckDatabase);
+  }
+  dtodServerUpSince = millis();
 }
 
 void mainMenuActionEnterCharacterNumber(void)
@@ -714,7 +698,6 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
   display_oled.println("Scan des deck à portée en cours .");
   display_oled.display();
   oledRequestSmall = true;
-  dtodServerRequest = true;
 
   // INIT
   WiFi.mode(WIFI_STA);
@@ -726,7 +709,6 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
   display_oled.println("Scan des deck à portée en cours ...");
   display_oled.display();
   oledRequestSmall = true;
-  dtodServerRequest = true;
 
   // WiFi.scanNetworks will return the number of networks found
   int n = WiFi.scanNetworks();
@@ -737,7 +719,6 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
     display_oled.println("Aucun DECK a scanner");
     display_oled.display();
     oledRequestSmall = true;
-    dtodServerRequest = true;
   }
   else
   {
@@ -793,7 +774,6 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
       paginableText = new DeckPaginableText(labelToDisplay, display_oled);
       paginableText->render();
       oledRequestAlways = true;
-      dtodServerRequest = true;
       hasDtodResultToDisplay = true;
 
       // Vibration motor
@@ -911,7 +891,6 @@ void pn532ReadRfidLoop(void)
   paginableText = new DeckPaginableText("En attente de SCAN", display_oled);
   paginableText->render();
   oledRequestAlways = true;
-  dtodServerRequest = true;
 
   uint8_t success;
   uint8_t uid[] = {0, 0, 0, 0, 0, 0, 0}; // Buffer to store the returned UID
@@ -952,7 +931,6 @@ void pn532ReadRfidLoop(void)
     paginableText = new DeckPaginableText(scanResult.label, display_oled);
     paginableText->render();
     oledRequestSmall = true;
-    dtodServerRequest = true;
 
     rfidUidBufferToStringLastValue = rfidUidBufferToString(uid);
   }
@@ -989,7 +967,6 @@ void useScanAction(void)
   paginableText = new DeckPaginableText(useScanActionTextToDisplay, display_oled);
   paginableText->render();
   oledRequestSmall = true;
-  dtodServerRequest = true;
 
   rfidUidBufferToStringLastValue = "";
 
@@ -1022,7 +999,6 @@ void sporulationEffectAfterUseScanAction(void)
   paginableText = new DeckPaginableText(sporulationEffectAfterUseScanActionText, display_oled);
   paginableText->render();
   oledRequestSmall = true;
-  dtodServerRequest = true;
 
   sporulationEffectAfterUseScanActionText = "";
 }
@@ -1032,7 +1008,6 @@ void confirmBeforeEnterCharacterNumberAction(void)
   confirmationPopUp = new DeckConfirmationPopUp("Definir id personnage ?", display_oled);
   confirmationPopUp->render();
   oledRequestAlways = true; // necessary ?
-  dtodServerRequest = true;
 }
 
 void confirmBeforeUseScanAction(void)
@@ -1040,7 +1015,6 @@ void confirmBeforeUseScanAction(void)
   confirmationPopUp = new DeckConfirmationPopUp("Utiliser l'objet ?", display_oled);
   confirmationPopUp->render();
   oledRequestAlways = true;
-  dtodServerRequest = true;
 }
 
 void enterCharacterNumberAction(void)
@@ -1110,7 +1084,6 @@ void loopStateMainMenu()
     setUpMainMenu();
     mainMenu->render();
     oledRequestMedium = true;
-    dtodServerRequest = true;
   }
   loopMainMenuOkButton();
   loopMainMenuUpButton();
@@ -1400,6 +1373,7 @@ void loopOledStateOnForSmallDelay()
   {
     // TODO
     lastOledStateChange = millis();
+    oledOn = true;
   }
   // TODO
 }
@@ -1410,6 +1384,7 @@ void loopOledStateOnForMediumDelay()
   {
     // TODO
     lastOledStateChange = millis();
+    oledOn = true;
   }
   // TODO
 }
@@ -1420,6 +1395,7 @@ void loopOledStateOnForLongDelay()
   {
     // TODO
     lastOledStateChange = millis();
+    oledOn = true;
   }
   // TODO
 }
@@ -1430,6 +1406,7 @@ void loopOledStateAlwaysOn()
   {
     // TODO
     lastOledStateChange = millis();
+    oledOn = true;
   }
   // TODO
 }
@@ -1440,28 +1417,11 @@ void loopOledStateOff()
   {
     display_oled.clearDisplay();
     display_oled.display();
+    oledOn = false;
+    #if DECKINO_DEBUG_SERIAL
+    Serial.println("loopOledStateOff!");
+    #endif
   }
-}
-
-//---
-
-void loopDtodServerStateOn()
-{
-  if (DtodServerMachine.executeOnce)
-  {
-    // TODO
-    lastDtodServerStateChange = millis();
-  }
-  // TODO
-}
-
-void loopDtodServerStateOff()
-{
-  if (DtodServerMachine.executeOnce)
-  {
-    // TODO
-  }
-  // TODO
 }
 
 //---
@@ -1534,19 +1494,4 @@ bool transitionOledStateAlwaysOnToOledStateOff()
 bool transitionOledGenericSecond(long second)
 {
   return millis() - lastOledStateChange > 1000 * second;
-}
-
-bool transitionDtodServerStateOnToDtodServerStateOff()
-{
-  return millis() - lastDtodServerStateChange > 1000 * 60; // Shutdown server 60 seconds after
-}
-
-bool transitionDtodServerStateOffToDtodServerStateOn()
-{
-  if (dtodServerRequest)
-  {
-    dtodServerRequest = false;
-    return true;
-  }
-  return false;
 }
