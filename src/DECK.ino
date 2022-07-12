@@ -87,6 +87,8 @@ State* StateConfirmBeforeUseScan = navigationMachine.addState(&loopStateConfirmB
 State* StateUseScan = navigationMachine.addState(&loopStateUseScan);
 State* StateSporulationEffectAfterUseScan = navigationMachine.addState(&loopStateSporulationEffectAfterUseScan);
 
+State* StateGenericRemoteScan = navigationMachine.addState(&loopStateGenericRemoteScan);
+
 State* StateConfirmBeforeEnterCharacterNumber = navigationMachine.addState(&loopStateConfirmBeforeEnterCharacterNumber);
 State* StateEnterCharacterNumber = navigationMachine.addState(&loopStateEnterCharacterNumber);
 State* StateTryToUpdateStim = navigationMachine.addState(&loopStateTryToUpdateStim);
@@ -94,6 +96,7 @@ State* StateTryToUpdateStim = navigationMachine.addState(&loopStateTryToUpdateSt
 State* StateDisplayDtodResult = navigationMachine.addState(&loopStateDisplayDtodResult);
 
 bool scanHasBeenPressed = false;
+bool genericActionRemoteScanHasBeenPressed = false;
 bool confirmBeforeEnterCharacterNumberHasBeenPressed = false;
 bool enterCharacterNumberHasBeenPressed = false;
 bool enterUseScanHasBeenPressed = false;
@@ -197,6 +200,7 @@ void setup(void) {
   StateMainMenu->addTransition(&transitionStateMainMenuToStateScan, StateScan);
   StateMainMenu->addTransition(&transitionStateMainMenuToConfirmBeforeEnterCharacterNumber, StateConfirmBeforeEnterCharacterNumber);
   StateMainMenu->addTransition(&transitionStateMainMenuToDisplayDtodResult, StateDisplayDtodResult);
+  StateMainMenu->addTransition(&transitionStateMainMenuToStateGenericRemoteScan, StateGenericRemoteScan);
 
   StateScan->addTransition(&transitionStateScanToStateMainMenu, StateMainMenu);//TODO : To modify
   StateScan->addTransition(&transitionStateScanToConfirmBeforeUseScan, StateConfirmBeforeUseScan);
@@ -207,6 +211,8 @@ void setup(void) {
   StateSporulationEffectAfterUseScan->addTransition(&transitionGenericReturnToMainMenu, StateMainMenu);
 
   StateDisplayDtodResult->addTransition(&transitionStateDisplayDtodResultToMainMenu, StateMainMenu);
+
+  StateGenericRemoteScan->addTransition(&transitionGenericReturnToMainMenu, StateMainMenu);
   
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToEnterCharacterNumber, StateEnterCharacterNumber);
   StateConfirmBeforeEnterCharacterNumber->addTransition(&transitionStateConfirmBeforeEnterCharacterNumberToStateMainMenu, StateMainMenu); 
@@ -265,7 +271,7 @@ void setUpMainMenu(void) {
     #if DECKINO_DEBUG_SERIAL
     Serial.println("[DEBUG BUILD MAIN MENU : REMOTE SCAN LOOP] " + String(remoteScans.get(h)));
     #endif
-    mainMenuItems[currentMainMenuItem++] = { .label = remoteScans.get(h), .value = remoteScans.get(h), .selected = false, .shortPressAction = &mainMenuActionDtod }; //Action TODO
+    mainMenuItems[currentMainMenuItem++] = { .label = remoteScans.get(h), .value = remoteScans.get(h), .selected = false, .shortPressAction = &mainMenuActionRemoteScan }; //Action TODO
 		if(currentMainMenuItem >=3) {
       break;
     }
@@ -552,7 +558,19 @@ void mainMenuActionScan(void) {
   scanHasBeenPressed = true;
 }
 
-void mainMenuActionDtod(void) {
+void mainMenuGenericActionRemoteScan(void) {
+  genericActionRemoteScanHasBeenPressed = true;
+}
+
+void mainMenuActionDtod() {
+  mainMenuActionOrRemoteScan(false);
+}
+
+void mainMenuActionRemoteScan() {
+  mainMenuActionOrRemoteScan(true);
+}
+
+void mainMenuActionOrRemoteScan(bool isRemoteScan) {
   display_oled.clearDisplay();
   display_oled.setCursor(0,0);
   display_oled.println("Scan des deck à portée en cours .");
@@ -616,9 +634,14 @@ void mainMenuActionDtod(void) {
 
       deckDatabase.persistFullFile("/temp.json", remoteDeckData);
 
-      String dtodLabel = getDtodLabelFromRemoteData();
+      String labelToDisplay;
+      if(isRemoteScan) {
+        labelToDisplay = getRemoteScanLabelFromRemoteData();
+      } else {
+        labelToDisplay = getDtodLabelFromRemoteData();
+      }
 
-      paginableText = new DeckPaginableText(dtodLabel, display_oled);
+      paginableText = new DeckPaginableText(labelToDisplay, display_oled);
       paginableText->render();
       oledRequestAlways = true;
       hasDtodResultToDisplay = true;
@@ -633,6 +656,15 @@ void mainMenuActionDtod(void) {
 
 String getDtodLabelFromRemoteData(void) {
   String result = deckDatabase.getMatchingLabelByRange("/pers.json", "dtod_ranges", deckDatabase.getFirstLevelDataByKey("/temp.json", "spore_percent").toInt());
+  return result;
+}
+
+String getRemoteScanLabelFromRemoteData() {
+  DeckMenuItem selectedMenuItem = mainMenu->getSelected();
+  selectedMenuItem.value;
+
+  String remotePlayerId = deckDatabase.getFirstLevelDataByKey("/temp.json", "player_id");
+  String result = "//TODO"; //TODO
   return result;
 }
 
@@ -978,10 +1010,32 @@ void loopStateDisplayDtodResult(){
   loopScanDownButton();
 }
 
+void loopStateGenericRemoteScan(){
+    if(navigationMachine.executeOnce) {
+    lastNavigationStateChange = millis();
+    #if DECKINO_DEBUG_SERIAL
+    Serial.println("[loopStateGenericRemoteScan] Hello");
+    #endif
+    // Nothing ?
+  }
+  loopScanOkButton();
+  loopScanUpButton();
+  loopScanDownButton();
+}
+
 
 bool transitionStateMainMenuToStateScan(){
   if(scanHasBeenPressed) {
     scanHasBeenPressed = false;
+    return true;
+  } 
+  return false;
+}
+
+bool transitionStateMainMenuToStateGenericRemoteScan(){
+  if(genericActionRemoteScanHasBeenPressed) 
+  if(genericActionRemoteScanHasBeenPressed) {
+    genericActionRemoteScanHasBeenPressed = false;
     return true;
   } 
   return false;
