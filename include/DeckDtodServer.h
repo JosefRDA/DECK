@@ -30,8 +30,9 @@ class DeckDtodServer {
 
   void handleClient(void);
   void handleRoot(void);
+  void close(void);
 
-   private:
+  private:
 
   // PRIVATE PROPERTIES ----------------------------------------------
   ESP8266WebServer* _webServer;
