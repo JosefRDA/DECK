@@ -664,6 +664,8 @@ void actionDtodServer(void)
     dtodServer = new DeckDtodServer(display_oled, deckDatabase);
   }
   dtodServerUpSince = millis();
+  paginableText = new DeckPaginableText("En attente d'être scanné par un autre DECK", display_oled);
+      paginableText->render();
 }
 
 void mainMenuActionEnterCharacterNumber(void)
