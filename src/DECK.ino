@@ -287,7 +287,7 @@ void setUpMainMenu(void)
       break;
     }
   }
-  mainMenu = new DeckMenu(mainMenuItems, (currentMainMenuItem - 1), display_oled);
+  mainMenu = new DeckMenu(mainMenuItems, currentMainMenuItem, display_oled);
 }
 
 void setupVibrationMotor(void)
@@ -342,12 +342,12 @@ void loop(void)
 
 void loopDtodServer()
 {
-  if (millis() - dtodServerUpSince > 1000 * 60) {
-    dtodServer->close();
-    dtodServer = NULL;
-  } else {
-    if (dtodServer != NULL){
-      dtodServer->handleClient();
+  if (dtodServer != NULL){
+    if (millis() - dtodServerUpSince > 1000 * 60) {
+      dtodServer->close();
+      dtodServer = NULL;
+    } else {
+        dtodServer->handleClient();
     }
   }
 }
