@@ -1,6 +1,8 @@
 #ifndef _DECKMENU_H_
 #define _DECKMENU_H_
 
+#define DECKMENU_DEBUG_SERIAL false
+
 #define DECKMENU_DIRECTION_UP false
 #define DECKMENU_DIRECTION_DOWN true
 
@@ -36,13 +38,13 @@ class DeckMenu {
   private:
 
     // PRIVATE PROPERTIES ----------------------------------------------
-    DeckMenuItem _items[3]; //TODO : Dynamic table allocation : https://stackoverflow.com/a/37078742
+    DeckMenuItem _items[6]; //TODO : Dynamic table allocation : https://stackoverflow.com/a/37078742
     byte _itemsLength;
-    uint8_t _currentPageId;
     Adafruit_SSD1306 _oled;
 
     // CLASS PRIVATE FUNCTIONS ----------------------------------------------
     uint8_t getSelectedId();
+    uint8_t getCurrentPage();
 };
 
 #endif // end _DECKMENU_H_

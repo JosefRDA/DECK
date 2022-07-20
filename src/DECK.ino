@@ -263,10 +263,13 @@ void setUpMainMenu(void)
   //   mainMenu = new DeckMenu(mainMenuItems, 2, display_oled);
   // }
 
-  const int maxMainMenuItems = 3;
+  const int maxMainMenuItems = 6;
   DeckMenuItem mainMenuItems[maxMainMenuItems];
   int currentMainMenuItem = 0;
   mainMenuItems[currentMainMenuItem++] = {.label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber};
+  
+  mainMenuItems[currentMainMenuItem++] = {.label = "ALOW", .value = "ALOW", .selected = false, .shortPressAction = &actionDtodServer};
+
   if (deckDatabase.getFirstLevelDataByKey("/pers.json", "can_dtod") == "true")
   {
     mainMenuItems[currentMainMenuItem++] = {.label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod};
@@ -279,12 +282,12 @@ void setUpMainMenu(void)
     Serial.println("[DEBUG BUILD MAIN MENU : REMOTE SCAN LOOP] " + String(remoteScans.get(h)));
 #endif
     mainMenuItems[currentMainMenuItem++] = {.label = remoteScans.get(h), .value = remoteScans.get(h), .selected = false, .shortPressAction = &mainMenuActionRemoteScan}; // Action TODO
-    if (currentMainMenuItem >= 3)
+    if (currentMainMenuItem > maxMainMenuItems)
     {
       break;
     }
   }
-  mainMenu = new DeckMenu(mainMenuItems, currentMainMenuItem, display_oled);
+  mainMenu = new DeckMenu(mainMenuItems, (currentMainMenuItem - 1), display_oled);
 }
 
 void setupVibrationMotor(void)
@@ -354,7 +357,6 @@ void loopMainMenuOkButton(void)
   uint8_t buttonValue = okButton.read();
   if (buttonValue != BUTTON_NO_EVENT)
   {
-    actionDtodServer();
     DeckMenuItem selectedMenuItem = mainMenu->getSelected();
 
     #if DECKINO_DEBUG_SERIAL
@@ -392,7 +394,6 @@ void loopMainMenuUpButton(void)
     mainMenu->select(DECKMENU_DIRECTION_UP);
     mainMenu->render();
     oledRequestSmall = true;
-    actionDtodServer();
   }
   else
   {
@@ -411,7 +412,6 @@ void loopMainMenuDownButton(void)
     mainMenu->select(DECKMENU_DIRECTION_DOWN);
     mainMenu->render();
     oledRequestSmall = true;
-    actionDtodServer();
   }
   else
   {

@@ -68,14 +68,28 @@ void DeckMenu::render(void) {
   _oled.print(" DECK ");
   
   //TODO : Handle more than 3 menu items
-  for (uint8_t i = 0; i < _itemsLength; i++) {
-    _oled.setCursor(DECKMENU_RENDER_X_POS, DECKMENU_RENDER_Y_FIRST_POS + i * DECKMENU_RENDER_Y_POS_OFSET);
+  uint8_t page = this->getCurrentPage();
+
+  uint8_t displayCpt = 0;
+  #if DECKMENU_DEBUG_SERIAL
+  Serial.println("[DECKMENU_DEBUG_SERIAL] Starting menu build for page " + String(page) + ".");
+  #endif
+  for (uint8_t i = page * DECKMENU_ITEMS_PER_PAGE; i < _itemsLength &&  displayCpt < 3; i++) {
+    _oled.setCursor(DECKMENU_RENDER_X_POS, DECKMENU_RENDER_Y_FIRST_POS + i%3 * DECKMENU_RENDER_Y_POS_OFSET);
     if(_items[i].selected) {
       _oled.setTextColor(BLACK, WHITE);
     } else {
       _oled.setTextColor(WHITE, BLACK);
     }
     _oled.print(_items[i].label);
+    #if DECKMENU_DEBUG_SERIAL
+    Serial.println("[DECKMENU_DEBUG_SERIAL] Item : " + String(i) + ", label : " + _items[i].label);
+    #endif
+    displayCpt++;
   }
   _oled.display();
+}
+
+uint8_t DeckMenu::getCurrentPage(void) { //commence a 0
+  return this->getSelectedId() / DECKMENU_ITEMS_PER_PAGE;
 }
