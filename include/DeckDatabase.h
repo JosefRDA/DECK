@@ -44,6 +44,7 @@ class DeckDatabase {
   
   void persistFullFile(const char * filename, String fileContent);
 
+  // @obselete
   void appendUsedStimLog(const char * filename, String contient);
 
   LinkedList<String> getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName);
