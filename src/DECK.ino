@@ -311,6 +311,7 @@ void setupOled(void)
 
 // Obselete : Keept for debug purpose only
 // TODO : Refactor : Add in a RFID util class
+// @obselete
 void printRfidReaderInfo(uint32_t versiondata)
 {
   // Got ok data, print it out!
@@ -943,9 +944,6 @@ void useScanAction(void)
   // Vibration motor
   digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
   lastVibrationMotorStartTime = millis();
-
-  // Old behaviour. Log obselete.
-  // deckDatabase.appendUsedStimLog("/used_stim_log.json", deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "stim_code"));
 
 #if DECKINO_DEBUG_SERIAL
   Serial.print("[SPORE](Before use) : ");

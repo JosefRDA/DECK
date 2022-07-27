@@ -290,7 +290,10 @@ void DeckDatabase::persistFullFile(const char * filename, String fileContent) {
   file.close();
 }
 
+// @obselete
 void DeckDatabase::appendUsedStimLog(const char * filename, String usableStimCode) {
+  //Usage : deckDatabase.appendUsedStimLog("/used_stim_log.json", deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "stim_code"));
+  
   DynamicJsonDocument doc(8192); //TODO : Check Size
 
   // Open file for reading
