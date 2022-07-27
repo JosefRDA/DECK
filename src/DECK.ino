@@ -1,8 +1,8 @@
 #define DECK_VERSION "v1.4.1"
 
 // TODO : Refactor debug via services
-#define DECKINO_DEBUG_SERIAL true
-#define DECKINO_DEBUG_OLED true
+#define DECKINO_DEBUG_SERIAL false
+#define DECKINO_DEBUG_OLED false
 
 #include <SPI.h>
 #include <Wire.h>
