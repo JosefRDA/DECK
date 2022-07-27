@@ -758,8 +758,6 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
     String remoteDeckData = "";
     if (maxForce > -999)
     {
-      // Old info from deck name
-      // remoteData = deckDatabase.getLabelByUid("/dtod.json", closestDeckName).label;
       remoteDeckData = mainMenuActionDtodGetRemoteData(closestDeckSsid);
 
       deckDatabase.persistFullFile("/temp.json", remoteDeckData);
