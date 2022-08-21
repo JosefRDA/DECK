@@ -239,6 +239,12 @@ String DeckDatabase::getMatchingLabelByRange(const char * filename, String field
 void DeckDatabase::persistFirstLevelDataByKeyValue(const char * filename, String fieldKey, String fieldValue) {
   JsonObject result;
 
+  //If target file not exist, create an empty json file
+  if(!LittleFS.exists(filename)) {
+    File file = LittleFS.open(filename, "w+");
+    file.print(String("{\n}").c_str());
+  }
+
   // Open file for reading
   File file = LittleFS.open(filename, "r");
   if (!file) 
@@ -279,7 +285,7 @@ void DeckDatabase::persistFirstLevelDataByKeyValue(const char * filename, String
 
 void DeckDatabase::persistFullFile(const char * filename, String fileContent) {
   // Open file for reading
-  File file = LittleFS.open(filename, "w");
+  File file = LittleFS.open(filename, "w+");
   if (!file) 
   {
     Serial.println(F("Failed to open file for writing"));
