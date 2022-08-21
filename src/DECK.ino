@@ -3,6 +3,7 @@
 // TODO : Refactor debug via services
 #define DECKINO_DEBUG_SERIAL false
 #define DECKINO_DEBUG_OLED false
+#define DECKINO_DEBUG_SERIAL_OLED_MACHINE false
 
 #include <SPI.h>
 #include <Wire.h>
@@ -131,6 +132,10 @@ bool oledRequestSmall = false;
 bool oledRequestAlways = false;
 bool oledRequestOff = false;
 unsigned long lastOledStateChange = 0L;
+
+//debug
+int debugLastOledMachineState = -1;
+
 // END REGION oledMachine
 
 unsigned long dtodServerUpSince = 0L;
@@ -339,6 +344,16 @@ void loop(void)
     }
   }
   oledMachine.run();
+  if (oledMachine.currentState != NULL)
+  {
+    if (debugLastOledMachineState != oledMachine.currentState)
+    {
+  #if DECKINO_DEBUG_SERIAL_OLED_MACHINE
+      Serial.println("[OLED CHANGE] OLD:" + String(debugLastOledMachineState) + " NEW:" + String(oledMachine.currentState));
+  #endif
+      debugLastOledMachineState = oledMachine.currentState;
+    }
+  }
 }
 
 void loopDtodServer()

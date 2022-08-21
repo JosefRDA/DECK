@@ -16,7 +16,7 @@ DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled, DeckDatabase deckDatabase)
   IPAddress subnet(255, 255, 0, 0);
   IPAddress primaryDNS(8, 8, 8, 8);   // optional
   IPAddress secondaryDNS(8, 8, 4, 4); // optional
-
+  
   /* Set these to your desired credentials. */
   String ssidSting = DECK_DTOD_SERVER_SSID_PREFIX + String("_") + deckDatabase.getFirstLevelDataByKey("/config.json", "player_id");
   const char *ssid = ssidSting.c_str();
@@ -26,10 +26,10 @@ DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled, DeckDatabase deckDatabase)
 
   _webServer = new ESP8266WebServer(80);
 
-  delay(1000);
+  //delay(1000);
 
   Serial.print("Configuring access point...");
-  if (!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS))
+  while(!WiFi.config(local_IP, gateway, subnet, primaryDNS, secondaryDNS))
   {
     Serial.println("STA Failed to configure");
   }

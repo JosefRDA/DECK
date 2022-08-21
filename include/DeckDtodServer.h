@@ -1,6 +1,8 @@
 #ifndef _DECKDTODSERVER_H_
 #define _DECKDTODSERVER_H_
 
+#define DTODSERVER_DEBUG_SERIAL false
+
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
