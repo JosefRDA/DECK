@@ -389,8 +389,7 @@ void loopMainMenuOkButton(void)
     #endif
 
     if (!oledOn) {
-      mainMenu->render();
-      oledOn = true;
+      mainMenuRender();
       oledRequestSmall = true;
     } else {
       switch (buttonValue)
@@ -418,8 +417,7 @@ void loopMainMenuUpButton(void)
   if (buttonValue == BUTTON_SHORT_PRESS)
   {
     mainMenu->select(DECKMENU_DIRECTION_UP);
-    mainMenu->render();
-    oledOn = true;
+    mainMenuRender();
     oledRequestSmall = true;
   }
   else
@@ -437,8 +435,7 @@ void loopMainMenuDownButton(void)
   {
     // TODO : IF IN MAIN MENU // Still relevent ?
     mainMenu->select(DECKMENU_DIRECTION_DOWN);
-    mainMenu->render();
-    oledOn = true;
+    mainMenuRender();
     oledRequestSmall = true;
   }
   else
@@ -480,7 +477,7 @@ void loopScanUpButton(void)
   if (buttonValue == BUTTON_SHORT_PRESS)
   {
     paginableText->prev();
-    paginableText->render();
+    paginableTextRender();
     oledRequestSmall = true;
   }
   else
@@ -497,7 +494,7 @@ void loopScanDownButton(void)
   if (buttonValue == BUTTON_SHORT_PRESS)
   {
     paginableText->next();
-    paginableText->render();
+    paginableTextRender();
     oledRequestSmall = true;
   }
   else
@@ -693,7 +690,7 @@ void actionDtodServer(void)
   }
   dtodServerUpSince = millis();
   paginableText = new DeckPaginableText("En attente d'être scanné par un autre DECK", display_oled);
-      paginableText->render();
+  paginableTextRender();
   deckDatabase.appendCsvLog(CSV_LOG_PATH, "ALOW");
 }
 
@@ -819,7 +816,7 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
       }
 
       paginableText = new DeckPaginableText(labelToDisplay, display_oled);
-      paginableText->render();
+      paginableTextRender();
       oledRequestAlways = true;
       hasDtodResultToDisplay = true;
 
@@ -936,7 +933,7 @@ void pn532ReadRfidLoop(void)
 {
 
   paginableText = new DeckPaginableText("En attente de SCAN", display_oled);
-  paginableText->render();
+  paginableTextRender();
   oledRequestAlways = true;
 
   bool success = false;
@@ -955,7 +952,7 @@ void pn532ReadRfidLoop(void)
       displayMessage += ".";
     }
     paginableText = new DeckPaginableText(displayMessage, display_oled);
-    paginableText->render();
+    paginableTextRender();
     oledRequestAlways = true;
   }
 
@@ -987,7 +984,7 @@ void pn532ReadRfidLoop(void)
     lastVibrationMotorStartTime = millis();
 
     paginableText = new DeckPaginableText(scanResult.label, display_oled);
-    paginableText->render();
+    paginableTextRender();
     oledRequestSmall = true;
 
     deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN RESULT = " + scanResult.label + "(" + scanResultId + " - usable " + (isScanUsable?"true":"false") +")" );
@@ -1022,7 +1019,7 @@ void useScanAction(void)
   }
 
   paginableText = new DeckPaginableText(useScanActionTextToDisplay, display_oled);
-  paginableText->render();
+  paginableTextRender();
   oledRequestSmall = true;
 
   rfidUidBufferToStringLastValue = "";
@@ -1056,7 +1053,7 @@ void sporulationEffectAfterUseScanAction(void)
   lastVibrationMotorStartTime = millis();
 
   paginableText = new DeckPaginableText(sporulationEffectAfterUseScanActionText, display_oled);
-  paginableText->render();
+  paginableTextRender();
   oledRequestSmall = true;
 
   sporulationEffectAfterUseScanActionText = "";
@@ -1091,7 +1088,7 @@ void tryToUpdateStimOkButtonAction(void)
   String paddedPlayerId = utilZeroPadPlayerId(deckDatabase.getFirstLevelDataByKey("/config.json", "player_id"));
 
   paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...", display_oled);
-  paginableText->render();
+  paginableTextRender();
 
   DeckMthrClient *mthrClient = new DeckMthrClient(deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_ssid"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_password"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_uri"));
 
@@ -1136,7 +1133,7 @@ void tryToUpdateStimOkButtonAction(void)
     persSucces = true;
   }
   paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...\n" + userDisplayMessage, display_oled);
-  paginableText->render();
+  paginableTextRender();
 
   String csvLogMessage = "TRY TO CHANGE PLAYER_ID (old=" + oldPaddedPlayerId + " - new=" + paddedPlayerId;
   csvLogMessage += " - STIM.JSON="; 
@@ -1155,8 +1152,7 @@ void loopStateMainMenu()
   {
     lastNavigationStateChange = millis();
     setUpMainMenu();
-    mainMenu->render();
-    oledOn = true;
+    mainMenuRender();
     oledRequestMedium = true;
   }
   loopMainMenuOkButton();
@@ -1580,4 +1576,14 @@ void oledDisplayBlackScreen(void) {
   display_oled.clearDisplay();
   display_oled.display();
   oledOn = false;
+}
+
+void mainMenuRender(void) {
+  mainMenu->render();
+  oledOn = true;
+}
+
+void paginableTextRender(void) {
+  paginableText->render();
+  oledOn = true;
 }
