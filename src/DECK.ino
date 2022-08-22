@@ -1,7 +1,7 @@
 #define DECK_VERSION "v1.4.3"
 
 // TODO : Refactor debug via services
-#define DECKINO_DEBUG_SERIAL false
+#define DECKINO_DEBUG_SERIAL true
 #define DECKINO_DEBUG_OLED false
 #define DECKINO_DEBUG_SERIAL_OLED_MACHINE false
 
@@ -143,6 +143,8 @@ unsigned long dtodServerUpSince = 0L;
 String rfidUidBufferToStringLastValue = "";
 String sporulationEffectAfterUseScanActionText = "";
 
+#define CSV_LOG_PATH "/log.csv"
+
 void setup(void)
 {
   setupVibrationMotor();
@@ -244,7 +246,15 @@ void setup(void)
   OledStateAlwaysOn->addTransition(&transitionOledStateAlwaysOnToOledStateOff, OledStateOff);
   // oledMachine transitions end
 
+  #if DECKINO_DEBUG_SERIAL
   deckDatabase.printJsonFile("/pers.json");
+  #endif
+
+  deckDatabase.appendCsvLog(CSV_LOG_PATH, "DECK STARTUP");
+  
+  #if DECKINO_DEBUG_SERIAL
+  deckDatabase.printCsvLog(CSV_LOG_PATH);
+  #endif
 
   oledRequestSmall = true;
 }
@@ -273,7 +283,7 @@ void setUpMainMenu(void)
   int currentMainMenuItem = 0;
   mainMenuItems[currentMainMenuItem++] = {.label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber};
   
-  mainMenuItems[currentMainMenuItem++] = {.label = "ALOW", .value = "ALOW", .selected = false, .shortPressAction = &actionDtodServer};
+  mainMenuItems[currentMainMenuItem++] = {.label = "ALOW", .value = "ALOW", .selected = false, .shortPressAction = &actionDtodServer, .longPressAction = &mainMenuActionEmptyLog};
 
   if (deckDatabase.getFirstLevelDataByKey("/pers.json", "can_dtod") == "true")
   {
@@ -359,9 +369,10 @@ void loop(void)
 void loopDtodServer()
 {
   if (dtodServer != NULL){
-    if (millis() - dtodServerUpSince > 1000 * 60) {
+    if (millis() - dtodServerUpSince > 1000 * 60) { //TODO : Check possible bug
       dtodServer->close();
       dtodServer = NULL;
+      deckDatabase.appendCsvLog(CSV_LOG_PATH, "ALOW TIMEOUT");
     } else {
         dtodServer->handleClient();
     }
@@ -682,6 +693,7 @@ void actionDtodServer(void)
   dtodServerUpSince = millis();
   paginableText = new DeckPaginableText("En attente d'être scanné par un autre DECK", display_oled);
       paginableText->render();
+  deckDatabase.appendCsvLog(CSV_LOG_PATH, "ALOW");
 }
 
 void mainMenuActionEnterCharacterNumber(void)
@@ -689,9 +701,20 @@ void mainMenuActionEnterCharacterNumber(void)
   confirmBeforeEnterCharacterNumberHasBeenPressed = true;
 }
 
+void mainMenuActionEmptyLog(void)
+{
+  deckDatabase.emptyCsvLog(CSV_LOG_PATH);
+  display_oled.clearDisplay();
+  display_oled.setCursor(0, 0);
+  display_oled.println("Log du deck effacé avec succès.");
+  display_oled.display();
+  oledRequestSmall = true;
+}
+
 void mainMenuActionScan(void)
 {
   scanHasBeenPressed = true;
+  deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN");
 }
 
 void mainMenuGenericActionRemoteScan(void)
@@ -728,6 +751,9 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
   display_oled.display();
   oledRequestSmall = true;
 
+  String csvLogString = (isRemoteScan?mainMenu->getSelected().value:"DTOD");
+ 
+
   // WiFi.scanNetworks will return the number of networks found
   int n = WiFi.scanNetworks();
   if (n == 0)
@@ -737,6 +763,7 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
     display_oled.println("Aucun DECK a scanner");
     display_oled.display();
     oledRequestSmall = true;
+    deckDatabase.appendCsvLog(CSV_LOG_PATH, csvLogString + " Aucun DECK a scanner");
   }
   else
   {
@@ -773,6 +800,8 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
     String remoteDeckData = "";
     if (maxForce > -999)
     {
+      
+      deckDatabase.appendCsvLog(CSV_LOG_PATH, csvLogString + " DECK " + closestDeckSsid + " SCAN");
       remoteDeckData = mainMenuActionDtodGetRemoteData(closestDeckSsid);
 
       deckDatabase.persistFullFile("/temp.json", remoteDeckData);
@@ -924,9 +953,9 @@ void pn532ReadRfidLoop(void)
 #if DECKINO_DEBUG_SERIAL
     Serial.print("Label from JSON: ");
 #endif
-
-    DeckScanResult scanResult = deckDatabase.getLabelByUid("/stim.json", rfidUidBufferToString(uid));
-    if (deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToString(uid), "usable") == "true")
+    String scanResultId = rfidUidBufferToString(uid);
+    DeckScanResult scanResult = deckDatabase.getLabelByUid("/stim.json", scanResultId);
+    if (deckDatabase.getFieldValueByUid("/stim.json", scanResultId, "usable") == "true")
     {
       isScanUsable = true;
     }
@@ -947,6 +976,8 @@ void pn532ReadRfidLoop(void)
     paginableText = new DeckPaginableText(scanResult.label, display_oled);
     paginableText->render();
     oledRequestSmall = true;
+
+    deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN RESULT = " + scanResult.label + "(" + scanResultId + " - usable " + (isScanUsable?"true":"false") +")" );
 
     rfidUidBufferToStringLastValue = rfidUidBufferToString(uid);
   }
@@ -996,6 +1027,8 @@ void useScanAction(void)
   Serial.print(sporulationEffectAfterUseScanActionText);
   Serial.println("");
 #endif
+   deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN USED");
+
 }
 
 int utilGetCurrentSporePercent(void)
@@ -1038,6 +1071,8 @@ void enterCharacterNumberAction(void)
 
 void tryToUpdateStimOkButtonAction(void)
 {
+  String oldPaddedPlayerId = utilZeroPadPlayerId(deckDatabase.getFirstLevelDataByKey("/config.json", "player_id"));
+
   deckDatabase.persistFirstLevelDataByKeyValue("/config.json", "player_id", String(choiceNumberPopUp->getFinalValue()));
 
   String paddedPlayerId = utilZeroPadPlayerId(deckDatabase.getFirstLevelDataByKey("/config.json", "player_id"));
@@ -1052,6 +1087,7 @@ void tryToUpdateStimOkButtonAction(void)
   RessourceResponse motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId + "/STIM.JSON");
 
   String userDisplayMessage = "";
+  bool stimSucces = false;
   if (motherResponse.httpCode == 404)
   {
     userDisplayMessage = "STIM : PERSONNAGE NOT FOUND";
@@ -1064,12 +1100,14 @@ void tryToUpdateStimOkButtonAction(void)
   {
     deckDatabase.persistFullFile("/stim.json", motherResponse.payload);
     userDisplayMessage = "STIM : DATA UPDATED";
+    stimSucces=true;
   }
 
   // DOWNLOAD PERS.JSON
 
   motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId + "/PERS.JSON");
 
+  bool persSucces = false;
   if (motherResponse.httpCode == 404)
   {
     userDisplayMessage += "\nPERS : PERSONNAGE NOT FOUND";
@@ -1082,9 +1120,18 @@ void tryToUpdateStimOkButtonAction(void)
   {
     deckDatabase.persistFullFile("/pers.json", motherResponse.payload);
     userDisplayMessage += "\nPERS : DATA UPDATED";
+    persSucces = true;
   }
   paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...\n" + userDisplayMessage, display_oled);
   paginableText->render();
+
+  String csvLogMessage = "TRY TO CHANGE PLAYER_ID (old=" + oldPaddedPlayerId + " - new=" + paddedPlayerId;
+  csvLogMessage += " - STIM.JSON="; 
+  csvLogMessage += (stimSucces ? "OK":"KO");
+  csvLogMessage += " - PERS.JSON="; 
+  csvLogMessage += (persSucces ? "OK":"KO");
+  csvLogMessage += " )"; 
+  deckDatabase.appendCsvLog(CSV_LOG_PATH, csvLogMessage);
 }
 
 //-------------------------

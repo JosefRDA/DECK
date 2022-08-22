@@ -50,6 +50,12 @@ class DeckDatabase {
   LinkedList<String> getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName);
 
   String getThirdLevelDataByKeys(const char * filename, String firstLevelKey, String secondLevelKey, String thirdLevelKey);
+
+  void appendCsvLog(const char * filename, String line);
+
+  void printCsvLog(const char * filename);
+
+  void emptyCsvLog(const char * filename);
   
 };
 

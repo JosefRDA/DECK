@@ -333,6 +333,40 @@ void DeckDatabase::appendUsedStimLog(const char * filename, String usableStimCod
   file.close();
 }
 
+void DeckDatabase::appendCsvLog(const char * filename, String line) {
+  // Open file for appending
+  File file = LittleFS.open(filename, "a+");
+  if (!file) 
+  {
+    Serial.println(F("Failed to open file for appending"));
+  }
+
+  file.print((String(millis()) + "," + line + "\n").c_str());
+  file.close();
+  
+}
+
+void DeckDatabase::printCsvLog(const char * filename) {
+  File file = LittleFS.open(filename, "r");
+  if (!file) 
+  {
+    Serial.println(F("[printCsvLog] Failed to open file for reading"));
+  }
+  
+  while(file.available()) {
+    String line = file.readStringUntil('\n');
+    Serial.println(line);
+  }
+
+  // Close the file (File's destructor doesn't close the file)
+  file.close();
+}
+
+void DeckDatabase::emptyCsvLog(const char * filename) {
+  LittleFS.remove(filename);
+  this->appendCsvLog(filename, "LOG CLEARED");
+}
+
 LinkedList<String> DeckDatabase::getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName) {
   const int maxResults = 2; //TODO : to delete once main menu will be abble to take more than 3 items
 
