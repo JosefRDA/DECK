@@ -1,7 +1,7 @@
 #define DECK_VERSION "v1.4.3"
 
 // TODO : Refactor debug via services
-#define DECKINO_DEBUG_SERIAL true
+#define DECKINO_DEBUG_SERIAL false
 #define DECKINO_DEBUG_OLED false
 #define DECKINO_DEBUG_SERIAL_OLED_MACHINE false
 
@@ -152,16 +152,15 @@ void setup(void)
 
   display_oled.begin(SSD1306_SWITCHCAPVCC);
   display_oled.drawBitmap(0, 0, clusterLogo_data, clusterLogo_width, clusterLogo_height, 1);
-  display_oled.display();
+  oledDisplay();
   delay(2000);
 
   display_oled.setCursor(27, 40);
   display_oled.println(DECK_VERSION);
-  display_oled.display();
+  oledDisplay();
   delay(1000);
 
-  display_oled.clearDisplay();
-  display_oled.display();
+  oledDisplayBlackScreen();
 
   Serial.begin(115200);
 
@@ -181,9 +180,9 @@ void setup(void)
     Serial.println("Didn't find PN53x board");
 #endif
 #if DECKINO_DEBUG_OLED
-    display_oled.clearDisplay();
+    oledClearDisplay();
     display_oled.println("Didn't find PN53x board");
-    display_oled.display();
+    oledDisplay();
 #endif
     delay(1000);
 
@@ -192,7 +191,7 @@ void setup(void)
 #endif
 #if DECKINO_DEBUG_OLED
     display_oled.println("Retrying ...");
-    display_oled.display();
+    oledDisplay();
 #endif
     nfc.begin();
 
@@ -316,12 +315,11 @@ void setupOled(void)
   // by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
   display_oled.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initialize with the I2C addr 0x3C (for the 64x48)
 
-  display_oled.clearDisplay();
 
   display_oled.setTextColor(WHITE);
   display_oled.setTextSize(1);
   display_oled.setCursor(0, 0);
-  display_oled.display();
+  oledDisplayBlackScreen();
 }
 
 // Obselete : Keept for debug purpose only
@@ -386,12 +384,13 @@ void loopMainMenuOkButton(void)
   {
     DeckMenuItem selectedMenuItem = mainMenu->getSelected();
 
-    #if DECKINO_DEBUG_SERIAL
+    //#if DECKINO_DEBUG_SERIAL
     Serial.println("[oledMachine.currentState] " + String(oledOn));
-    #endif
+    //#endif
 
     if (!oledOn) {
-      display_oled.display();
+      mainMenu->render();
+      oledOn = true;
       oledRequestSmall = true;
     } else {
       switch (buttonValue)
@@ -420,6 +419,7 @@ void loopMainMenuUpButton(void)
   {
     mainMenu->select(DECKMENU_DIRECTION_UP);
     mainMenu->render();
+    oledOn = true;
     oledRequestSmall = true;
   }
   else
@@ -438,6 +438,7 @@ void loopMainMenuDownButton(void)
     // TODO : IF IN MAIN MENU // Still relevent ?
     mainMenu->select(DECKMENU_DIRECTION_DOWN);
     mainMenu->render();
+    oledOn = true;
     oledRequestSmall = true;
   }
   else
@@ -455,7 +456,7 @@ void loopScanOkButton(void)
   {
     if (oledMachine.currentState == OledStateOff->index)
     {
-      display_oled.display();
+      oledDisplay();
       oledRequestSmall = true;
     }
     else
@@ -514,7 +515,7 @@ void loopConfirmBeforeUseScanOkButton(void)
   {
     if (oledMachine.currentState == OledStateOff->index)
     {
-      display_oled.display();
+      oledDisplay();
       oledRequestSmall = true;
     }
     else
@@ -538,7 +539,7 @@ void loopConfirmBeforeEnterCharacterNumberOkButton(void)
   {
     if (oledMachine.currentState == OledStateOff->index)
     {
-      display_oled.display();
+      oledDisplay();
       oledRequestSmall = true;
     }
     else
@@ -594,7 +595,7 @@ void loopEnterCharacterNumberOkButton(void)
   {
     if (oledMachine.currentState == OledStateOff->index)
     {
-      display_oled.display();
+      oledDisplay();
       oledRequestSmall = true;
     }
     else
@@ -673,7 +674,7 @@ void loopTryToUpdateStimOkButton(void)
   {
     if (oledMachine.currentState == OledStateOff->index)
     {
-      display_oled.display();
+      oledDisplay();
       oledRequestSmall = true;
     }
     else
@@ -704,10 +705,10 @@ void mainMenuActionEnterCharacterNumber(void)
 void mainMenuActionEmptyLog(void)
 {
   deckDatabase.emptyCsvLog(CSV_LOG_PATH);
-  display_oled.clearDisplay();
+  oledClearDisplay();
   display_oled.setCursor(0, 0);
   display_oled.println("Log du deck effacé avec succès.");
-  display_oled.display();
+  oledDisplay();
   oledRequestSmall = true;
 }
 
@@ -734,10 +735,10 @@ void mainMenuActionRemoteScan()
 
 void mainMenuActionOrRemoteScan(bool isRemoteScan)
 {
-  display_oled.clearDisplay();
+  oledClearDisplay();
   display_oled.setCursor(0, 0);
   display_oled.println("Scan des deck à portée en cours .");
-  display_oled.display();
+  oledDisplay();
   oledRequestSmall = true;
 
   // INIT
@@ -745,10 +746,10 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
   WiFi.disconnect();
   delay(100);
 
-  display_oled.clearDisplay();
+  oledClearDisplay();
   display_oled.setCursor(0, 0);
   display_oled.println("Scan des deck à portée en cours ...");
-  display_oled.display();
+  oledDisplay();
   oledRequestSmall = true;
 
   String csvLogString = (isRemoteScan?mainMenu->getSelected().value:"DTOD");
@@ -758,10 +759,10 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
   int n = WiFi.scanNetworks();
   if (n == 0)
   {
-    display_oled.clearDisplay();
+    oledClearDisplay();
     display_oled.setCursor(0, 0);
     display_oled.println("Aucun DECK a scanner");
-    display_oled.display();
+    oledDisplay();
     oledRequestSmall = true;
     deckDatabase.appendCsvLog(CSV_LOG_PATH, csvLogString + " Aucun DECK a scanner");
   }
@@ -794,7 +795,7 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
         }
       }
     }
-    display_oled.clearDisplay();
+    oledClearDisplay();
     display_oled.setCursor(0, 0);
 
     String remoteDeckData = "";
@@ -1143,6 +1144,7 @@ void loopStateMainMenu()
     lastNavigationStateChange = millis();
     setUpMainMenu();
     mainMenu->render();
+    oledOn = true;
     oledRequestMedium = true;
   }
   loopMainMenuOkButton();
@@ -1433,7 +1435,6 @@ void loopOledStateOnForSmallDelay()
   {
     // TODO
     lastOledStateChange = millis();
-    oledOn = true;
   }
   // TODO
 }
@@ -1444,7 +1445,6 @@ void loopOledStateOnForMediumDelay()
   {
     // TODO
     lastOledStateChange = millis();
-    oledOn = true;
   }
   // TODO
 }
@@ -1455,7 +1455,6 @@ void loopOledStateOnForLongDelay()
   {
     // TODO
     lastOledStateChange = millis();
-    oledOn = true;
   }
   // TODO
 }
@@ -1466,7 +1465,6 @@ void loopOledStateAlwaysOn()
   {
     // TODO
     lastOledStateChange = millis();
-    oledOn = true;
   }
   // TODO
 }
@@ -1475,9 +1473,7 @@ void loopOledStateOff()
 {
   if (oledMachine.executeOnce)
   {
-    display_oled.clearDisplay();
-    display_oled.display();
-    oledOn = false;
+    oledDisplayBlackScreen();
     #if DECKINO_DEBUG_SERIAL
     Serial.println("loopOledStateOff!");
     #endif
@@ -1554,4 +1550,22 @@ bool transitionOledStateAlwaysOnToOledStateOff()
 bool transitionOledGenericSecond(long second)
 {
   return millis() - lastOledStateChange > 1000 * second;
+}
+
+//----------
+
+void oledClearDisplay(void) {
+  display_oled.clearDisplay();
+  oledOn = false;
+}
+
+void oledDisplay(void){
+  display_oled.display();
+  oledOn = true;
+}
+
+void oledDisplayBlackScreen(void) {
+  display_oled.clearDisplay();
+  display_oled.display();
+  oledOn = false;
 }
