@@ -384,9 +384,9 @@ void loopMainMenuOkButton(void)
   {
     DeckMenuItem selectedMenuItem = mainMenu->getSelected();
 
-    //#if DECKINO_DEBUG_SERIAL
+    #if DECKINO_DEBUG_SERIAL
     Serial.println("[oledMachine.currentState] " + String(oledOn));
-    //#endif
+    #endif
 
     if (!oledOn) {
       mainMenu->render();
@@ -704,6 +704,7 @@ void mainMenuActionEnterCharacterNumber(void)
 
 void mainMenuActionEmptyLog(void)
 {
+  //TODO : Move to navigation state ?
   deckDatabase.emptyCsvLog(CSV_LOG_PATH);
   oledClearDisplay();
   display_oled.setCursor(0, 0);
@@ -938,14 +939,25 @@ void pn532ReadRfidLoop(void)
   paginableText->render();
   oledRequestAlways = true;
 
-  uint8_t success;
+  bool success = false;
   uint8_t uid[] = {0, 0, 0, 0, 0, 0, 0}; // Buffer to store the returned UID
   uint8_t uidLength;                     // Length of the UID (4 or 7 bytes depending on ISO14443A card type)
 
   // Wait for an ISO14443A type cards (Mifare, etc.).  When one is found
   // 'uid' will be populated with the UID, and uidLength will indicate
   // if the uid is 4 bytes (Mifare Classic) or 7 bytes (Mifare Ultralight)
-  success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength);
+  int rfidScanTryCpt = 0;
+  while(success == false) {
+    success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 100);
+    rfidScanTryCpt++;
+    String displayMessage = "En attente de SCAN    ";
+    for(int cpt =0; cpt <= (rfidScanTryCpt % 3); cpt++) {
+      displayMessage += ".";
+    }
+    paginableText = new DeckPaginableText(displayMessage, display_oled);
+    paginableText->render();
+    oledRequestAlways = true;
+  }
 
   if (success)
   {
