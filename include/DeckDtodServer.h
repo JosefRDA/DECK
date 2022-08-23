@@ -13,6 +13,7 @@
 #include <Adafruit_SSD1306.h>
 
 #include "DeckDatabase.h"
+#include "DeckPaginableText.h"
 
 #ifndef DECK_DTOD_SERVER_SSID_PREFIX
 #define DECK_DTOD_SERVER_SSID_PREFIX "DECK"

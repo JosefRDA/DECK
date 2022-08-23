@@ -55,25 +55,25 @@ void DeckDtodServer::handleClient(void)
 
 void DeckDtodServer::handleRoot(void)
 {
-  _oled.clearDisplay();
-  _oled.setTextSize(1);
-  _oled.setCursor(0, 0);
+  // _oled.clearDisplay();
+  // _oled.setTextSize(1);
+  // _oled.setCursor(0, 0);
 
-  _oled.drawRoundRect(0, 5, 64, 43, 4, WHITE);
+  // _oled.drawRoundRect(0, 5, 64, 43, 4, WHITE);
 
-  //_oled.setCursor(4,2);
-  //_oled.print("");
-  _oled.setCursor(4, 12);
-  _oled.print("Accepter");
-  _oled.setCursor(4, 22);
-  _oled.print("DTOD ?");
-  _oled.setCursor(4, 34);
-  _oled.setTextColor(BLACK, WHITE);
-  _oled.print("OUI");
-  _oled.setTextColor(WHITE, BLACK);
-  _oled.print("   ");
-  _oled.print("NON");
-  _oled.display();
+  // //_oled.setCursor(4,2);
+  // //_oled.print("");
+  // _oled.setCursor(4, 12);
+  // _oled.print("Accepter");
+  // _oled.setCursor(4, 22);
+  // _oled.print("DTOD ?");
+  // _oled.setCursor(4, 34);
+  // _oled.setTextColor(BLACK, WHITE);
+  // _oled.print("OUI");
+  // _oled.setTextColor(WHITE, BLACK);
+  // _oled.print("   ");
+  // _oled.print("NON");
+  // _oled.display();
 
   #if DTODSERVER_DEBUG_SERIAL
   Serial.println("[DeckDtodServer::handleRoot] After Display");
@@ -120,6 +120,12 @@ void DeckDtodServer::handleRoot(void)
   #if DTODSERVER_DEBUG_SERIAL
   Serial.println("[DeckDtodServer::handleRoot] After _webServer stop");
   #endif
+
+  //DISPLAY
+  DeckPaginableText paginableText("Informations transmises au DECK distant", _oled);
+  paginableText.render();
+
+  
 }
 
 void DeckDtodServer::close(void)
