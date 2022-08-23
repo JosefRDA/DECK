@@ -813,7 +813,9 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
       else
       {
         String playerSporePercent = closestDeckSsid.substring(9);
-        labelToDisplay = getDtodLabelFromRemoteData(playerSporePercent);
+        long playerSporePercentLng = strtol(playerSporePercent.c_str(), NULL, 16);
+        playerSporePercentLng -= 7;
+        labelToDisplay = getDtodLabelFromRemoteData(String(playerSporePercentLng));
       }
 
       paginableText = new DeckPaginableText(labelToDisplay, display_oled);

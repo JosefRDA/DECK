@@ -36,11 +36,15 @@ DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled, DeckDatabase deckDatabase)
   char playerIdBuffer[3];
   sprintf(playerIdBuffer, "%03d", deckDatabase.getFirstLevelDataByKey("/config.json", "player_id").toInt());
   String playerId = String(playerIdBuffer);
+
+  char sporePercentBuffer[2];
+  sprintf(sporePercentBuffer,"%02X",sporePercentInt + 7);
+  String sporePercentStr = String(sporePercentBuffer);
   
   /* Set these to your desired credentials. */
   String ssidSting = DECK_DTOD_SERVER_SSID_PREFIX;
   ssidSting += String("_") + playerId;
-  ssidSting += String("_") + String(sporePercentInt);
+  ssidSting += String("_") + sporePercentStr;
   
   const char *ssid = ssidSting.c_str();
   const char *password = DECK_DTOD_SERVER_PASSWORD;
