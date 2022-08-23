@@ -1114,11 +1114,26 @@ void tryToUpdateStimOkButtonAction(void)
   paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...", display_oled);
   paginableTextRender();
 
+  #if DECKINO_DEBUG_SERIAL
+  Serial.println("[tryToUpdateStimOkButtonAction] before mthrClient construct");
+  Serial.println("[tryToUpdateStimOkButtonAction] begin print /wifi.json");
+  deckDatabase.printJsonFile("/wifi.json");
+  Serial.println("[tryToUpdateStimOkButtonAction] end print /wifi.json");
+  #endif
+
   DeckMthrClient *mthrClient = new DeckMthrClient(deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_ssid"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_password"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_uri"));
+
+  #if DECKINO_DEBUG_SERIAL
+  Serial.println("[tryToUpdateStimOkButtonAction] after mthrClient construct");
+  #endif
 
   // DOWNLOAD STIM.JSON
 
   RessourceResponse motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId + "/STIM.JSON");
+
+  #if DECKINO_DEBUG_SERIAL
+  Serial.println("[tryToUpdateStimOkButtonAction] after motherResponse download");
+  #endif
 
   String userDisplayMessage = "";
   bool stimSucces = false;
