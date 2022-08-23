@@ -22,7 +22,7 @@ DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled, DeckDatabase deckDatabase)
   if(sporeActuelStr.length() > 0) {
     sporeActuel = sporeActuelStr.toInt();
   } 
-  String sporeMaxStr = _deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel");
+  String sporeMaxStr = _deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max");
   int sporeMax = 0; //default 10
   if(sporeMaxStr.length() > 0) {
     sporeMax = sporeMaxStr.toInt();
