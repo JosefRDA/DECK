@@ -187,7 +187,11 @@ String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldK
   else
   {
     JsonObject configArray = doc.as<JsonObject>();
-    result = String(configArray[fieldKey].as<char*>());
+    if(configArray.containsKey(fieldKey)) {
+      result = String(configArray[fieldKey].as<char*>());
+    } else {
+      result = ""; //Return empty string if key not found
+    }
   }
 
   file.close();

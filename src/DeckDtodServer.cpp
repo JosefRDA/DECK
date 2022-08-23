@@ -75,14 +75,51 @@ void DeckDtodServer::handleRoot(void)
   _oled.print("NON");
   _oled.display();
 
+  #if DTODSERVER_DEBUG_SERIAL
+  Serial.println("[DeckDtodServer::handleRoot] After Display");
+  //_deckDatabase.printJsonFile("/pers.json");
+  #endif
+
   // Todo : take from utilGetCurrentSporePercent
-  int sporePercentInt = round(_deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel").toInt() * 100 / _deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max").toInt());
+  String sporeActuelStr = _deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel");
+  int sporeActuel = 0;
+  if(sporeActuelStr.length() > 0) {
+    sporeActuel = sporeActuelStr.toInt();
+  } 
+  String sporeMaxStr = _deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel");
+  int sporeMax = 10; //default 10
+  if(sporeMaxStr.length() > 0) {
+    sporeMax = sporeMaxStr.toInt();
+  } 
+  int sporePercentInt = round(sporeActuel * 100 / sporeMax);
+
+  #if DTODSERVER_DEBUG_SERIAL
+  Serial.println("[DeckDtodServer::handleRoot] After sporePercentInt");
+  #endif
 
   String playerId = _deckDatabase.getFirstLevelDataByKey("/config.json", "player_id");
+
+  #if DTODSERVER_DEBUG_SERIAL
+  Serial.println("[DeckDtodServer::handleRoot] After playerId");
+  #endif
+
   String returnPayload = "{ \"spore_percent\" : \"" + String(sporePercentInt) + "\", \"player_id\" : \"" + String(playerId) + "\" }";
+
+  #if DTODSERVER_DEBUG_SERIAL
+  Serial.println("[DeckDtodServer::handleRoot] After returnPayload generation");
+  #endif
+
   this->_webServer->send(200, "application/json", returnPayload);
 
+  #if DTODSERVER_DEBUG_SERIAL
+  Serial.println("[DeckDtodServer::handleRoot] After _webServer returnPayload");
+  #endif
+
   this->_webServer->stop();
+
+  #if DTODSERVER_DEBUG_SERIAL
+  Serial.println("[DeckDtodServer::handleRoot] After _webServer stop");
+  #endif
 }
 
 void DeckDtodServer::close(void)

@@ -1043,7 +1043,17 @@ void useScanAction(void)
 
 int utilGetCurrentSporePercent(void)
 {
-  return round(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel").toInt() * 100 / deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max").toInt());
+  String sporeActuelStr = deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel");
+  int sporeActuel = 0;
+  if(sporeActuelStr.length() > 0) {
+    sporeActuel = sporeActuelStr.toInt();
+  } 
+  String sporeMaxStr = deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel");
+  int sporeMax = 10; //default 10
+  if(sporeMaxStr.length() > 0) {
+    sporeMax = sporeMaxStr.toInt();
+  }
+  return round(sporeActuel * 100 / sporeMax);
 }
 
 void sporulationEffectAfterUseScanAction(void)
@@ -1120,19 +1130,19 @@ void tryToUpdateStimOkButtonAction(void)
   bool persSucces = false;
   if (motherResponse.httpCode == 404)
   {
-    userDisplayMessage += "\nPERS : PERSONNAGE NOT FOUND";
+    userDisplayMessage += " - ECHEC PERS : PERSONNAGE NOT FOUND";
   }
   else if (motherResponse.httpCode != 200)
   {
-    userDisplayMessage += "\nPERS : NETWORK ERROR : " + String(motherResponse.httpCode);
+    userDisplayMessage += " - ECHEC PERS : NETWORK ERROR : " + String(motherResponse.httpCode);
   }
   else
   {
     deckDatabase.persistFullFile("/pers.json", motherResponse.payload);
-    userDisplayMessage += "\nPERS : DATA UPDATED";
+    userDisplayMessage += " - SUCCESS PERS : DATA UPDATED";
     persSucces = true;
   }
-  paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...\n" + userDisplayMessage, display_oled);
+  paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "..." + userDisplayMessage, display_oled);
   paginableTextRender();
 
   String csvLogMessage = "TRY TO CHANGE PLAYER_ID (old=" + oldPaddedPlayerId + " - new=" + paddedPlayerId;
