@@ -1,7 +1,7 @@
 #define DECK_VERSION "v1.4.3"
 
 // TODO : Refactor debug via services
-#define DECKINO_DEBUG_SERIAL false
+#define DECKINO_DEBUG_SERIAL true
 #define DECKINO_DEBUG_OLED false
 #define DECKINO_DEBUG_SERIAL_OLED_MACHINE false
 
@@ -839,7 +839,7 @@ String getRemoteScanLabelFromRemoteData()
   DeckMenuItem selectedMenuItem = mainMenu->getSelected();
   selectedMenuItem.value;
 
-  String remotePlayerId = deckDatabase.getFirstLevelDataByKey("/temp.json", "player_id");
+  String remotePlayerId = utilZeroPadPlayerId(deckDatabase.getFirstLevelDataByKey("/temp.json", "player_id"));
   String result = deckDatabase.getThirdLevelDataByKeys("/pers.json", "rmt_scan", selectedMenuItem.value, remotePlayerId);
   return result;
 }
