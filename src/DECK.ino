@@ -779,7 +779,9 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
 #if DECKINO_DEBUG_SERIAL
         Serial.println("DECK FOUND :");
         Serial.print("NAME : ");
-        Serial.println(WiFi.SSID(i).substring(4));
+        Serial.println(WiFi.SSID(i).substring(5,8));
+        Serial.print("SPORE : ");
+        Serial.println(WiFi.SSID(i).substring(9));
         Serial.print("FORCE : ");
         Serial.println(WiFi.RSSI(i));
 #endif
@@ -801,18 +803,17 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
     {
       
       deckDatabase.appendCsvLog(CSV_LOG_PATH, csvLogString + " DECK " + closestDeckSsid + " SCAN");
-      remoteDeckData = mainMenuActionDtodGetRemoteData(closestDeckSsid);
-
-      deckDatabase.persistFullFile("/temp.json", remoteDeckData);
 
       String labelToDisplay;
       if (isRemoteScan)
       {
-        labelToDisplay = getRemoteScanLabelFromRemoteData();
+        String paddedPlayerId = closestDeckSsid.substring(5,8);
+        labelToDisplay = getRemoteScanLabelFromRemoteData(paddedPlayerId);
       }
       else
       {
-        labelToDisplay = getDtodLabelFromRemoteData();
+        String playerSporePercent = closestDeckSsid.substring(9);
+        labelToDisplay = getDtodLabelFromRemoteData(playerSporePercent);
       }
 
       paginableText = new DeckPaginableText(labelToDisplay, display_oled);
@@ -828,18 +829,26 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
   WiFi.disconnect();
 }
 
-String getDtodLabelFromRemoteData(void)
+String getDtodLabelFromRemoteData(String playerSporePercent)
 {
-  String result = deckDatabase.getMatchingLabelByRange("/pers.json", "dtod_ranges", deckDatabase.getFirstLevelDataByKey("/temp.json", "spore_percent").toInt());
+  int playerSporePercentInt = playerSporePercent.toInt();
+  if(playerSporePercentInt == 0) {
+    playerSporePercentInt =1; //Si sporulation 0% on affiche le message de 1%
+  }
+  String result = deckDatabase.getMatchingLabelByRange("/pers.json", "dtod_ranges", playerSporePercentInt);
+  
+  #if DECKINO_DEBUG_SERIAL
+  Serial.println("[getDtodLabelFromRemoteData] Label found for " + playerSporePercent + "% : \"" + result + "\"");
+  #endif
+
   return result;
 }
 
-String getRemoteScanLabelFromRemoteData()
+String getRemoteScanLabelFromRemoteData(String remotePlayerId)
 {
   DeckMenuItem selectedMenuItem = mainMenu->getSelected();
   selectedMenuItem.value;
 
-  String remotePlayerId = utilZeroPadPlayerId(deckDatabase.getFirstLevelDataByKey("/temp.json", "player_id"));
   String result = deckDatabase.getThirdLevelDataByKeys("/pers.json", "rmt_scan", selectedMenuItem.value, remotePlayerId);
   return result;
 }
@@ -1049,9 +1058,12 @@ int utilGetCurrentSporePercent(void)
     sporeActuel = sporeActuelStr.toInt();
   } 
   String sporeMaxStr = deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel");
-  int sporeMax = 10; //default 10
+  int sporeMax = 0; //default 10
   if(sporeMaxStr.length() > 0) {
     sporeMax = sporeMaxStr.toInt();
+  } 
+  if(sporeMax == 0) {
+    sporeMax = 10; //default 10
   }
   return round(sporeActuel * 100 / sporeMax);
 }
