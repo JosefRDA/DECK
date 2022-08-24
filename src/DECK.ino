@@ -1,4 +1,4 @@
-#define DECK_VERSION "v1.4.3"
+#define DECK_VERSION "v1.4.4"
 
 // TODO : Refactor debug via services
 #define DECKINO_DEBUG_SERIAL true
@@ -1085,7 +1085,8 @@ void sporulationEffectAfterUseScanAction(void)
 
 void confirmBeforeEnterCharacterNumberAction(void)
 {
-  confirmationPopUp = new DeckConfirmationPopUp("Definir id personnage ?", display_oled);
+  String confirmBeforeEnterCharacterNumberActionMessage = "ID_PERS=" + utilZeroPadPlayerId(deckDatabase.getFirstLevelDataByKey("/config.json", "player_id")) + " changer ?";
+  confirmationPopUp = new DeckConfirmationPopUp(confirmBeforeEnterCharacterNumberActionMessage, display_oled);
   confirmationPopUp->render();
   oledRequestAlways = true; // necessary ?
 }
