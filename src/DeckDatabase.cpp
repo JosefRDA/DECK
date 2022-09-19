@@ -38,9 +38,6 @@ void DeckDatabase::printJsonFile(const char * filename){
     serializeJsonPretty(doc, Serial);
     Serial.println();
   }
-
-  doc.garbageCollect();
-  doc.clear();
   // Close the file (File's destructor doesn't close the file)
   file.close();
 }
@@ -67,9 +64,6 @@ String DeckDatabase::jsonFileToString(const char * filename){
   {
     serializeJsonPretty(doc, result);
   }
-
-  doc.garbageCollect();
-  doc.clear();
 
   // Close the file (File's destructor doesn't close the file)
   file.close();
@@ -164,9 +158,6 @@ JsonObject DeckDatabase::getStimByUid(const char * filename, String uid) {
     }
   }
 
-  doc.garbageCollect();
-  doc.clear();
-
   // Close the file (File's destructor doesn't close the file)
   file.close();
 
@@ -174,40 +165,7 @@ JsonObject DeckDatabase::getStimByUid(const char * filename, String uid) {
 }
 
 String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldKey) {
-  String result;
-
-  // Open file for reading
-  File file = LittleFS.open(filename, "r");
-  if (!file) 
-  {
-    Serial.println(F("Failed to open file for reading"));
-  }
-
-  StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
-
-  // Deserialize the JSON document
-  DeserializationError error = deserializeJson(doc, file);
-  if (error)
-  {
-    Serial.println(F("Failed to deserialize file"));
-    Serial.println(error.c_str());
-  }
-  else
-  {
-    JsonObject configArray = doc.as<JsonObject>();
-    if(configArray.containsKey(fieldKey)) {
-      result = String(configArray[fieldKey].as<char*>());
-    } else {
-      result = ""; //Return empty string if key not found
-    }
-  }
-
-  doc.garbageCollect();
-  doc.clear();
-
-  file.close();
-
-  return result;
+  return this->getFirstLevelDataByKey(filename, fieldKey, "");
 }
 
 String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldKey, String fallback) {
@@ -240,9 +198,6 @@ String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldK
       result = ""; //Return empty string if key not found
     }
   }
-
-  doc.garbageCollect();
-  doc.clear();
 
   file.close();
 
@@ -284,9 +239,6 @@ String DeckDatabase::getMatchingLabelByRange(const char * filename, String field
 
     result = String(matchingRangeJson["label"].as<char*>());
   }
-
-  doc.garbageCollect();
-  doc.clear();
 
   file.close();
 
@@ -347,9 +299,6 @@ void DeckDatabase::persistFirstLevelDataByKeyValue(const char * filename, String
     file.print(targetJson.c_str());
 
   }
-
-  doc.garbageCollect();
-  doc.clear();
 
   file.close();
 }
@@ -479,9 +428,6 @@ LinkedList<String> DeckDatabase::getSubNodesOfAFirstLevelNode(const char * filen
     }
   }
 
-  doc.garbageCollect();
-  doc.clear();
-
   file.close();
   return result;
 }
@@ -531,9 +477,6 @@ String DeckDatabase::getThirdLevelDataByKeys(const char * filename, String first
       }
     }
   }
-
-  doc.garbageCollect();
-  doc.clear();
 
   file.close();
   return result;
