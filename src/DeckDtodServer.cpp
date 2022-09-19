@@ -17,7 +17,7 @@ DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled, DeckDatabase deckDatabase)
   IPAddress primaryDNS(8, 8, 8, 8);   // optional
   IPAddress secondaryDNS(8, 8, 4, 4); // optional
 
-  String sporeActuelStr = _deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel");
+  String sporeActuelStr = _deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", _deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel"));
   int sporeActuel = 0;
   if(sporeActuelStr.length() > 0) {
     sporeActuel = sporeActuelStr.toInt();

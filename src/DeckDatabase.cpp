@@ -174,6 +174,10 @@ JsonObject DeckDatabase::getStimByUid(const char * filename, String uid) {
 }
 
 String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldKey) {
+  return this->getFirstLevelDataByKey(filename, fieldKey, "");
+}
+
+String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldKey, String fallback) {
   String result;
 
   // Open file for reading
@@ -181,6 +185,7 @@ String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldK
   if (!file) 
   {
     Serial.println(F("Failed to open file for reading"));
+    return fallback;
   }
 
   StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
@@ -191,6 +196,7 @@ String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldK
   {
     Serial.println(F("Failed to deserialize file"));
     Serial.println(error.c_str());
+    return fallback;
   }
   else
   {
@@ -252,6 +258,17 @@ String DeckDatabase::getMatchingLabelByRange(const char * filename, String field
   file.close();
 
   return result;
+}
+
+void DeckDatabase::persistSporeActuel(String fieldValue) {
+  const char * filename = "/spor.json";
+  const String sporeFiledName = "spore_actuel";
+  if(!LittleFS.exists(filename)) {
+    File file = LittleFS.open(filename, "w+");
+    file.print(String("{\n\t\"spore_actuel\" : \"" + fieldValue + "\"\n}").c_str());
+  } else {
+    this->persistFirstLevelDataByKeyValue(filename, sporeFiledName, fieldValue);
+  }
 }
 
 void DeckDatabase::persistFirstLevelDataByKeyValue(const char * filename, String fieldKey, String fieldValue) {

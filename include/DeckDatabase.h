@@ -38,7 +38,11 @@ class DeckDatabase {
 
   void persistFirstLevelDataByKeyValue(const char * filename, String fieldKey, String fieldValue);
 
+  void persistSporeActuel(String fieldValue);
+
   String getFirstLevelDataByKey(const char * filename, String fieldKey);
+
+  String getFirstLevelDataByKey(const char * filename, String fieldKey, String fallback);
 
   String getMatchingLabelByRange(const char * filename, String fieldKey, int rangeValue);
   
