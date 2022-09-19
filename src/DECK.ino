@@ -1018,10 +1018,13 @@ void useScanAction(void)
   Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel"));
   Serial.println("");
 #endif
-
+  int sporeMaxInt = deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max").toInt();
+  if(sporeMaxInt == 0) {
+    sporeMaxInt = 10;
+  }
   deckDatabase.persistFirstLevelDataByKeyValue("/pers.json", "spore_actuel",
                                                String(constrain(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel").toInt() + deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "spore").toInt(), 0,
-                                                                deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max").toInt())));
+                                                                sporeMaxInt)));
 
   String useScanActionTextToDisplay = deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "effect");
   if (useScanActionTextToDisplay == "")
@@ -1040,7 +1043,7 @@ void useScanAction(void)
 #if DECKINO_DEBUG_SERIAL
   Serial.print("[SPORE](After use) : ");
   Serial.print("- Spore Max : ");
-  Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max"));
+  Serial.print(String(sporeMaxInt));
   Serial.print(" - Spore Actuel : ");
   Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel"));
   Serial.println("");
