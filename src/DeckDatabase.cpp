@@ -95,7 +95,7 @@ DeckScanResult DeckDatabase::getLabelByUid(const char * filename, String uid) {
   DeckScanResult result;
   JsonObject stim = getStimByUid(filename, uid);
   if(stim) {
-    result.label = stim["label"].as<char*>();
+    result.label = stim["label"].as<const char*>();
     result.usable = false;
     return result;
   } else {
@@ -111,7 +111,7 @@ String DeckDatabase::getFieldValueByUid(const char * filename, String uid, Strin
 
   JsonObject stim = getStimByUid(filename, uid);
   if(stim) {
-    result = stim[fieldKey].as<char*>();
+    result = stim[fieldKey].as<const char*>();
   } else {
     result = String("[UNKNOWN] :") + uid;
   }
@@ -152,7 +152,7 @@ JsonObject DeckDatabase::getStimByUid(const char * filename, String uid) {
     JsonArray stimArray = doc.as<JsonArray>();
     for(JsonVariant value : stimArray) {
       JsonObject stimValue = value.as<JsonObject>();
-      if(uid.equals(stimValue["uid"].as<char*>())) {
+      if(uid.equals(stimValue["uid"].as<const char*>())) {
         result = stimValue;
       }
     }
@@ -193,7 +193,7 @@ String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldK
   {
     JsonObject configArray = doc.as<JsonObject>();
     if(configArray.containsKey(fieldKey)) {
-      result = String(configArray[fieldKey].as<char*>());
+      result = String(configArray[fieldKey].as<const char*>());
     } else {
       result = ""; //Return empty string if key not found
     }
@@ -231,13 +231,13 @@ String DeckDatabase::getMatchingLabelByRange(const char * filename, String field
     JsonObject matchingRangeJson;
     for(JsonVariant value : rangesArray) {
       JsonObject rangeJson = value.as<JsonObject>();
-      if(String(rangeJson["min"].as<char*>()).toInt() <  rangeValue && String(rangeJson["max"].as<char*>()).toInt() >  rangeValue) {
+      if(String(rangeJson["min"].as<const char*>()).toInt() <  rangeValue && String(rangeJson["max"].as<const char*>()).toInt() >  rangeValue) {
         matchingRangeJson = rangeJson;
         break;
       }
     }
 
-    result = String(matchingRangeJson["label"].as<char*>());
+    result = String(matchingRangeJson["label"].as<const char*>());
   }
 
   file.close();
@@ -413,7 +413,7 @@ LinkedList<String> DeckDatabase::getSubNodesOfAFirstLevelNode(const char * filen
     JsonObject rootJson = doc.as<JsonObject>();
     JsonArray nodeArray = rootJson[firstLevelNodeName].as<JsonArray>();
     //JsonObject configArray = doc.as<JsonObject>();
-    //result = String(configArray[fieldKey].as<char*>());
+    //result = String(configArray[fieldKey].as<const char*>());
   
     for(JsonObject nodeArrayObject : nodeArray) {
       for(JsonPair nodeArrayPair : nodeArrayObject) {
@@ -457,7 +457,7 @@ String DeckDatabase::getThirdLevelDataByKeys(const char * filename, String first
     JsonObject rootJson = doc.as<JsonObject>();
     JsonArray nodeArray = rootJson[firstLevelKey].as<JsonArray>();
     //JsonObject configArray = doc.as<JsonObject>();
-    //result = String(configArray[fieldKey].as<char*>());
+    //result = String(configArray[fieldKey].as<const char*>());
   
     for(JsonObject nodeArrayObject : nodeArray) {
       for(JsonPair nodeArrayPair : nodeArrayObject) {
@@ -465,9 +465,9 @@ String DeckDatabase::getThirdLevelDataByKeys(const char * filename, String first
 
           JsonObject rmtScanValues = nodeArrayPair.value().as<JsonObject>();
           if(rmtScanValues.containsKey(thirdLevelKey)) {
-            result = String(rmtScanValues[thirdLevelKey].as<char*>());
+            result = String(rmtScanValues[thirdLevelKey].as<const char*>());
           } else {
-            result = String(rmtScanValues["default"].as<char*>());
+            result = String(rmtScanValues["default"].as<const char*>());
           }
           break;
         }
