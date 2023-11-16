@@ -1,4 +1,4 @@
-#define DECK_VERSION "v1.4.7"
+#define DECK_VERSION "v1.5.0"
 
 // TODO : Refactor debug via services
 #define DECKINO_DEBUG_SERIAL true
@@ -69,7 +69,7 @@ unsigned long lastVibrationMotorStartTime = 0;
 #define VIBRATION_MOTOR_DELAY 2000
 
 #define SSID_PREFIX "DECK"
-//#define SSID_PREFIX "TOTO"
+// #define SSID_PREFIX "TOTO"
 
 #include "ClusterLogo.h"
 #include "DeckScanResult.h"
@@ -133,7 +133,7 @@ bool oledRequestAlways = false;
 bool oledRequestOff = false;
 unsigned long lastOledStateChange = 0L;
 
-//debug
+// debug
 int debugLastOledMachineState = -1;
 
 // END REGION oledMachine
@@ -245,15 +245,15 @@ void setup(void)
   OledStateAlwaysOn->addTransition(&transitionOledStateAlwaysOnToOledStateOff, OledStateOff);
   // oledMachine transitions end
 
-  #if DECKINO_DEBUG_SERIAL
+#if DECKINO_DEBUG_SERIAL
   deckDatabase.printJsonFile("/pers.json");
-  #endif
+#endif
 
   deckDatabase.appendCsvLog(CSV_LOG_PATH, "DECK STARTUP");
-  
-  #if DECKINO_DEBUG_SERIAL
+
+#if DECKINO_DEBUG_SERIAL
   deckDatabase.printCsvLog(CSV_LOG_PATH);
-  #endif
+#endif
 
   oledRequestSmall = true;
 }
@@ -281,7 +281,7 @@ void setUpMainMenu(void)
   DeckMenuItem mainMenuItems[maxMainMenuItems];
   int currentMainMenuItem = 0;
   mainMenuItems[currentMainMenuItem++] = {.label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber};
-  
+
   mainMenuItems[currentMainMenuItem++] = {.label = "ALOW", .value = "ALOW", .selected = false, .shortPressAction = &actionDtodServer, .longPressAction = &mainMenuActionEmptyLog};
 
   if (deckDatabase.getFirstLevelDataByKey("/pers.json", "can_dtod") == "true")
@@ -314,7 +314,6 @@ void setupOled(void)
 {
   // by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
   display_oled.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initialize with the I2C addr 0x3C (for the 64x48)
-
 
   display_oled.setTextColor(WHITE);
   display_oled.setTextSize(1);
@@ -356,9 +355,9 @@ void loop(void)
   {
     if (debugLastOledMachineState != oledMachine.currentState)
     {
-  #if DECKINO_DEBUG_SERIAL_OLED_MACHINE
+#if DECKINO_DEBUG_SERIAL_OLED_MACHINE
       Serial.println("[OLED CHANGE] OLD:" + String(debugLastOledMachineState) + " NEW:" + String(oledMachine.currentState));
-  #endif
+#endif
       debugLastOledMachineState = oledMachine.currentState;
     }
   }
@@ -366,13 +365,17 @@ void loop(void)
 
 void loopDtodServer()
 {
-  if (dtodServer != NULL){
-    if (millis() - dtodServerUpSince > 1000 * 60) { //TODO : Check possible bug
+  if (dtodServer != NULL)
+  {
+    if (millis() - dtodServerUpSince > 1000 * 60)
+    { // TODO : Check possible bug
       dtodServer->close();
       dtodServer = NULL;
       deckDatabase.appendCsvLog(CSV_LOG_PATH, "ALOW TIMEOUT");
-    } else {
-        dtodServer->handleClient();
+    }
+    else
+    {
+      dtodServer->handleClient();
     }
   }
 }
@@ -384,14 +387,17 @@ void loopMainMenuOkButton(void)
   {
     DeckMenuItem selectedMenuItem = mainMenu->getSelected();
 
-    #if DECKINO_DEBUG_SERIAL
+#if DECKINO_DEBUG_SERIAL
     Serial.println("[oledMachine.currentState] " + String(oledOn));
-    #endif
+#endif
 
-    if (!oledOn) {
+    if (!oledOn)
+    {
       mainMenuRender();
       oledRequestSmall = true;
-    } else {
+    }
+    else
+    {
       switch (buttonValue)
       {
       case BUTTON_SHORT_PRESS:
@@ -685,7 +691,8 @@ void loopTryToUpdateStimOkButton(void)
 
 void actionDtodServer(void)
 {
-  if(dtodServer == NULL) {
+  if (dtodServer == NULL)
+  {
     dtodServer = new DeckDtodServer(display_oled, deckDatabase);
   }
   dtodServerUpSince = millis();
@@ -701,7 +708,7 @@ void mainMenuActionEnterCharacterNumber(void)
 
 void mainMenuActionEmptyLog(void)
 {
-  //TODO : Move to navigation state ?
+  // TODO : Move to navigation state ?
   deckDatabase.emptyCsvLog(CSV_LOG_PATH);
   oledClearDisplay();
   display_oled.setCursor(0, 0);
@@ -750,8 +757,7 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
   oledDisplay();
   oledRequestSmall = true;
 
-  String csvLogString = (isRemoteScan?mainMenu->getSelected().value:"DTOD");
- 
+  String csvLogString = (isRemoteScan ? mainMenu->getSelected().value : "DTOD");
 
   // WiFi.scanNetworks will return the number of networks found
   int n = WiFi.scanNetworks();
@@ -779,7 +785,7 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
 #if DECKINO_DEBUG_SERIAL
         Serial.println("DECK FOUND :");
         Serial.print("NAME : ");
-        Serial.println(WiFi.SSID(i).substring(5,8));
+        Serial.println(WiFi.SSID(i).substring(5, 8));
         Serial.print("SPORE : ");
         Serial.println(WiFi.SSID(i).substring(9));
         Serial.print("FORCE : ");
@@ -801,13 +807,13 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
     String remoteDeckData = "";
     if (maxForce > -999)
     {
-      
+
       deckDatabase.appendCsvLog(CSV_LOG_PATH, csvLogString + " DECK " + closestDeckSsid + " SCAN");
 
       String labelToDisplay;
       if (isRemoteScan)
       {
-        String paddedPlayerId = closestDeckSsid.substring(5,8);
+        String paddedPlayerId = closestDeckSsid.substring(5, 8);
         labelToDisplay = getRemoteScanLabelFromRemoteData(paddedPlayerId);
       }
       else
@@ -834,14 +840,15 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
 String getDtodLabelFromRemoteData(String playerSporePercent)
 {
   int playerSporePercentInt = playerSporePercent.toInt();
-  if(playerSporePercentInt == 0) {
-    playerSporePercentInt =1; //Si sporulation 0% on affiche le message de 1%
+  if (playerSporePercentInt == 0)
+  {
+    playerSporePercentInt = 1; // Si sporulation 0% on affiche le message de 1%
   }
   String result = deckDatabase.getMatchingLabelByRange("/pers.json", "dtod_ranges", playerSporePercentInt);
-  
-  #if DECKINO_DEBUG_SERIAL
+
+#if DECKINO_DEBUG_SERIAL
   Serial.println("[getDtodLabelFromRemoteData] Label found for " + playerSporePercent + "% : \"" + result + "\"");
-  #endif
+#endif
 
   return result;
 }
@@ -955,11 +962,13 @@ void pn532ReadRfidLoop(void)
   // 'uid' will be populated with the UID, and uidLength will indicate
   // if the uid is 4 bytes (Mifare Classic) or 7 bytes (Mifare Ultralight)
   int rfidScanTryCpt = 0;
-  while(success == false) {
+  while (success == false)
+  {
     success = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength, 100);
     rfidScanTryCpt++;
     String displayMessage = "En attente de SCAN    ";
-    for(int cpt =0; cpt <= (rfidScanTryCpt % 3); cpt++) {
+    for (int cpt = 0; cpt <= (rfidScanTryCpt % 3); cpt++)
+    {
       displayMessage += ".";
     }
     paginableText = new DeckPaginableText(displayMessage, display_oled);
@@ -998,7 +1007,7 @@ void pn532ReadRfidLoop(void)
     paginableTextRender();
     oledRequestSmall = true;
 
-    deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN RESULT = " + scanResult.label + "(" + scanResultId + " - usable " + (isScanUsable?"true":"false") +")" );
+    deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN RESULT = " + scanResult.label + "(" + scanResultId + " - usable " + (isScanUsable ? "true" : "false") + ")");
 
     rfidUidBufferToStringLastValue = rfidUidBufferToString(uid);
   }
@@ -1019,12 +1028,13 @@ void useScanAction(void)
   Serial.println("");
 #endif
   int sporeMaxInt = deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max").toInt();
-  if(sporeMaxInt == 0) {
+  if (sporeMaxInt == 0)
+  {
     sporeMaxInt = 10;
   }
   deckDatabase.persistSporeActuel(
-                                               String(constrain(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")).toInt() + deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "spore").toInt(), 0,
-                                                                sporeMaxInt)));
+      String(constrain(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")).toInt() + deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "spore").toInt(), 0,
+                       sporeMaxInt)));
 
   String useScanActionTextToDisplay = deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "effect");
   if (useScanActionTextToDisplay == "")
@@ -1051,24 +1061,26 @@ void useScanAction(void)
   Serial.print(sporulationEffectAfterUseScanActionText);
   Serial.println("");
 #endif
-   deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN USED");
-
+  deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN USED");
 }
 
 int utilGetCurrentSporePercent(void)
 {
   String sporeActuelStr = deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel"));
   int sporeActuel = 0;
-  if(sporeActuelStr.length() > 0) {
+  if (sporeActuelStr.length() > 0)
+  {
     sporeActuel = sporeActuelStr.toInt();
-  } 
+  }
   String sporeMaxStr = deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max");
-  int sporeMax = 0; //default 10
-  if(sporeMaxStr.length() > 0) {
+  int sporeMax = 0; // default 10
+  if (sporeMaxStr.length() > 0)
+  {
     sporeMax = sporeMaxStr.toInt();
-  } 
-  if(sporeMax == 0) {
-    sporeMax = 10; //default 10
+  }
+  if (sporeMax == 0)
+  {
+    sporeMax = 10; // default 10
   }
   return round(sporeActuel * 100 / sporeMax);
 }
@@ -1118,26 +1130,26 @@ void tryToUpdateStimOkButtonAction(void)
   paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...", display_oled);
   paginableTextRender();
 
-  #if DECKINO_DEBUG_SERIAL
+#if DECKINO_DEBUG_SERIAL
   Serial.println("[tryToUpdateStimOkButtonAction] before mthrClient construct");
   Serial.println("[tryToUpdateStimOkButtonAction] begin print /wifi.json");
   deckDatabase.printJsonFile("/wifi.json");
   Serial.println("[tryToUpdateStimOkButtonAction] end print /wifi.json");
-  #endif
+#endif
 
   DeckMthrClient *mthrClient = new DeckMthrClient(deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_ssid"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_password"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_uri"));
 
-  #if DECKINO_DEBUG_SERIAL
+#if DECKINO_DEBUG_SERIAL
   Serial.println("[tryToUpdateStimOkButtonAction] after mthrClient construct");
-  #endif
+#endif
 
   // DOWNLOAD STIM.JSON
 
   RessourceResponse motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId + "/STIM.JSON");
 
-  #if DECKINO_DEBUG_SERIAL
+#if DECKINO_DEBUG_SERIAL
   Serial.println("[tryToUpdateStimOkButtonAction] after motherResponse download");
-  #endif
+#endif
 
   String userDisplayMessage = "";
   bool stimSucces = false;
@@ -1153,7 +1165,7 @@ void tryToUpdateStimOkButtonAction(void)
   {
     deckDatabase.persistFullFile("/stim.json", motherResponse.payload);
     userDisplayMessage = "STIM : DATA UPDATED";
-    stimSucces=true;
+    stimSucces = true;
   }
 
   // DOWNLOAD PERS.JSON
@@ -1179,11 +1191,11 @@ void tryToUpdateStimOkButtonAction(void)
   paginableTextRender();
 
   String csvLogMessage = "TRY TO CHANGE PLAYER_ID (old=" + oldPaddedPlayerId + " - new=" + paddedPlayerId;
-  csvLogMessage += " - STIM.JSON="; 
-  csvLogMessage += (stimSucces ? "OK":"KO");
-  csvLogMessage += " - PERS.JSON="; 
-  csvLogMessage += (persSucces ? "OK":"KO");
-  csvLogMessage += " )"; 
+  csvLogMessage += " - STIM.JSON=";
+  csvLogMessage += (stimSucces ? "OK" : "KO");
+  csvLogMessage += " - PERS.JSON=";
+  csvLogMessage += (persSucces ? "OK" : "KO");
+  csvLogMessage += " )";
   deckDatabase.appendCsvLog(CSV_LOG_PATH, csvLogMessage);
 }
 
@@ -1305,9 +1317,9 @@ void loopStateGenericRemoteScan()
   if (navigationMachine.executeOnce)
   {
     lastNavigationStateChange = millis();
-    #if DECKINO_DEBUG_SERIAL
+#if DECKINO_DEBUG_SERIAL
     Serial.println("[loopStateGenericRemoteScan] Hello");
-    #endif
+#endif
     // Nothing ?
   }
   loopScanOkButton();
@@ -1525,9 +1537,9 @@ void loopOledStateOff()
   if (oledMachine.executeOnce)
   {
     oledDisplayBlackScreen();
-    #if DECKINO_DEBUG_SERIAL
+#if DECKINO_DEBUG_SERIAL
     Serial.println("loopOledStateOff!");
-    #endif
+#endif
   }
 }
 
@@ -1605,28 +1617,33 @@ bool transitionOledGenericSecond(long second)
 
 //----------
 
-void oledClearDisplay(void) {
+void oledClearDisplay(void)
+{
   display_oled.clearDisplay();
   oledOn = false;
 }
 
-void oledDisplay(void){
+void oledDisplay(void)
+{
   display_oled.display();
   oledOn = true;
 }
 
-void oledDisplayBlackScreen(void) {
+void oledDisplayBlackScreen(void)
+{
   display_oled.clearDisplay();
   display_oled.display();
   oledOn = false;
 }
 
-void mainMenuRender(void) {
+void mainMenuRender(void)
+{
   mainMenu->render();
   oledOn = true;
 }
 
-void paginableTextRender(void) {
+void paginableTextRender(void)
+{
   paginableText->render();
   oledOn = true;
 }
