@@ -1,4 +1,4 @@
-#define DECK_VERSION "v1.5.0"
+#define DECK_VERSION "v1.5.1"
 
 // TODO : Refactor debug via services
 #define DECKINO_DEBUG_SERIAL true
@@ -12,6 +12,13 @@
 #include "ESP8266WiFi.h"
 PN532_I2C pn532i2c(Wire);
 PN532 nfc(pn532i2c);
+
+#pragma region OTA
+#include <ElegantOTA.h>
+
+#define OTA_ACTIVE true
+
+#pragma endregion
 
 // OLED
 #include <Adafruit_GFX.h>
@@ -96,10 +103,13 @@ State *StateTryToUpdateStim = navigationMachine.addState(&loopStateTryToUpdateSt
 
 State *StateDisplayDtodResult = navigationMachine.addState(&loopStateDisplayDtodResult);
 
+State *StateOta = navigationMachine.addState(&loopStateOta);
+
 bool scanHasBeenPressed = false;
 bool genericActionRemoteScanHasBeenPressed = false;
 bool confirmBeforeEnterCharacterNumberHasBeenPressed = false;
 bool enterCharacterNumberHasBeenPressed = false;
+bool otaHasBeenPressed = false;
 bool enterUseScanHasBeenPressed = false;
 bool returnToMainMenuHasBeenPressed = false;
 bool confirmHasBeenPressed = false;
@@ -145,8 +155,15 @@ String sporulationEffectAfterUseScanActionText = "";
 
 #define CSV_LOG_PATH "/log.csv"
 
+#if OTA_ACTIVE
+const char *otaSsid = "ota";
+const char *otaPassword = "otaotaota";
+ESP8266WebServer otaServer(80);
+#endif
+
 void setup(void)
 {
+  // setupOTA();
   setupVibrationMotor();
   setupOled();
 
@@ -212,6 +229,7 @@ void setup(void)
   StateMainMenu->addTransition(&transitionStateMainMenuToConfirmBeforeEnterCharacterNumber, StateConfirmBeforeEnterCharacterNumber);
   StateMainMenu->addTransition(&transitionStateMainMenuToDisplayDtodResult, StateDisplayDtodResult);
   StateMainMenu->addTransition(&transitionStateMainMenuToStateGenericRemoteScan, StateGenericRemoteScan);
+  StateMainMenu->addTransition(&transitionStateMainMenuToStateOta, StateOta);
 
   StateScan->addTransition(&transitionStateScanToStateMainMenu, StateMainMenu); // TODO : To modify
   StateScan->addTransition(&transitionStateScanToConfirmBeforeUseScan, StateConfirmBeforeUseScan);
@@ -258,6 +276,36 @@ void setup(void)
   oledRequestSmall = true;
 }
 
+void setupOTA(void)
+{
+#if OTA_ACTIVE
+  Serial.println("==BEGIN SETUP OTA==");
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(otaSsid, otaPassword);
+  Serial.println("");
+
+  // Wait for connection
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    delay(500);
+    Serial.print(".");
+  }
+  Serial.println("");
+  Serial.print("Connected to ");
+  Serial.println(otaSsid);
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  otaServer.on("/", []()
+               { otaServer.send(200, "text/plain", "Hi! This is ElegantOTA Demo."); });
+
+  ElegantOTA.begin(&otaServer); // Start ElegantOTA
+  otaServer.begin();
+  Serial.println("HTTP server started");
+  Serial.println("==END SETUP OTA==");
+#endif
+}
+
 void setUpMainMenu(void)
 {
   // if(deckDatabase.getFirstLevelDataByKey("/pers.json", "can_dtod") == "true") {
@@ -301,6 +349,8 @@ void setUpMainMenu(void)
       break;
     }
   }
+  mainMenuItems[currentMainMenuItem++] = {.label = "OTA=", .value = "OTA=", .selected = false, .shortPressAction = &mainMenuActionOta, .longPressAction = &mainMenuActionOta};
+
   mainMenu = new DeckMenu(mainMenuItems, currentMainMenuItem, display_oled);
 }
 
@@ -337,6 +387,7 @@ void printRfidReaderInfo(uint32_t versiondata)
 
 void loop(void)
 {
+  loopOta();
   loopVibrationMotor();
   loopDtodServer();
   navigationMachine.run();
@@ -361,6 +412,12 @@ void loop(void)
       debugLastOledMachineState = oledMachine.currentState;
     }
   }
+}
+
+void loopOta(void)
+{
+  otaServer.handleClient();
+  ElegantOTA.loop();
 }
 
 void loopDtodServer()
@@ -930,6 +987,11 @@ String mainMenuActionDtodGetRemoteData(String closestDeckSsid)
   return result;
 }
 
+void mainMenuActionOta(void)
+{
+  otaHasBeenPressed = true;
+}
+
 void loopVibrationMotor(void)
 {
   if (lastVibrationMotorStartTime != 0 && millis() > lastVibrationMotorStartTime + VIBRATION_MOTOR_DELAY)
@@ -1327,6 +1389,18 @@ void loopStateGenericRemoteScan()
   loopScanDownButton();
 }
 
+void loopStateOta()
+{
+  if (navigationMachine.executeOnce)
+  {
+    lastNavigationStateChange = millis();
+    setupOTA();
+    paginableText = new DeckPaginableText(String("Ongoing OTA"), display_oled);
+    paginableTextRender();
+  }
+  loopOta();
+}
+
 bool transitionStateMainMenuToStateScan()
 {
   if (scanHasBeenPressed)
@@ -1382,6 +1456,16 @@ bool transitionStateConfirmBeforeEnterCharacterNumberToEnterCharacterNumber()
   if (enterCharacterNumberHasBeenPressed)
   {
     enterCharacterNumberHasBeenPressed = false;
+    return true;
+  }
+  return false;
+}
+
+bool transitionStateMainMenuToStateOta()
+{
+  if (otaHasBeenPressed)
+  {
+    otaHasBeenPressed = false;
     return true;
   }
   return false;
