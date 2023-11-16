@@ -1,13 +1,13 @@
 #include "DeckDatabase.h"
 
-
 // CONSTRUCTORS ------------------------------------------------------------
 
-DeckDatabase::DeckDatabase() { }
+DeckDatabase::DeckDatabase() {}
 
 // CLASS MEMBER FUNCTIONS --------------------------------------------------
 
-void DeckDatabase::mountFS(void) {
+void DeckDatabase::mountFS(void)
+{
   Serial.println(F("Mount LittleFS"));
   if (!LittleFS.begin())
   {
@@ -16,10 +16,11 @@ void DeckDatabase::mountFS(void) {
   }
 }
 
-void DeckDatabase::printJsonFile(const char * filename){
+void DeckDatabase::printJsonFile(const char *filename)
+{
   // Open file for reading
   File file = LittleFS.open(filename, "r");
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("Failed to open file for reading"));
   }
@@ -42,11 +43,12 @@ void DeckDatabase::printJsonFile(const char * filename){
   file.close();
 }
 
-String DeckDatabase::jsonFileToString(const char * filename){
+String DeckDatabase::jsonFileToString(const char *filename)
+{
   String result = "";
-    // Open file for reading
+  // Open file for reading
   File file = LittleFS.open(filename, "r");
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("Failed to open file for reading"));
   }
@@ -71,7 +73,8 @@ String DeckDatabase::jsonFileToString(const char * filename){
   return result;
 }
 
-void DeckDatabase::listDir(const char * dirname) {
+void DeckDatabase::listDir(const char *dirname)
+{
   Serial.printf("Listing directory: %s", dirname);
   Serial.println();
 
@@ -91,54 +94,68 @@ void DeckDatabase::listDir(const char * dirname) {
   Serial.println();
 }
 
-DeckScanResult DeckDatabase::getLabelByUid(const char * filename, String uid) {
+DeckScanResult DeckDatabase::getLabelByUid(const char *filename, String uid)
+{
   DeckScanResult result;
   JsonObject stim = getStimByUid(filename, uid);
-  if(stim) {
-    result.label = stim["label"].as<const char*>();
+  if (stim)
+  {
+    result.label = stim["label"].as<const char *>();
     result.usable = false;
     return result;
-  } else {
+  }
+  else
+  {
     result.label = String("[UNKNOWN] :") + uid;
     result.usable = false;
     return result;
   }
 }
 
-//TODO/Refactor : Handle return by custom return payload (struct) or exception (better !)
-String DeckDatabase::getFieldValueByUid(const char * filename, String uid, String fieldKey) {
+// TODO/Refactor : Handle return by custom return payload (struct) or exception (better !)
+String DeckDatabase::getFieldValueByUid(const char *filename, String uid, String fieldKey)
+{
   String result;
 
   JsonObject stim = getStimByUid(filename, uid);
-  if(stim) {
-    result = stim[fieldKey].as<const char*>();
-  } else {
+  if (stim)
+  {
+    result = stim[fieldKey].as<const char *>();
+  }
+  else
+  {
     result = String("[UNKNOWN] :") + uid;
   }
 
   return result;
 }
 
-bool DeckDatabase::getUsableByUid(const char * filename, String uid) {
+bool DeckDatabase::getUsableByUid(const char *filename, String uid)
+{
   JsonObject stim = getStimByUid(filename, uid);
-  if(stim) {
+  if (stim)
+  {
     return stim["value"].as<bool>();
-  } else {
+  }
+  else
+  {
     return false;
   }
 }
 
-JsonObject DeckDatabase::getStimByUid(const char * filename, String uid) {
+JsonObject DeckDatabase::getStimByUid(const char *filename, String uid)
+{
   JsonObject result;
 
   // Open file for reading
   File file = LittleFS.open(filename, "r");
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("Failed to open file for reading"));
   }
 
-  StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
+  // StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
+  DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 512);
 
   // Deserialize the JSON document
   DeserializationError error = deserializeJson(doc, file);
@@ -150,9 +167,11 @@ JsonObject DeckDatabase::getStimByUid(const char * filename, String uid) {
   else
   {
     JsonArray stimArray = doc.as<JsonArray>();
-    for(JsonVariant value : stimArray) {
+    for (JsonVariant value : stimArray)
+    {
       JsonObject stimValue = value.as<JsonObject>();
-      if(uid.equals(stimValue["uid"].as<const char*>())) {
+      if (uid.equals(stimValue["uid"].as<const char *>()))
+      {
         result = stimValue;
       }
     }
@@ -164,16 +183,18 @@ JsonObject DeckDatabase::getStimByUid(const char * filename, String uid) {
   return result;
 }
 
-String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldKey) {
+String DeckDatabase::getFirstLevelDataByKey(const char *filename, String fieldKey)
+{
   return this->getFirstLevelDataByKey(filename, fieldKey, "");
 }
 
-String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldKey, String fallback) {
+String DeckDatabase::getFirstLevelDataByKey(const char *filename, String fieldKey, String fallback)
+{
   String result;
 
   // Open file for reading
   File file = LittleFS.open(filename, "r");
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("Failed to open file for reading"));
     return fallback;
@@ -192,10 +213,13 @@ String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldK
   else
   {
     JsonObject configArray = doc.as<JsonObject>();
-    if(configArray.containsKey(fieldKey)) {
-      result = String(configArray[fieldKey].as<const char*>());
-    } else {
-      result = ""; //Return empty string if key not found
+    if (configArray.containsKey(fieldKey))
+    {
+      result = String(configArray[fieldKey].as<const char *>());
+    }
+    else
+    {
+      result = ""; // Return empty string if key not found
     }
   }
 
@@ -204,12 +228,13 @@ String DeckDatabase::getFirstLevelDataByKey(const char * filename, String fieldK
   return result;
 }
 
-String DeckDatabase::getMatchingLabelByRange(const char * filename, String fieldKey, int rangeValue) {
+String DeckDatabase::getMatchingLabelByRange(const char *filename, String fieldKey, int rangeValue)
+{
   String result = "";
 
   // Open file for reading
   File file = LittleFS.open(filename, "r");
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("Failed to open file for reading"));
   }
@@ -229,15 +254,17 @@ String DeckDatabase::getMatchingLabelByRange(const char * filename, String field
     JsonArray rangesArray = rootJson[fieldKey].as<JsonArray>();
 
     JsonObject matchingRangeJson;
-    for(JsonVariant value : rangesArray) {
+    for (JsonVariant value : rangesArray)
+    {
       JsonObject rangeJson = value.as<JsonObject>();
-      if(String(rangeJson["min"].as<const char*>()).toInt() <  rangeValue && String(rangeJson["max"].as<const char*>()).toInt() >  rangeValue) {
+      if (String(rangeJson["min"].as<const char *>()).toInt() < rangeValue && String(rangeJson["max"].as<const char *>()).toInt() > rangeValue)
+      {
         matchingRangeJson = rangeJson;
         break;
       }
     }
 
-    result = String(matchingRangeJson["label"].as<const char*>());
+    result = String(matchingRangeJson["label"].as<const char *>());
   }
 
   file.close();
@@ -245,29 +272,35 @@ String DeckDatabase::getMatchingLabelByRange(const char * filename, String field
   return result;
 }
 
-void DeckDatabase::persistSporeActuel(String fieldValue) {
-  const char * filename = "/spor.json";
+void DeckDatabase::persistSporeActuel(String fieldValue)
+{
+  const char *filename = "/spor.json";
   const String sporeFiledName = "spore_actuel";
-  if(!LittleFS.exists(filename)) {
+  if (!LittleFS.exists(filename))
+  {
     File file = LittleFS.open(filename, "w+");
     file.print(String("{\n\t\"spore_actuel\" : \"" + fieldValue + "\"\n}").c_str());
-  } else {
+  }
+  else
+  {
     this->persistFirstLevelDataByKeyValue(filename, sporeFiledName, fieldValue);
   }
 }
 
-void DeckDatabase::persistFirstLevelDataByKeyValue(const char * filename, String fieldKey, String fieldValue) {
+void DeckDatabase::persistFirstLevelDataByKeyValue(const char *filename, String fieldKey, String fieldValue)
+{
   JsonObject result;
 
-  //If target file not exist, create an empty json file
-  if(!LittleFS.exists(filename)) {
+  // If target file not exist, create an empty json file
+  if (!LittleFS.exists(filename))
+  {
     File file = LittleFS.open(filename, "w+");
     file.print(String("{\n}").c_str());
   }
 
   // Open file for reading
   File file = LittleFS.open(filename, "r");
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("Failed to open file for reading"));
   }
@@ -289,7 +322,7 @@ void DeckDatabase::persistFirstLevelDataByKeyValue(const char * filename, String
     file.close();
     file = LittleFS.open(filename, "w");
 
-    if (!file) 
+    if (!file)
     {
       Serial.println(F("Failed to open file for writing"));
     }
@@ -297,16 +330,16 @@ void DeckDatabase::persistFirstLevelDataByKeyValue(const char * filename, String
     String targetJson;
     serializeJson(configArray, targetJson);
     file.print(targetJson.c_str());
-
   }
 
   file.close();
 }
 
-void DeckDatabase::persistFullFile(const char * filename, String fileContent) {
+void DeckDatabase::persistFullFile(const char *filename, String fileContent)
+{
   // Open file for reading
   File file = LittleFS.open(filename, "w+");
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("Failed to open file for writing"));
   }
@@ -317,14 +350,15 @@ void DeckDatabase::persistFullFile(const char * filename, String fileContent) {
 }
 
 // @obselete
-void DeckDatabase::appendUsedStimLog(const char * filename, String usableStimCode) {
-  //Usage : deckDatabase.appendUsedStimLog("/used_stim_log.json", deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "stim_code"));
-  
-  DynamicJsonDocument doc(8192); //TODO : Check Size
+void DeckDatabase::appendUsedStimLog(const char *filename, String usableStimCode)
+{
+  // Usage : deckDatabase.appendUsedStimLog("/used_stim_log.json", deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "stim_code"));
+
+  DynamicJsonDocument doc(8192); // TODO : Check Size
 
   // Open file for reading
   File file = LittleFS.open(filename, "r");
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("Failed to open file for reading"));
   }
@@ -333,19 +367,18 @@ void DeckDatabase::appendUsedStimLog(const char * filename, String usableStimCod
 
   // Append new element
   JsonObject obj = doc.createNestedObject();
-  char dateString[80]; //enough ?
-  sprintf(dateString,"%lu",millis());
+  char dateString[80]; // enough ?
+  sprintf(dateString, "%lu", millis());
   obj["timestamp"] = dateString;
   obj["stim"] = usableStimCode.c_str();
 
-
   file = LittleFS.open(filename, "w");
 
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("Failed to open file for writing"));
   }
-  
+
   String targetJson;
   serializeJson(doc, targetJson);
   file.print(targetJson.c_str());
@@ -353,27 +386,29 @@ void DeckDatabase::appendUsedStimLog(const char * filename, String usableStimCod
   file.close();
 }
 
-void DeckDatabase::appendCsvLog(const char * filename, String line) {
+void DeckDatabase::appendCsvLog(const char *filename, String line)
+{
   // Open file for appending
   File file = LittleFS.open(filename, "a+");
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("Failed to open file for appending"));
   }
 
   file.print((String(millis()) + "," + line + "\n").c_str());
   file.close();
-  
 }
 
-void DeckDatabase::printCsvLog(const char * filename) {
+void DeckDatabase::printCsvLog(const char *filename)
+{
   File file = LittleFS.open(filename, "r");
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("[printCsvLog] Failed to open file for reading"));
   }
-  
-  while(file.available()) {
+
+  while (file.available())
+  {
     String line = file.readStringUntil('\n');
     Serial.println(line);
   }
@@ -382,19 +417,21 @@ void DeckDatabase::printCsvLog(const char * filename) {
   file.close();
 }
 
-void DeckDatabase::emptyCsvLog(const char * filename) {
+void DeckDatabase::emptyCsvLog(const char *filename)
+{
   LittleFS.remove(filename);
   this->appendCsvLog(filename, "LOG CLEARED");
 }
 
-LinkedList<String> DeckDatabase::getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName) {
-  const int maxResults = 2; //TODO : to delete once main menu will be abble to take more than 3 items
+LinkedList<String> DeckDatabase::getSubNodesOfAFirstLevelNode(const char *filename, String firstLevelNodeName)
+{
+  const int maxResults = 2; // TODO : to delete once main menu will be abble to take more than 3 items
 
   LinkedList<String> result = LinkedList<String>();
-  
+
   // Open file for reading
   File file = LittleFS.open(filename, "r");
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("Failed to open file for reading"));
   }
@@ -412,17 +449,21 @@ LinkedList<String> DeckDatabase::getSubNodesOfAFirstLevelNode(const char * filen
   {
     JsonObject rootJson = doc.as<JsonObject>();
     JsonArray nodeArray = rootJson[firstLevelNodeName].as<JsonArray>();
-    //JsonObject configArray = doc.as<JsonObject>();
-    //result = String(configArray[fieldKey].as<const char*>());
-  
-    for(JsonObject nodeArrayObject : nodeArray) {
-      for(JsonPair nodeArrayPair : nodeArrayObject) {
+    // JsonObject configArray = doc.as<JsonObject>();
+    // result = String(configArray[fieldKey].as<const char*>());
+
+    for (JsonObject nodeArrayObject : nodeArray)
+    {
+      for (JsonPair nodeArrayPair : nodeArrayObject)
+      {
         result.add(nodeArrayPair.key().c_str());
-        if(result.size() >= maxResults) {
+        if (result.size() >= maxResults)
+        {
           break;
         }
       }
-      if(result.size() >= maxResults) {
+      if (result.size() >= maxResults)
+      {
         break;
       }
     }
@@ -432,13 +473,14 @@ LinkedList<String> DeckDatabase::getSubNodesOfAFirstLevelNode(const char * filen
   return result;
 }
 
-String DeckDatabase::getThirdLevelDataByKeys(const char * filename, String firstLevelKey, String secondLevelKey, String thirdLevelKey) {
+String DeckDatabase::getThirdLevelDataByKeys(const char *filename, String firstLevelKey, String secondLevelKey, String thirdLevelKey)
+{
 
   String result = "";
-  
+
   // Open file for reading
   File file = LittleFS.open(filename, "r");
-  if (!file) 
+  if (!file)
   {
     Serial.println(F("Failed to open file for reading"));
   }
@@ -456,23 +498,30 @@ String DeckDatabase::getThirdLevelDataByKeys(const char * filename, String first
   {
     JsonObject rootJson = doc.as<JsonObject>();
     JsonArray nodeArray = rootJson[firstLevelKey].as<JsonArray>();
-    //JsonObject configArray = doc.as<JsonObject>();
-    //result = String(configArray[fieldKey].as<const char*>());
-  
-    for(JsonObject nodeArrayObject : nodeArray) {
-      for(JsonPair nodeArrayPair : nodeArrayObject) {
-        if(String(nodeArrayPair.key().c_str()) == secondLevelKey) {
+    // JsonObject configArray = doc.as<JsonObject>();
+    // result = String(configArray[fieldKey].as<const char*>());
+
+    for (JsonObject nodeArrayObject : nodeArray)
+    {
+      for (JsonPair nodeArrayPair : nodeArrayObject)
+      {
+        if (String(nodeArrayPair.key().c_str()) == secondLevelKey)
+        {
 
           JsonObject rmtScanValues = nodeArrayPair.value().as<JsonObject>();
-          if(rmtScanValues.containsKey(thirdLevelKey)) {
-            result = String(rmtScanValues[thirdLevelKey].as<const char*>());
-          } else {
-            result = String(rmtScanValues["default"].as<const char*>());
+          if (rmtScanValues.containsKey(thirdLevelKey))
+          {
+            result = String(rmtScanValues[thirdLevelKey].as<const char *>());
+          }
+          else
+          {
+            result = String(rmtScanValues["default"].as<const char *>());
           }
           break;
         }
       }
-      if(result.length() > 0) {
+      if (result.length() > 0)
+      {
         break;
       }
     }

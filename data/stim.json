@@ -19,5 +19,1510 @@
       "stim_code": "NESK",
       "effect": "[EFFET] Vous vous sentez euphorique pendant quelques minutes",
       "spore": "-2"
+   },{
+      "uid":"B517A7AC",
+      "label":"Carte Blanche 2",
+           "usable": "false"
    }
+,{
+      "uid":"A0000001",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000002",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000003",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000004",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000005",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000006",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000007",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000008",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000009",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000010",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000011",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000012",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000013",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000014",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000015",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000016",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000017",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000018",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000019",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000020",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000021",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000022",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000023",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000024",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000025",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000026",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000027",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000028",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000029",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000030",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000031",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000032",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000033",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000034",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000035",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000036",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000037",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000038",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000039",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000040",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000041",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000042",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000043",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000044",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000045",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000046",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000047",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000048",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000049",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000050",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000051",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000052",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000053",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000054",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000055",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000056",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000057",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000058",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000059",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000060",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000061",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000062",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000063",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000064",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000065",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000066",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000067",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000068",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000069",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000070",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000071",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000072",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000073",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000074",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000075",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000076",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000077",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000078",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000079",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000080",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000081",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000082",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000083",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000084",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000085",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000086",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000087",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000088",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000089",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000090",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000091",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000092",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000093",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000094",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000095",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000096",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000097",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000098",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000099",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000100",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000101",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000102",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000103",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000104",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000105",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000106",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000107",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000108",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000109",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000110",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000111",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000112",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000113",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000114",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000115",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000116",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000117",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000118",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000119",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000120",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000121",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000122",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000123",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000124",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000125",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000126",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000127",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000128",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000129",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000130",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000131",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000132",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000133",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000134",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000135",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000136",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000137",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000138",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000139",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000140",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000141",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000142",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000143",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000144",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000145",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000146",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000147",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000148",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000149",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000150",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000151",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000152",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000153",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000154",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000155",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000156",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000157",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000158",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000159",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000160",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000161",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000162",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000163",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000164",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000165",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000166",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000167",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000168",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000169",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000170",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000171",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000172",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000173",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000174",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000175",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000176",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000177",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000178",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000179",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000180",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000181",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000182",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000183",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000184",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000185",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000186",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000187",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000188",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000189",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000190",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000191",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000192",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000193",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000194",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000195",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000196",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000197",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000198",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000199",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000200",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000201",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000202",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000203",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000204",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000205",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000206",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000207",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000208",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000209",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000210",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000211",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000212",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000213",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000214",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000215",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000216",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000217",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000218",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000219",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000220",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000221",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000222",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000223",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000224",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000225",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000226",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000227",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000228",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000229",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000230",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000231",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000232",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000233",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000234",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000235",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000236",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000237",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000238",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000239",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000240",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000241",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000242",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000243",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000244",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000245",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000246",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000247",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000248",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000249",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000250",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000251",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000252",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000253",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000254",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000255",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000256",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000257",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000258",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000259",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000260",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000261",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000262",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000263",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000264",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000265",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000266",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000267",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000268",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000269",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000270",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000271",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000272",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000273",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000274",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000275",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000276",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000277",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000278",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000279",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000280",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000281",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000282",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000283",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000284",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000285",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000286",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000287",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000288",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000289",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000290",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000291",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000292",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000293",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000294",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000295",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000296",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000297",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000298",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000299",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+,{
+      "uid":"A0000300",
+      "label":"Carte Blanche 2",
+           "usable": "false"
+   }
+   
 ]
