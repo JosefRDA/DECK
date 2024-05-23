@@ -69,7 +69,33 @@ RessourceResponse DeckMthrClient::DownloadRessource(String relativePath)  {
 
                 // file found at server
                 if (result.httpCode == HTTP_CODE_OK || result.httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-                    result.payload = http.getString();
+
+                    #if DECKMTHRCLIENT_DEBUG
+                    Serial.print("[DECKMTHRCLIENT][HTTP] Able to download request payload\n");
+                    #endif
+
+                    // get tcp stream
+                    WiFiClient *stream = http.getStreamPtr();
+                    while(stream->available()){
+                        // read char by char to avoid large memory allocation
+                        char c = stream->read();
+                        result.payload += String(c);
+
+                        #if DECKMTHRCLIENT_DEBUG
+                        if(result.payload.length() % 100 == 0){
+                            Serial.print("[DECKMTHRCLIENT][HTTP] Reading request payload ...\n");
+                        }
+                        #endif
+                    }
+
+                    #if DECKMTHRCLIENT_DEBUG
+                    Serial.print("[DECKMTHRCLIENT][HTTP] Succes : End of request payload reached\n");
+                    #endif
+
+                } else {
+                    #if DECKMTHRCLIENT_DEBUG
+                    Serial.print("[DECKMTHRCLIENT][HTTP] Unable to download request payload\n");
+                    #endif
                 }
             } else {
                 #if DECKMTHRCLIENT_DEBUG
@@ -78,12 +104,12 @@ RessourceResponse DeckMthrClient::DownloadRessource(String relativePath)  {
                 #endif
             }
 
-            http.end();
-            } else {
-                #if DECKMTHRCLIENT_DEBUG
-                Serial.printf("[DECKMTHRCLIENT][HTTP] Unable to connect\n");
-                #endif
-            }
+        http.end();
+        } else {
+            #if DECKMTHRCLIENT_DEBUG
+            Serial.printf("[DECKMTHRCLIENT][HTTP] Unable to connect\n");
+            #endif
+        }
 
     }
     return result;

@@ -1,4 +1,4 @@
-#define DECK_VERSION "v1.5.0"
+#define DECK_VERSION "v1.5.1"
 
 // TODO : Refactor debug via services
 #define DECKINO_DEBUG_SERIAL true
@@ -862,6 +862,8 @@ String getRemoteScanLabelFromRemoteData(String remotePlayerId)
   return result;
 }
 
+//
+[[deprecated]]
 String mainMenuActionDtodGetRemoteData(String closestDeckSsid)
 {
   String result = "";
