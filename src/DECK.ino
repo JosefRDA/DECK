@@ -1,4 +1,4 @@
-#define DECK_VERSION "v1.5.1"
+#define DECK_VERSION "v1.5.2"
 
 // TODO : Refactor debug via services
 #define DECKINO_DEBUG_SERIAL true
@@ -1158,15 +1158,35 @@ void tryToUpdateStimOkButtonAction(void)
   if (motherResponse.httpCode == 404)
   {
     userDisplayMessage = "STIM : PERSONNAGE NOT FOUND";
+    
+    #if DECKINO_DEBUG_SERIAL
+      Serial.println("[tryToUpdateStimOkButtonAction] HTTP 404 : STIM PERSONNAGE NOT FOUND");
+    #endif
   }
   else if (motherResponse.httpCode != 200)
   {
     userDisplayMessage = "STIM : NETWORK ERROR : " + String(motherResponse.httpCode);
+
+    #if DECKINO_DEBUG_SERIAL
+      Serial.println("[tryToUpdateStimOkButtonAction] " + userDisplayMessage);
+    #endif
   }
   else
   {
+    #if DECKINO_DEBUG_SERIAL
+      Serial.println("[tryToUpdateStimOkButtonAction] STIM : DOWNLOAD SUCCESS");
+      Serial.println("[tryToUpdateStimOkButtonAction] STIM : TRY TO PERSIST");
+    #endif
+
     deckDatabase.persistFullFile("/stim.json", motherResponse.payload);
+    
     userDisplayMessage = "STIM : DATA UPDATED";
+    
+    #if DECKINO_DEBUG_SERIAL
+      Serial.println("[tryToUpdateStimOkButtonAction] STIM : PERSTIS SUCCESS");
+      Serial.println("[tryToUpdateStimOkButtonAction] " + userDisplayMessage);
+    #endif
+
     stimSucces = true;
   }
 

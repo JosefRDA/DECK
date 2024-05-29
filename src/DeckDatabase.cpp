@@ -149,10 +149,12 @@ JsonObject DeckDatabase::getStimByUid(const char *filename, String uid)
 
   // Open file for reading
   File file = LittleFS.open(filename, "r");
-  if (!file)
-  {
-    Serial.println(F("Failed to open file for reading"));
-  }
+  #if DECKDATABASE_DEBUG_SERIAL
+    if (!file)
+    {
+      Serial.println(F("[DeckDatabase::getStimByUid] Failed to open file for reading"));
+    }
+  #endif
 
   // StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
   DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 512);
@@ -161,8 +163,14 @@ JsonObject DeckDatabase::getStimByUid(const char *filename, String uid)
   DeserializationError error = deserializeJson(doc, file);
   if (error)
   {
-    Serial.println(F("Failed to deserialize file"));
-    Serial.println(error.c_str());
+    #if DECKDATABASE_DEBUG_SERIAL
+      Serial.println("[DeckDatabase::getStimByUid] Failed to deserialize file : " + String(filename) + " with error : " + error.c_str());
+      #if DECKDATABASE_DEBUG_PRINT_FILE_ON_ERROR
+        Serial.println("=== BEGIN OF FILE ===");
+        this->rawPrintFile(filename);
+        Serial.println("=== END OF FILE ===");
+      #endif
+    #endif
   }
   else
   {
@@ -344,7 +352,15 @@ void DeckDatabase::persistFullFile(const char *filename, String fileContent)
     Serial.println(F("Failed to open file for writing"));
   }
 
+  #if DECKDATABASE_DEBUG_SERIAL
+    Serial.println("[DeckDatabase::persistFullFile] Try to write a " + String(fileContent.length()) + " bytes file" );
+  #endif
+
   file.print(fileContent.c_str());
+
+  #if DECKDATABASE_DEBUG_SERIAL
+    Serial.println("[DeckDatabase::persistFullFile] File writen" );
+  #endif
 
   file.close();
 }
@@ -399,22 +415,28 @@ void DeckDatabase::appendCsvLog(const char *filename, String line)
   file.close();
 }
 
+void DeckDatabase::rawPrintFile(const char *filename) {
+  #if DECKDATABASE_DEBUG_SERIAL
+    File file = LittleFS.open(filename, "r");
+    if (!file)
+    {
+      Serial.println(F("[DeckDatabase::rawPrintFile] Failed to open file for reading"));
+    }
+
+    while (file.available())
+    {
+      String line = file.readStringUntil('\n');
+      Serial.println(line);
+    }
+
+    // Close the file (File's destructor doesn't close the file)
+    file.close();
+  #endif
+}
+
 void DeckDatabase::printCsvLog(const char *filename)
 {
-  File file = LittleFS.open(filename, "r");
-  if (!file)
-  {
-    Serial.println(F("[printCsvLog] Failed to open file for reading"));
-  }
-
-  while (file.available())
-  {
-    String line = file.readStringUntil('\n');
-    Serial.println(line);
-  }
-
-  // Close the file (File's destructor doesn't close the file)
-  file.close();
+  this->rawPrintFile(filename);
 }
 
 void DeckDatabase::emptyCsvLog(const char *filename)

@@ -1,5 +1,5 @@
 {
     "mthr_ssid": "MTHR",
     "mthr_password": "Cluster1",
-    "mthr_uri": "http://192.168.137.1:8080"
+    "mthr_uri": "http://192.168.1.2:8080"
 }

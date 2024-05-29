@@ -7,6 +7,9 @@
 #include "DeckScanResult.h"
 
 // to upload config file : https://github.com/earlephilhower/arduino-esp8266littlefs-plugin/releases
+
+#define DECKDATABASE_DEBUG_SERIAL true
+#define DECKDATABASE_DEBUG_PRINT_FILE_ON_ERROR true
 #define SIZE_ARRAY 20
 #define MAX_SIZE_CODE 9
 #define STATIC_JSON_DOCUMENT_SIZE 2048
@@ -56,6 +59,8 @@ class DeckDatabase {
   String getThirdLevelDataByKeys(const char * filename, String firstLevelKey, String secondLevelKey, String thirdLevelKey);
 
   void appendCsvLog(const char * filename, String line);
+
+  void rawPrintFile(const char * filename);
 
   void printCsvLog(const char * filename);
 
