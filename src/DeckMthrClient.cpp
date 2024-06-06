@@ -12,15 +12,40 @@ DeckMthrClient::DeckMthrClient(String ssid, String password, String hostName) {
     #if DECKMTHRCLIENT_DEBUG
     Serial.println("[DeckMthrClient::DeckMthrClient] BEFORE CONNEXION TEST TO " + ssid + " " + password + " " + hostName);
     
-    Serial.println("[DECKMTHRCLIENT]this->_wiFiMulti->run() = " + String(this->_wiFiMulti->run()));
     #endif
 
     while(this->_wiFiMulti->run() != WL_CONNECTED) {
         #if DECKMTHRCLIENT_DEBUG
-        Serial.println("[DeckMthrClient::DeckMthrClient] TESTING CONNEXION");
+        
+        Serial.print("[DeckMthrClient::DeckMthrClient] TESTING CONNEXION STATUS : ");
+        switch (this->_wiFiMulti->run())
+        {
+        case WL_NO_SSID_AVAIL:
+            Serial.print("NO SSID AVAIL");
+            break;
+        case WL_CONNECT_FAILED:
+            Serial.print("CONNECT FAILED");
+            break;
+        case WL_CONNECTION_LOST:
+            Serial.print("CONNECTION_LOST");
+            break;
+        case WL_WRONG_PASSWORD:
+            Serial.print("WRONG_PASSWORD");
+            break;
+        case WL_DISCONNECTED:
+            Serial.print("DISCONNECTED");
+            break;
+        
+        default:
+            Serial.print("OTHER ERROR : " + String(this->_wiFiMulti->run()));
+            break;
+        }
         #endif
         delay(100);
     }
+    #if DECKMTHRCLIENT_DEBUG
+    Serial.print("[DeckMthrClient::DeckMthrClient] CONNECTED");
+    #endif
 } 
 
 // CLASS MEMBER FUNCTIONS --------------------------------------------------
