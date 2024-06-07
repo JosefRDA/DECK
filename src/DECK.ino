@@ -971,19 +971,12 @@ void pn532ReadRfidLoop(void)
   {
     // Display some basic information about the card
 
-    DECKINO_DEBUG_SERIAL_PRINT_CST("Label from JSON: ");
 
     String scanResultId = rfidUidBufferToString(uid);
-    DeckScanResult scanResult = deckDatabase.getLabelByUid("/stim.json", scanResultId);
-    if (deckDatabase.getFieldValueByUid("/stim.json", scanResultId, "usable") == "true")
-    {
-      isScanUsable = true;
-    }
-    else
-    {
-      isScanUsable = false;
-    }
-
+    DeckScanResult scanResult = deckDatabase.getStimResultByUid(scanResultId);
+    isScanUsable = scanResult.usable;
+    
+    DECKINO_DEBUG_SERIAL_PRINT_CST("Label from JSON: ");
     DECKINO_DEBUG_SERIAL_PRINTLN(scanResult.label);
     DECKINO_DEBUG_SERIAL_PRINTLN_CST("");
 
@@ -995,7 +988,7 @@ void pn532ReadRfidLoop(void)
     paginableTextRender();
     oledRequestSmall = true;
 
-    deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN RESULT = " + scanResult.label + "(" + scanResultId + " - usable " + (isScanUsable ? "true" : "false") + ")");
+    deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN RESULT = " + scanResult.label + "(" + scanResultId + " - usable " + (scanResult.usable ? "true" : "false") + ")");
 
     rfidUidBufferToStringLastValue = rfidUidBufferToString(uid);
   }
@@ -1020,10 +1013,10 @@ void useScanAction(void)
     sporeMaxInt = 10;
   }
   deckDatabase.persistSporeActuel(
-      String(constrain(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")).toInt() + deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "spore").toInt(), 0,
+      String(constrain(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")).toInt() + deckDatabase.getFieldValueByUid(rfidUidBufferToStringLastValue, "spore").toInt(), 0,
                        sporeMaxInt)));
 
-  String useScanActionTextToDisplay = deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "effect");
+  String useScanActionTextToDisplay = deckDatabase.getFieldValueByUid(rfidUidBufferToStringLastValue, "effect");
   if (useScanActionTextToDisplay == "")
   {
     useScanActionTextToDisplay = USE_SCAN_ACTION_DEFAULT_MESSAGE;
@@ -1131,9 +1124,9 @@ void tryToUpdateStimOkButtonAction(void)
   DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] after motherResponse download");
   
   DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] PRINTING MOTHER RESPONSE PAYLOAD");
-  DECKINO_DEBUG_SERIAL_PRINTLN_CST("=== BEGIN OF FILE ===");
+  DECKINO_DEBUG_SERIAL_PRINTLN_CST("=== BEGIN OF RESPONSE ===");
   DECKINO_DEBUG_SERIAL_PRINTLN(motherResponse.payload);
-  DECKINO_DEBUG_SERIAL_PRINTLN_CST("=== END OF FILE ===");
+  DECKINO_DEBUG_SERIAL_PRINTLN_CST("=== END OF RESPONSE ===");
 
   String userDisplayMessage = "";
   bool stimSucces = false;

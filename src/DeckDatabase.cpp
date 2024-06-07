@@ -8,10 +8,10 @@ DeckDatabase::DeckDatabase() {}
 
 void DeckDatabase::mountFS(void)
 {
-  Serial.println(F("Mount LittleFS"));
+  DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Mount LittleFS");
   if (!LittleFS.begin())
   {
-    Serial.println(F("LittleFS mount failed"));
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("LittleFS mount failed");
     return;
   }
 }
@@ -22,7 +22,7 @@ void DeckDatabase::printJsonFile(const char *filename)
   File file = LittleFS.open(filename, "r");
   if (!file)
   {
-    Serial.println(F("Failed to open file for reading"));
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to open file for reading");
   }
 
   StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
@@ -31,13 +31,13 @@ void DeckDatabase::printJsonFile(const char *filename)
   DeserializationError error = deserializeJson(doc, file);
   if (error)
   {
-    Serial.println(F("Failed to deserialize file"));
-    Serial.println(error.c_str());
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to deserialize file");
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN(error.c_str());
   }
   else
   {
     serializeJsonPretty(doc, Serial);
-    Serial.println();
+    DECKDATABASE_DEBUG_SERIAL_NEWLINE();
   }
   // Close the file (File's destructor doesn't close the file)
   file.close();
@@ -50,7 +50,7 @@ String DeckDatabase::jsonFileToString(const char *filename)
   File file = LittleFS.open(filename, "r");
   if (!file)
   {
-    Serial.println(F("Failed to open file for reading"));
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to open file for reading");
   }
 
   StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
@@ -59,8 +59,8 @@ String DeckDatabase::jsonFileToString(const char *filename)
   DeserializationError error = deserializeJson(doc, file);
   if (error)
   {
-    Serial.println(F("Failed to deserialize file"));
-    Serial.println(error.c_str());
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to deserialize file");
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN(error.c_str());
   }
   else
   {
@@ -75,49 +75,45 @@ String DeckDatabase::jsonFileToString(const char *filename)
 
 void DeckDatabase::listDir(const char *dirname)
 {
-  Serial.printf("Listing directory: %s", dirname);
-  Serial.println();
+  DECKDATABASE_DEBUG_SERIAL_PRINTF("Listing directory: %s", dirname);
+  DECKDATABASE_DEBUG_SERIAL_NEWLINE();
 
   Dir root = LittleFS.openDir(dirname);
 
   while (root.next())
   {
     File file = root.openFile("r");
-    Serial.print(F("  FILE: "));
-    Serial.print(root.fileName());
-    Serial.print(F("  SIZE: "));
-    Serial.print(file.size());
-    Serial.println();
+    DECKDATABASE_DEBUG_SERIAL_PRINT_CST("  FILE: ");
+    DECKDATABASE_DEBUG_SERIAL_PRINT(root.fileName());
+    DECKDATABASE_DEBUG_SERIAL_PRINT_CST("  SIZE: ");
+    DECKDATABASE_DEBUG_SERIAL_PRINT(file.size());
+    DECKDATABASE_DEBUG_SERIAL_NEWLINE();
     file.close();
   }
 
-  Serial.println();
+  DECKDATABASE_DEBUG_SERIAL_NEWLINE();
 }
 
-DeckScanResult DeckDatabase::getLabelByUid(const char *filename, String uid)
+DeckScanResult DeckDatabase::getStimResultByUid(String uid)
 {
   DeckScanResult result;
-  JsonObject stim = getStimByUid(filename, uid);
-  if (stim)
-  {
-    result.label = stim["label"].as<const char *>();
-    result.usable = false;
-    return result;
-  }
-  else
-  {
-    result.label = String("[UNKNOWN] :") + uid;
-    result.usable = false;
-    return result;
-  }
+  JsonObject stim = this->getStimByUid(uid);
+  result.label = stim["label"].as<const char *>();
+  result.usable = stim["usable"].as<const char *>() == "true";
+  return result;
+}
+
+String DeckDatabase::getLabelByUid(String uid)
+{
+  return this->getStimByUid(uid)["label"].as<const char *>();
 }
 
 // TODO/Refactor : Handle return by custom return payload (struct) or exception (better !)
-String DeckDatabase::getFieldValueByUid(const char *filename, String uid, String fieldKey)
+String DeckDatabase::getFieldValueByUid(String uid, String fieldKey)
 {
   String result;
 
-  JsonObject stim = getStimByUid(filename, uid);
+  JsonObject stim = this->getStimByUid(uid);
   if (stim)
   {
     result = stim[fieldKey].as<const char *>();
@@ -130,9 +126,10 @@ String DeckDatabase::getFieldValueByUid(const char *filename, String uid, String
   return result;
 }
 
-bool DeckDatabase::getUsableByUid(const char *filename, String uid)
+// unused ?
+bool DeckDatabase::getUsableByUid(String uid)
 {
-  JsonObject stim = getStimByUid(filename, uid);
+  JsonObject stim = this->getStimByUid(uid);
   if (stim)
   {
     return stim["value"].as<bool>();
@@ -143,52 +140,135 @@ bool DeckDatabase::getUsableByUid(const char *filename, String uid)
   }
 }
 
-JsonObject DeckDatabase::getStimByUid(const char *filename, String uid)
+JsonObject DeckDatabase::getStimByUid(String uid)
+{
+  return this->getRessourceByUid(DECKDATABASE_FOLDER_STIM_NAME, uid);
+}
+
+//@Obselete
+JsonObject DeckDatabase::odlGetStimByUid(const char *filename, String uid)
 {
   JsonObject result;
 
   // Open file for reading
   File file = LittleFS.open(filename, "r");
-  #if DECKDATABASE_DEBUG_SERIAL
-    if (!file)
+  if (!file)
+  {
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("[DeckDatabase::getStimByUid] Failed to open file for reading");
+  } else {
+    // StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
+    DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 512);
+
+    // Deserialize the JSON document
+    DeserializationError error = deserializeJson(doc, file);
+    if (error)
     {
-      Serial.println(F("[DeckDatabase::getStimByUid] Failed to open file for reading"));
+      DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::getStimByUid] Failed to deserialize file : ");
+      DECKDATABASE_DEBUG_SERIAL_PRINT(String(filename));
+      DECKDATABASE_DEBUG_SERIAL_PRINT_CST(" with error : ");
+      DECKDATABASE_DEBUG_SERIAL_PRINTLN(error.c_str());
+      this->rawPrintFile(filename);
     }
-  #endif
-
-  // StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
-  DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 512);
-
-  // Deserialize the JSON document
-  DeserializationError error = deserializeJson(doc, file);
-  if (error)
-  {
-    #if DECKDATABASE_DEBUG_SERIAL
-      Serial.println("[DeckDatabase::getStimByUid] Failed to deserialize file : " + String(filename) + " with error : " + error.c_str());
-      #if DECKDATABASE_DEBUG_PRINT_FILE_ON_ERROR
-        Serial.println("=== BEGIN OF FILE ===");
-        this->rawPrintFile(filename);
-        Serial.println("=== END OF FILE ===");
-      #endif
-    #endif
-  }
-  else
-  {
-    JsonArray stimArray = doc.as<JsonArray>();
-    for (JsonVariant value : stimArray)
+    else
     {
-      JsonObject stimValue = value.as<JsonObject>();
-      if (uid.equals(stimValue["uid"].as<const char *>()))
+      JsonArray stimArray = doc.as<JsonArray>();
+      for (JsonVariant value : stimArray)
       {
-        result = stimValue;
+        JsonObject stimValue = value.as<JsonObject>();
+        if (uid.equals(stimValue["uid"].as<const char *>()))
+        {
+          result = stimValue;
+        }
       }
     }
   }
-
   // Close the file (File's destructor doesn't close the file)
   file.close();
 
   return result;
+}
+
+JsonObject DeckDatabase::getRessourceByUid(const char *folderPath, String uid) {
+  JsonObject result;
+
+  String filename = (String(folderPath) + DECKDATABASE_FOLDER_SEPARATOR + uid + DECKDATABASE_JSON_FILE_EXTENSION);
+
+  // Checking if file exists
+  if(this->fileExists(filename.c_str(), __func__)) {
+    
+    // Open file for reading
+    File file = this->openFile(filename.c_str(), "r", __func__);
+    if(file) {
+       // StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
+      DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - DECKDATABASE_JSONDYNAMICDOCUMENT_SIZE_TO_LEFT);
+
+      // Deserialize the JSON document
+      DeserializationError error = deserializeJson(doc, file);
+      if (error) {
+        this->logDocumentDeserializationError(error, filename.c_str(), __func__);
+      } 
+      else 
+      {
+        if(doc.is<JsonObject>()) {
+          result = doc.as<JsonObject>();
+        } else {
+          DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::getRessourceByUid] ERROR : Result is not a JsonObject !");
+          this->rawPrintFile(filename.c_str());
+        }
+      }
+    }
+  } else {
+    if(uid != DECKDATABASE_DEFAUT_STIM_UID) {
+      result = this->getRessourceByUid(folderPath, DECKDATABASE_DEFAUT_STIM_UID);
+    } else {
+      DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::getRessourceByUid] ERROR : No default ressource found !");
+    }
+  }
+  
+  return result;
+}
+
+//TODO : Transfer to filesystem utils class
+bool DeckDatabase::fileExists(const char *fileFullPath, String debugCallContext)
+{
+  DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::");
+  DECKDATABASE_DEBUG_SERIAL_PRINT(debugCallContext);
+  DECKDATABASE_DEBUG_SERIAL_PRINT_CST("] ");
+  bool result = LittleFS.exists(fileFullPath);
+  if(result) {
+    DECKDATABASE_DEBUG_SERIAL_PRINT(fileFullPath);
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST(" exists");
+  } else {
+    DECKDATABASE_DEBUG_SERIAL_PRINT(fileFullPath);
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST(" does not exist");
+  }
+  return result;
+}
+
+//TODO : Transfer to filesystem utils class
+File DeckDatabase::openFile(const char *filename, const char *mode, String debugCallContext)
+{
+  File file = LittleFS.open(filename, mode);
+  if (!file)
+  {
+    DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::");
+    DECKDATABASE_DEBUG_SERIAL_PRINT(debugCallContext);
+    DECKDATABASE_DEBUG_SERIAL_PRINT_CST("] Failed to open file with mode ");
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN(mode);
+  }
+  return file;
+}
+
+// Only Debug
+void DeckDatabase::logDocumentDeserializationError(DeserializationError error, const char *filename, String debugCallContext)
+{
+  DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::");
+  DECKDATABASE_DEBUG_SERIAL_PRINT(debugCallContext);
+  DECKDATABASE_DEBUG_SERIAL_PRINT_CST("] Failed to deserialize file : ");
+  DECKDATABASE_DEBUG_SERIAL_PRINT(String(filename));
+  DECKDATABASE_DEBUG_SERIAL_PRINT_CST(" with error : ");
+  DECKDATABASE_DEBUG_SERIAL_PRINTLN(error.c_str());
+  this->rawPrintFile(filename);
 }
 
 String DeckDatabase::getFirstLevelDataByKey(const char *filename, String fieldKey)
@@ -204,7 +284,7 @@ String DeckDatabase::getFirstLevelDataByKey(const char *filename, String fieldKe
   File file = LittleFS.open(filename, "r");
   if (!file)
   {
-    Serial.println(F("Failed to open file for reading"));
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to open file for reading");
     return fallback;
   }
 
@@ -214,8 +294,8 @@ String DeckDatabase::getFirstLevelDataByKey(const char *filename, String fieldKe
   DeserializationError error = deserializeJson(doc, file);
   if (error)
   {
-    Serial.println(F("Failed to deserialize file"));
-    Serial.println(error.c_str());
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to deserialize file");
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN(error.c_str());
     return fallback;
   }
   else
@@ -244,7 +324,7 @@ String DeckDatabase::getMatchingLabelByRange(const char *filename, String fieldK
   File file = LittleFS.open(filename, "r");
   if (!file)
   {
-    Serial.println(F("Failed to open file for reading"));
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to open file for reading");
   }
 
   StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
@@ -253,8 +333,8 @@ String DeckDatabase::getMatchingLabelByRange(const char *filename, String fieldK
   DeserializationError error = deserializeJson(doc, file);
   if (error)
   {
-    Serial.println(F("Failed to deserialize file"));
-    Serial.println(error.c_str());
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to deserialize file");
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN(error.c_str());
   }
   else
   {
@@ -310,7 +390,7 @@ void DeckDatabase::persistFirstLevelDataByKeyValue(const char *filename, String 
   File file = LittleFS.open(filename, "r");
   if (!file)
   {
-    Serial.println(F("Failed to open file for reading"));
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to open file for reading");
   }
 
   StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
@@ -319,8 +399,8 @@ void DeckDatabase::persistFirstLevelDataByKeyValue(const char *filename, String 
   DeserializationError error = deserializeJson(doc, file);
   if (error)
   {
-    Serial.println(F("Failed to deserialize file"));
-    Serial.println(error.c_str());
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to deserialize file");
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN(error.c_str());
   }
   else
   {
@@ -332,7 +412,7 @@ void DeckDatabase::persistFirstLevelDataByKeyValue(const char *filename, String 
 
     if (!file)
     {
-      Serial.println(F("Failed to open file for writing"));
+      DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to open file for writing");
     }
 
     String targetJson;
@@ -349,18 +429,16 @@ void DeckDatabase::persistFullFile(const char *filename, String fileContent)
   File file = LittleFS.open(filename, "w+");
   if (!file)
   {
-    Serial.println(F("Failed to open file for writing"));
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to open file for writing");
   }
 
-  #if DECKDATABASE_DEBUG_SERIAL
-    Serial.println("[DeckDatabase::persistFullFile] Try to write a " + String(fileContent.length()) + " bytes file" );
-  #endif
+  DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::persistFullFile] Try to write a ");
+  DECKDATABASE_DEBUG_SERIAL_PRINT(String(fileContent.length()));
+  DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST(" bytes file");
 
   file.print(fileContent.c_str());
 
-  #if DECKDATABASE_DEBUG_SERIAL
-    Serial.println("[DeckDatabase::persistFullFile] File writen" );
-  #endif
+  DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("[DeckDatabase::persistFullFile] File writen" );
 
   file.close();
 }
@@ -376,7 +454,7 @@ void DeckDatabase::appendUsedStimLog(const char *filename, String usableStimCode
   File file = LittleFS.open(filename, "r");
   if (!file)
   {
-    Serial.println(F("Failed to open file for reading"));
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to open file for reading");
   }
   deserializeJson(doc, file);
   file.close();
@@ -392,7 +470,7 @@ void DeckDatabase::appendUsedStimLog(const char *filename, String usableStimCode
 
   if (!file)
   {
-    Serial.println(F("Failed to open file for writing"));
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to open file for writing");
   }
 
   String targetJson;
@@ -408,32 +486,38 @@ void DeckDatabase::appendCsvLog(const char *filename, String line)
   File file = LittleFS.open(filename, "a+");
   if (!file)
   {
-    Serial.println(F("Failed to open file for appending"));
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to open file for appending");
   }
 
   file.print((String(millis()) + "," + line + "\n").c_str());
   file.close();
 }
 
-void DeckDatabase::rawPrintFile(const char *filename) {
-  #if DECKDATABASE_DEBUG_SERIAL
-    File file = LittleFS.open(filename, "r");
-    if (!file)
-    {
-      Serial.println(F("[DeckDatabase::rawPrintFile] Failed to open file for reading"));
-    }
+//Todo : debug only
+void DeckDatabase::rawPrintFile(const char *fileFullPath) {
+  #if DECKDATABASE_DEBUG_PRINT_FILE_ON_ERROR
+  File file = this->openFile(fileFullPath, "r", __func__);
 
+  if(file) {
+    DECKDATABASE_DEBUG_SERIAL_PRINT_CST("=== BEGIN OF FILE [");
+    DECKDATABASE_DEBUG_SERIAL_PRINT(fileFullPath);
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("] ===");
     while (file.available())
     {
       String line = file.readStringUntil('\n');
-      Serial.println(line);
+      DECKDATABASE_DEBUG_SERIAL_PRINTLN(line);
     }
+    DECKDATABASE_DEBUG_SERIAL_PRINT_CST("=== END OF FILE [");
+    DECKDATABASE_DEBUG_SERIAL_PRINT(fileFullPath);
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("] ===");
+  }
 
-    // Close the file (File's destructor doesn't close the file)
-    file.close();
+  // Close the file (File's destructor doesn't close the file)
+  file.close();
   #endif
 }
 
+//Todo : debug only
 void DeckDatabase::printCsvLog(const char *filename)
 {
   this->rawPrintFile(filename);
@@ -455,7 +539,7 @@ LinkedList<String> DeckDatabase::getSubNodesOfAFirstLevelNode(const char *filena
   File file = LittleFS.open(filename, "r");
   if (!file)
   {
-    Serial.println(F("Failed to open file for reading"));
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to open file for reading");
   }
 
   StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
@@ -464,8 +548,8 @@ LinkedList<String> DeckDatabase::getSubNodesOfAFirstLevelNode(const char *filena
   DeserializationError error = deserializeJson(doc, file);
   if (error)
   {
-    Serial.println(F("Failed to deserialize file"));
-    Serial.println(error.c_str());
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to deserialize file");
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN(error.c_str());
   }
   else
   {
@@ -504,7 +588,7 @@ String DeckDatabase::getThirdLevelDataByKeys(const char *filename, String firstL
   File file = LittleFS.open(filename, "r");
   if (!file)
   {
-    Serial.println(F("Failed to open file for reading"));
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to open file for reading");
   }
 
   StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
@@ -513,8 +597,8 @@ String DeckDatabase::getThirdLevelDataByKeys(const char *filename, String firstL
   DeserializationError error = deserializeJson(doc, file);
   if (error)
   {
-    Serial.println(F("Failed to deserialize file"));
-    Serial.println(error.c_str());
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("Failed to deserialize file");
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN(error.c_str());
   }
   else
   {

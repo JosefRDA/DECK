@@ -13,7 +13,8 @@
         "cmath": "cpp",
         "string_view": "cpp",
         "initializer_list": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "string": "cpp"
     },
     "cmake.configureOnOpen": false
 }
