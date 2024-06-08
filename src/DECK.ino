@@ -1117,51 +1117,16 @@ void tryToUpdateStimOkButtonAction(void)
 
   DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] after mthrClient construct");
 
+
   // DOWNLOAD STIM.JSON
 
-  RessourceResponse motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId + "/STIM.JSON");
+  UpdateStimsResponse updateStimsResponse = mthrClient->updateStims(paddedPlayerId, deckDatabase, true);
 
-  DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] after motherResponse download");
+  String userDisplayMessage = updateStimsResponse.userMessage;
   
-  DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] PRINTING MOTHER RESPONSE PAYLOAD");
-  DECKINO_DEBUG_SERIAL_PRINTLN_CST("=== BEGIN OF RESPONSE ===");
-  DECKINO_DEBUG_SERIAL_PRINTLN(motherResponse.payload);
-  DECKINO_DEBUG_SERIAL_PRINTLN_CST("=== END OF RESPONSE ===");
-
-  String userDisplayMessage = "";
-  bool stimSucces = false;
-  if (motherResponse.httpCode == 404)
-  {
-    userDisplayMessage = "STIM : PERSONNAGE NOT FOUND";
-  
-    DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] HTTP 404 : STIM PERSONNAGE NOT FOUND");
-  }
-  else if (motherResponse.httpCode != 200)
-  {
-    userDisplayMessage = "STIM : NETWORK ERROR : " + String(motherResponse.httpCode);
-
-    DECKINO_DEBUG_SERIAL_PRINT_CST("[tryToUpdateStimOkButtonAction] ");
-    DECKINO_DEBUG_SERIAL_PRINTLN(userDisplayMessage);
-  }
-  else
-  {
-    DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] STIM : DOWNLOAD SUCCESS");
-    DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] STIM : TRY TO PERSIST");
-
-    deckDatabase.persistFullFile("/stim.json", motherResponse.payload);
-    
-    userDisplayMessage = "STIM : DATA UPDATED";
-    
-    DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] STIM : PERSTIS SUCCESS");
-    DECKINO_DEBUG_SERIAL_PRINT_CST("[tryToUpdateStimOkButtonAction] ");
-    DECKINO_DEBUG_SERIAL_PRINTLN(userDisplayMessage);
-
-    stimSucces = true;
-  }
-
   // DOWNLOAD PERS.JSON
 
-  motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId + "/PERS.JSON");
+  RessourceResponse motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId + "/PERS.JSON");
 
   bool persSucces = false;
   if (motherResponse.httpCode == 404)
@@ -1184,12 +1149,13 @@ void tryToUpdateStimOkButtonAction(void)
 
   String csvLogMessage = "TRY TO CHANGE PLAYER_ID (old=" + oldPaddedPlayerId + " - new=" + paddedPlayerId;
   csvLogMessage += " - STIM.JSON=";
-  csvLogMessage += (stimSucces ? "OK" : "KO");
+  csvLogMessage += (!updateStimsResponse.error ? "OK" : "KO");
   csvLogMessage += " - PERS.JSON=";
   csvLogMessage += (persSucces ? "OK" : "KO");
   csvLogMessage += " )";
   deckDatabase.appendCsvLog(CSV_LOG_PATH, csvLogMessage);
 }
+
 
 //-------------------------
 

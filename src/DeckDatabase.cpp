@@ -145,49 +145,6 @@ JsonObject DeckDatabase::getStimByUid(String uid)
   return this->getRessourceByUid(DECKDATABASE_FOLDER_STIM_NAME, uid);
 }
 
-//@Obselete
-JsonObject DeckDatabase::odlGetStimByUid(const char *filename, String uid)
-{
-  JsonObject result;
-
-  // Open file for reading
-  File file = LittleFS.open(filename, "r");
-  if (!file)
-  {
-    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("[DeckDatabase::getStimByUid] Failed to open file for reading");
-  } else {
-    // StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
-    DynamicJsonDocument doc(ESP.getMaxFreeBlockSize() - 512);
-
-    // Deserialize the JSON document
-    DeserializationError error = deserializeJson(doc, file);
-    if (error)
-    {
-      DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::getStimByUid] Failed to deserialize file : ");
-      DECKDATABASE_DEBUG_SERIAL_PRINT(String(filename));
-      DECKDATABASE_DEBUG_SERIAL_PRINT_CST(" with error : ");
-      DECKDATABASE_DEBUG_SERIAL_PRINTLN(error.c_str());
-      this->rawPrintFile(filename);
-    }
-    else
-    {
-      JsonArray stimArray = doc.as<JsonArray>();
-      for (JsonVariant value : stimArray)
-      {
-        JsonObject stimValue = value.as<JsonObject>();
-        if (uid.equals(stimValue["uid"].as<const char *>()))
-        {
-          result = stimValue;
-        }
-      }
-    }
-  }
-  // Close the file (File's destructor doesn't close the file)
-  file.close();
-
-  return result;
-}
-
 JsonObject DeckDatabase::getRessourceByUid(const char *folderPath, String uid) {
   JsonObject result;
 
@@ -423,6 +380,7 @@ void DeckDatabase::persistFirstLevelDataByKeyValue(const char *filename, String 
   file.close();
 }
 
+//Note : Override File if already exist
 void DeckDatabase::persistFullFile(const char *filename, String fileContent)
 {
   // Open file for reading

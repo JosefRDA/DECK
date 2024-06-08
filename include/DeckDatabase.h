@@ -8,7 +8,6 @@
 
 // to upload config file : https://github.com/earlephilhower/arduino-esp8266littlefs-plugin/releases
 
-#define DECKDATABASE_DEBUG_SERIAL true
 #define DECKDATABASE_DEBUG_PRINT_FILE_ON_ERROR true
 #define SIZE_ARRAY 20
 #define MAX_SIZE_CODE 9
@@ -20,6 +19,8 @@
 
 #define DECKDATABASE_FOLDER_STIM_NAME "stim"
 #define DECKDATABASE_DEFAUT_STIM_UID "default"
+
+#define DECKDATABASE_DEBUG_SERIAL true
 
 #ifdef DECKDATABASE_DEBUG_SERIAL
   #define DECKDATABASE_DEBUG_SERIAL_PRINTLN(x) Serial.println(x)
@@ -64,8 +65,6 @@ class DeckDatabase {
   bool getUsableByUid(String uid);
 
   JsonObject getStimByUid(String uid);
-
-  JsonObject odlGetStimByUid(const char *filename, String uid);
 
   void persistFirstLevelDataByKeyValue(const char * filename, String fieldKey, String fieldValue);
 

@@ -40,6 +40,7 @@ DeckMthrClient::DeckMthrClient(String ssid, String password, String hostName) {
             Serial.print("OTHER ERROR : " + String(this->_wiFiMulti->run()));
             break;
         }
+        Serial.println();
         #endif
         delay(100);
     }
@@ -72,13 +73,15 @@ RessourceResponse DeckMthrClient::DownloadRessource(String relativePath)  {
         String fullRequest = this->_hostName + relativePath;
 
         #if DECKMTHRCLIENT_DEBUG
-        Serial.println("[DECKMTHRCLIENT]BEFORE http.begin");
+        Serial.print("[DECKMTHRCLIENT]BEFORE http.begin ");
+        Serial.print(fullRequest);
+        Serial.println();
         #endif
 
         if (http.begin(client, fullRequest )) {  // HTTP
 
             #if DECKMTHRCLIENT_DEBUG
-            Serial.print("[DECKMTHRCLIENT][HTTP] GET...\n");
+            Serial.println("[DECKMTHRCLIENT][HTTP] GET ...");
             #endif
 
             // start connection and send HTTP header
@@ -139,3 +142,91 @@ RessourceResponse DeckMthrClient::DownloadRessource(String relativePath)  {
     }
     return result;
 } 
+
+UpdateStimsResponse DeckMthrClient::updateStims(String paddedPlayerId, DeckDatabase deckDatabase, bool forceUpdate) {
+   DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST("[DeckMthrClient::updateStims] begin");
+   UpdateStimsResponse result;
+
+   RessourceResponse motherResponse = this->downloadRessourceWithDebug("/HTTP/pers/" + paddedPlayerId + "/stim/list.csv", "updateStims");
+
+   if(motherResponse.httpCode == t_http_codes::HTTP_CODE_OK) {
+
+    CSV_Parser stimListCsvParser(motherResponse.payload.c_str(), "sL");
+
+    char **uid = (char**)stimListCsvParser["uid"];
+    int32_t *lastUpdateTimestamp = (int32_t*)stimListCsvParser["lastUpdateTimestamp"];
+
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINT_CST("[DeckMthrClient::updateStims] Number of lines : ");
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN(stimListCsvParser.getRowsCount()+1);
+
+    for (int i = 0; i <= stimListCsvParser.getRowsCount(); i++) {
+      DECKMTHRCLIENT_DEBUG_SERIAL_PRINT_CST("uid : ");
+      DECKMTHRCLIENT_DEBUG_SERIAL_PRINT(uid[i]);
+      DECKMTHRCLIENT_DEBUG_SERIAL_PRINT_CST(" - lastUpdateTimestamp : ");
+      DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN(lastUpdateTimestamp[i]);
+
+      this->updateStimIfNeeded(paddedPlayerId.c_str(), uid[i], lastUpdateTimestamp[i], deckDatabase, forceUpdate);
+    }
+    result.error = false;
+    result.userMessage = "STIMs : DATA UPDATED";
+   } else if(motherResponse.httpCode == t_http_codes::HTTP_CODE_NOT_FOUND) {
+    result.error = false;
+    result.userMessage = "STIMs : PERSONNAGE NOT FOUND";
+   } else {
+    result.error = true;
+    result.userMessage = "STIMs : ERROR HTTP " + String(motherResponse.httpCode);
+   }
+   
+   DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST("[DeckMthrClient::updateStims] end");
+   return result;
+}
+
+void DeckMthrClient::updateStimIfNeeded(const char * paddedPlayerId, const char * stimUid, int32_t lastUpdateTimestamp, DeckDatabase deckDatabase, bool forceUpdate) {
+    if(forceUpdate || checkIfStimUpdateIsNeeded(stimUid, lastUpdateTimestamp)) {
+        this->updateStim(paddedPlayerId, stimUid, deckDatabase);
+    }
+}
+
+//TODO
+bool DeckMthrClient::checkIfStimUpdateIsNeeded(const char * stimUid, int32_t lastUpdateTimestamp) {
+    return true;
+}
+
+void DeckMthrClient::updateStim(const char * paddedPlayerId, const char * stimUid, DeckDatabase deckDatabase) {
+  DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST("[DeckMthrClient::updateStim] begin");
+
+  RessourceResponse motherResponse = this->downloadRessourceWithDebug("/HTTP/pers/" + String(paddedPlayerId) + "/stim/" + String(stimUid) + ".json", "updateStim");
+
+  if(motherResponse.httpCode == t_http_codes::HTTP_CODE_OK) {
+    String fileFullPath = "/stim/" + String(stimUid) + ".json";
+    deckDatabase.persistFullFile(fileFullPath.c_str(), motherResponse.payload);
+  }
+
+  DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST("[DeckMthrClient::updateStim] end");
+}
+
+RessourceResponse DeckMthrClient::downloadRessourceWithDebug(const String relativePath, const char * debugCallContext) {
+  RessourceResponse motherResponse = this->DownloadRessource(relativePath);
+
+  if (motherResponse.httpCode == t_http_codes::HTTP_CODE_NOT_FOUND)
+  {
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINT_CST("[DeckMthrClient::");
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINT(debugCallContext);
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST("] HTTP 404 : RESSOURCE NOT FOUND");
+  }
+  else if (motherResponse.httpCode != t_http_codes::HTTP_CODE_OK)
+  {
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINT_CST("[DeckMthrClient::");
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINT(debugCallContext);
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST("] HTTP ");
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINT(motherResponse.httpCode);
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST(" : ERROR");
+  }
+  else
+  {
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINT_CST("[DeckMthrClient::");
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINT(debugCallContext);
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST("] HTTP 200 : SUCCESS");
+  }
+  return motherResponse;
+}
