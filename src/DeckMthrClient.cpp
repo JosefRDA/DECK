@@ -150,6 +150,7 @@ UpdateStimsResponse DeckMthrClient::updateStims(String paddedPlayerId, DeckDatab
    RessourceResponse motherResponse = this->downloadRessourceWithDebug("/HTTP/pers/" + paddedPlayerId + "/stim/list.csv", "updateStims");
 
    if(motherResponse.httpCode == t_http_codes::HTTP_CODE_OK) {
+    //TODO : if force clear whole stim folder
 
     CSV_Parser stimListCsvParser(motherResponse.payload.c_str(), "sL");
 

@@ -1126,7 +1126,7 @@ void tryToUpdateStimOkButtonAction(void)
   
   // DOWNLOAD PERS.JSON
 
-  RessourceResponse motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId + "/PERS.JSON");
+  RessourceResponse motherResponse = mthrClient->DownloadRessource("/HTTP/pers/" + paddedPlayerId + "/pers.json");
 
   bool persSucces = false;
   if (motherResponse.httpCode == 404)
