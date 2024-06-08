@@ -1,0 +1,46 @@
+{
+    "player_id":"001",
+    "can_dtod":"true",
+    "spore_actuel" : "1",
+    "spore_max" : "10",
+    "dtod_ranges": [
+      {
+        "min" : "0",
+        "max" : "50",
+        "label" : "[Message résultat DTOD pour 1% a 50%]"
+      },
+      {
+        "min" : "51",
+        "max" : "99",
+        "label" : "[Message résultat DTOD pour 51% a 99%]"
+      }
+    ],
+    "spore_ranges": [
+      {
+        "min" : "0",
+        "max" : "50",
+        "label" : "[Message effet spore pour 1% a 50%]"
+      },
+      {
+        "min" : "51",
+        "max" : "99",
+        "label" : "[Message effet spore pour 51% a 99%]"
+      }
+    ],
+    "rmt_scan":[
+       {
+          "TARO":{
+             "001":"[TARO Message pour PJ 001]",
+             "002":"[TARO Message pour PJ 002]",
+             "default":"[TARO Message par defaut]"
+          }
+       },
+       {
+          "MEDI":{
+             "001":"[MEDI Message pour PJ 001]",
+             "002":"[MEDI Message pour PJ 002]",
+             "default":"[MEDI Message par defaut]"
+          }
+       }
+    ]  
+  }

@@ -1,9 +1,25 @@
-#define DECK_VERSION "v1.5.1"
+#define DECK_VERSION "v1.5.3"
 
 // TODO : Refactor debug via services
 #define DECKINO_DEBUG_SERIAL true
 #define DECKINO_DEBUG_OLED false
 #define DECKINO_DEBUG_SERIAL_OLED_MACHINE false
+
+#ifdef DECKINO_DEBUG_SERIAL
+  #define DECKINO_DEBUG_SERIAL_PRINTLN(x) Serial.println(x)
+  #define DECKINO_DEBUG_SERIAL_PRINTLN_CST(x) Serial.println(F(x))
+  #define DECKINO_DEBUG_SERIAL_PRINT(x) Serial.print(x)
+  #define DECKINO_DEBUG_SERIAL_PRINT_CST(x) Serial.print(F(x))
+  #define DECKINO_DEBUG_SERIAL_PRINTF(x,y) Serial.printf(x,y)
+  #define DECKINO_DEBUG_SERIAL_SETUP() Serial.begin(115200);
+#else
+  #define DECKINO_DEBUG_SERIAL_PRINTLN(x)
+  #define DECKINO_DEBUG_SERIAL_PRINTLN_CST(x)
+  #define DECKINO_DEBUG_SERIAL_PRINT(x)
+  #define DECKINO_DEBUG_SERIAL_PRINT_CST(x)
+  #define DECKINO_DEBUG_SERIAL_PRINTF(x,y)
+  #define DECKINO_DEBUG_SERIAL_SETUP()
+#endif 
 
 #include <SPI.h>
 #include <Wire.h>
@@ -162,11 +178,9 @@ void setup(void)
 
   oledDisplayBlackScreen();
 
-  Serial.begin(115200);
+  DECKINO_DEBUG_SERIAL_SETUP();
 
-#if DECKINO_DEBUG_SERIAL
-  Serial.println("Hello!");
-#endif
+  DECKINO_DEBUG_SERIAL_PRINTLN_CST("DECK STARTUP");
 
   deckDatabase.mountFS();
 
@@ -176,9 +190,7 @@ void setup(void)
 
   while (!versiondata)
   {
-#if DECKINO_DEBUG_SERIAL
-    Serial.println("Didn't find PN53x board");
-#endif
+    DECKINO_DEBUG_SERIAL_PRINTLN_CST("Didn't find PN53x board");
 #if DECKINO_DEBUG_OLED
     oledClearDisplay();
     display_oled.println("Didn't find PN53x board");
@@ -186,9 +198,7 @@ void setup(void)
 #endif
     delay(1000);
 
-#if DECKINO_DEBUG_SERIAL
-    Serial.println("Retrying ...");
-#endif
+    DECKINO_DEBUG_SERIAL_PRINTLN_CST("Retrying ...");
 #if DECKINO_DEBUG_OLED
     display_oled.println("Retrying ...");
     oledDisplay();
@@ -292,9 +302,8 @@ void setUpMainMenu(void)
 
   for (int h = 0; h < remoteScans.size(); h++)
   {
-#if DECKINO_DEBUG_SERIAL
-    Serial.println("[DEBUG BUILD MAIN MENU : REMOTE SCAN LOOP] " + String(remoteScans.get(h)));
-#endif
+    DECKINO_DEBUG_SERIAL_PRINTLN("[DEBUG BUILD MAIN MENU : REMOTE SCAN LOOP] " + String(remoteScans.get(h)));
+
     mainMenuItems[currentMainMenuItem++] = {.label = remoteScans.get(h), .value = remoteScans.get(h), .selected = false, .shortPressAction = &mainMenuActionRemoteScan}; // Action TODO
     if (currentMainMenuItem > maxMainMenuItems)
     {
@@ -344,9 +353,7 @@ void loop(void)
   {
     if (debugLastNavigationMachineState != navigationMachine.currentState)
     {
-#if DECKINO_DEBUG_SERIAL
-      Serial.println("[STATE CHANGE] OLD:" + String(debugLastNavigationMachineState) + " NEW:" + String(navigationMachine.currentState));
-#endif
+      DECKINO_DEBUG_SERIAL_PRINTLN("[STATE CHANGE] OLD:" + String(debugLastNavigationMachineState) + " NEW:" + String(navigationMachine.currentState));
       debugLastNavigationMachineState = navigationMachine.currentState;
     }
   }
@@ -387,9 +394,7 @@ void loopMainMenuOkButton(void)
   {
     DeckMenuItem selectedMenuItem = mainMenu->getSelected();
 
-#if DECKINO_DEBUG_SERIAL
-    Serial.println("[oledMachine.currentState] " + String(oledOn));
-#endif
+    DECKINO_DEBUG_SERIAL_PRINTLN("[oledMachine.currentState] " + String(oledOn));
 
     if (!oledOn)
     {
@@ -781,16 +786,13 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
       // TODO ajouter ici le filtre par seuil minimum de force
       if (WiFi.SSID(i).substring(0, 4) == SSID_PREFIX)
       {
-
-#if DECKINO_DEBUG_SERIAL
-        Serial.println("DECK FOUND :");
-        Serial.print("NAME : ");
-        Serial.println(WiFi.SSID(i).substring(5, 8));
-        Serial.print("SPORE : ");
-        Serial.println(WiFi.SSID(i).substring(9));
-        Serial.print("FORCE : ");
-        Serial.println(WiFi.RSSI(i));
-#endif
+        DECKINO_DEBUG_SERIAL_PRINTLN_CST("DECK FOUND :");
+        DECKINO_DEBUG_SERIAL_PRINT_CST("NAME : ");
+        DECKINO_DEBUG_SERIAL_PRINTLN(WiFi.SSID(i).substring(5, 8));
+        DECKINO_DEBUG_SERIAL_PRINT_CST("SPORE : ");
+        DECKINO_DEBUG_SERIAL_PRINTLN(WiFi.SSID(i).substring(9));
+        DECKINO_DEBUG_SERIAL_PRINT_CST("FORCE : ");
+        DECKINO_DEBUG_SERIAL_PRINTLN(WiFi.RSSI(i));
 
         int force = WiFi.RSSI(i);
         if (force > maxForce)
@@ -846,9 +848,7 @@ String getDtodLabelFromRemoteData(String playerSporePercent)
   }
   String result = deckDatabase.getMatchingLabelByRange("/pers.json", "dtod_ranges", playerSporePercentInt);
 
-#if DECKINO_DEBUG_SERIAL
-  Serial.println("[getDtodLabelFromRemoteData] Label found for " + playerSporePercent + "% : \"" + result + "\"");
-#endif
+  DECKINO_DEBUG_SERIAL_PRINTLN("[getDtodLabelFromRemoteData] Label found for " + playerSporePercent + "% : \"" + result + "\"");
 
   return result;
 }
@@ -878,20 +878,16 @@ String mainMenuActionDtodGetRemoteData(String closestDeckSsid)
 
   while ((WiFiMulti.run() != WL_CONNECTED))
   {
-#if DECKINO_DEBUG_SERIAL
-    Serial.println("[mainMenuActionDtodGetRemoteData] Waiting for connexion on SSID:" + closestDeckSsid + " pass:" + "aaaaaaaa");
-#endif
+    DECKINO_DEBUG_SERIAL_PRINTLN("[mainMenuActionDtodGetRemoteData] Waiting for connexion on SSID:" + closestDeckSsid + " pass:" + "aaaaaaaa");
+
   }
 
-#if DECKINO_DEBUG_SERIAL
-  Serial.println("[mainMenuActionDtodGetRemoteData][HTTP] begin...");
-#endif
+  DECKINO_DEBUG_SERIAL_PRINTLN_CST("[mainMenuActionDtodGetRemoteData][HTTP] begin...");
   if (http.begin(client, "http://192.168.4.1/"))
   { // HTTP
 
-#if DECKINO_DEBUG_SERIAL
-    Serial.println("[mainMenuActionDtodGetRemoteData][HTTP] GET...");
-#endif
+    DECKINO_DEBUG_SERIAL_PRINTLN_CST("[mainMenuActionDtodGetRemoteData][HTTP] GET...");
+
     // start connection and send HTTP header
     int httpCode = http.GET();
 
@@ -899,24 +895,19 @@ String mainMenuActionDtodGetRemoteData(String closestDeckSsid)
     if (httpCode > 0)
     {
 // HTTP header has been send and Server response header has been handled
-#if DECKINO_DEBUG_SERIAL
-      Serial.printf("[mainMenuActionDtodGetRemoteData][HTTP] GET... code: %d\n", httpCode);
-#endif
+      DECKINO_DEBUG_SERIAL_PRINTF("[mainMenuActionDtodGetRemoteData][HTTP] GET... code: %d\n", httpCode);
 
       // file found at server
       if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY)
       {
         result = http.getString();
-#if DECKINO_DEBUG_SERIAL
-        Serial.println("[mainMenuActionDtodGetRemoteData][DATA RECIEVED]" + result);
-#endif
+        DECKINO_DEBUG_SERIAL_PRINTLN_CST("[mainMenuActionDtodGetRemoteData][DATA RECIEVED]");
+        DECKINO_DEBUG_SERIAL_PRINTLN(result);
       }
     }
     else
     {
-#if DECKINO_DEBUG_SERIAL
-      Serial.printf("[mainMenuActionDtodGetRemoteData][HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
-#endif
+      DECKINO_DEBUG_SERIAL_PRINTF("[mainMenuActionDtodGetRemoteData][HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
     }
 
     http.end();
@@ -924,9 +915,7 @@ String mainMenuActionDtodGetRemoteData(String closestDeckSsid)
   else
   {
 
-#if DECKINO_DEBUG_SERIAL
-    Serial.printf("[mainMenuActionDtodGetRemoteData][HTTP] Unable to connect\n");
-#endif
+    DECKINO_DEBUG_SERIAL_PRINTLN_CST("[mainMenuActionDtodGetRemoteData][HTTP] Unable to connect");
   }
 
   return result;
@@ -982,24 +971,14 @@ void pn532ReadRfidLoop(void)
   {
     // Display some basic information about the card
 
-#if DECKINO_DEBUG_SERIAL
-    Serial.print("Label from JSON: ");
-#endif
-    String scanResultId = rfidUidBufferToString(uid);
-    DeckScanResult scanResult = deckDatabase.getLabelByUid("/stim.json", scanResultId);
-    if (deckDatabase.getFieldValueByUid("/stim.json", scanResultId, "usable") == "true")
-    {
-      isScanUsable = true;
-    }
-    else
-    {
-      isScanUsable = false;
-    }
 
-#if DECKINO_DEBUG_SERIAL
-    Serial.println(scanResult.label);
-    Serial.println("");
-#endif
+    String scanResultId = rfidUidBufferToString(uid);
+    DeckScanResult scanResult = deckDatabase.getStimResultByUid(scanResultId);
+    isScanUsable = scanResult.usable;
+    
+    DECKINO_DEBUG_SERIAL_PRINT_CST("Label from JSON: ");
+    DECKINO_DEBUG_SERIAL_PRINTLN(scanResult.label);
+    DECKINO_DEBUG_SERIAL_PRINTLN_CST("");
 
     // Vibration motor
     digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
@@ -1009,7 +988,7 @@ void pn532ReadRfidLoop(void)
     paginableTextRender();
     oledRequestSmall = true;
 
-    deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN RESULT = " + scanResult.label + "(" + scanResultId + " - usable " + (isScanUsable ? "true" : "false") + ")");
+    deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN RESULT = " + scanResult.label + "(" + scanResultId + " - usable " + (scanResult.usable ? "true" : "false") + ")");
 
     rfidUidBufferToStringLastValue = rfidUidBufferToString(uid);
   }
@@ -1021,24 +1000,23 @@ void useScanAction(void)
   digitalWrite(PIN_VIBRATION_MOTOR, HIGH);
   lastVibrationMotorStartTime = millis();
 
-#if DECKINO_DEBUG_SERIAL
-  Serial.print("[SPORE](Before use) : ");
-  Serial.print("- Spore Max : ");
-  Serial.print(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max"));
-  Serial.print(" - Spore Actuel : ");
-  Serial.print(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")));
-  Serial.println("");
-#endif
+  DECKINO_DEBUG_SERIAL_PRINT_CST("[SPORE](Before use) : ");
+  DECKINO_DEBUG_SERIAL_PRINT_CST("- Spore Max : ");
+  DECKINO_DEBUG_SERIAL_PRINT(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max"));
+  DECKINO_DEBUG_SERIAL_PRINT_CST(" - Spore Actuel : ");
+  DECKINO_DEBUG_SERIAL_PRINT(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")));
+  DECKINO_DEBUG_SERIAL_PRINTLN_CST("");
+
   int sporeMaxInt = deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max").toInt();
   if (sporeMaxInt == 0)
   {
     sporeMaxInt = 10;
   }
   deckDatabase.persistSporeActuel(
-      String(constrain(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")).toInt() + deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "spore").toInt(), 0,
+      String(constrain(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")).toInt() + deckDatabase.getFieldValueByUid(rfidUidBufferToStringLastValue, "spore").toInt(), 0,
                        sporeMaxInt)));
 
-  String useScanActionTextToDisplay = deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "effect");
+  String useScanActionTextToDisplay = deckDatabase.getFieldValueByUid(rfidUidBufferToStringLastValue, "effect");
   if (useScanActionTextToDisplay == "")
   {
     useScanActionTextToDisplay = USE_SCAN_ACTION_DEFAULT_MESSAGE;
@@ -1052,17 +1030,15 @@ void useScanAction(void)
 
   sporulationEffectAfterUseScanActionText = deckDatabase.getMatchingLabelByRange("/pers.json", "spore_ranges", utilGetCurrentSporePercent());
 
-#if DECKINO_DEBUG_SERIAL
-  Serial.print("[SPORE](After use) : ");
-  Serial.print("- Spore Max : ");
-  Serial.print(String(sporeMaxInt));
-  Serial.print(" - Spore Actuel : ");
-  Serial.print(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")));
-  Serial.println("");
-  Serial.print("Range Label : ");
-  Serial.print(sporulationEffectAfterUseScanActionText);
-  Serial.println("");
-#endif
+  DECKINO_DEBUG_SERIAL_PRINT_CST("[SPORE](After use) : ");
+  DECKINO_DEBUG_SERIAL_PRINT_CST("- Spore Max : ");
+  DECKINO_DEBUG_SERIAL_PRINT(String(sporeMaxInt));
+  DECKINO_DEBUG_SERIAL_PRINT_CST(" - Spore Actuel : ");
+  DECKINO_DEBUG_SERIAL_PRINT(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")));
+  DECKINO_DEBUG_SERIAL_PRINT_CST("");
+  DECKINO_DEBUG_SERIAL_PRINT_CST("Range Label : ");
+  DECKINO_DEBUG_SERIAL_PRINT(sporulationEffectAfterUseScanActionText);
+  DECKINO_DEBUG_SERIAL_PRINT_CST("");
   deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN USED");
 }
 
@@ -1132,47 +1108,25 @@ void tryToUpdateStimOkButtonAction(void)
   paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...", display_oled);
   paginableTextRender();
 
-#if DECKINO_DEBUG_SERIAL
-  Serial.println("[tryToUpdateStimOkButtonAction] before mthrClient construct");
-  Serial.println("[tryToUpdateStimOkButtonAction] begin print /wifi.json");
+  DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] before mthrClient construct");
+  DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] begin print /wifi.json");
   deckDatabase.printJsonFile("/wifi.json");
-  Serial.println("[tryToUpdateStimOkButtonAction] end print /wifi.json");
-#endif
+  DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] end print /wifi.json");
 
   DeckMthrClient *mthrClient = new DeckMthrClient(deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_ssid"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_password"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_uri"));
 
-#if DECKINO_DEBUG_SERIAL
-  Serial.println("[tryToUpdateStimOkButtonAction] after mthrClient construct");
-#endif
+  DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] after mthrClient construct");
+
 
   // DOWNLOAD STIM.JSON
 
-  RessourceResponse motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId + "/STIM.JSON");
+  UpdateStimsResponse updateStimsResponse = mthrClient->updateStims(paddedPlayerId, deckDatabase, true);
 
-#if DECKINO_DEBUG_SERIAL
-  Serial.println("[tryToUpdateStimOkButtonAction] after motherResponse download");
-#endif
-
-  String userDisplayMessage = "";
-  bool stimSucces = false;
-  if (motherResponse.httpCode == 404)
-  {
-    userDisplayMessage = "STIM : PERSONNAGE NOT FOUND";
-  }
-  else if (motherResponse.httpCode != 200)
-  {
-    userDisplayMessage = "STIM : NETWORK ERROR : " + String(motherResponse.httpCode);
-  }
-  else
-  {
-    deckDatabase.persistFullFile("/stim.json", motherResponse.payload);
-    userDisplayMessage = "STIM : DATA UPDATED";
-    stimSucces = true;
-  }
-
+  String userDisplayMessage = updateStimsResponse.userMessage;
+  
   // DOWNLOAD PERS.JSON
 
-  motherResponse = mthrClient->DownloadRessource("/HTTP/JSON/" + paddedPlayerId + "/PERS.JSON");
+  RessourceResponse motherResponse = mthrClient->DownloadRessource("/HTTP/pers/" + paddedPlayerId + "/pers.json");
 
   bool persSucces = false;
   if (motherResponse.httpCode == 404)
@@ -1185,6 +1139,7 @@ void tryToUpdateStimOkButtonAction(void)
   }
   else
   {
+
     deckDatabase.persistFullFile("/pers.json", motherResponse.payload);
     userDisplayMessage += " - SUCCESS PERS : DATA UPDATED";
     persSucces = true;
@@ -1194,12 +1149,13 @@ void tryToUpdateStimOkButtonAction(void)
 
   String csvLogMessage = "TRY TO CHANGE PLAYER_ID (old=" + oldPaddedPlayerId + " - new=" + paddedPlayerId;
   csvLogMessage += " - STIM.JSON=";
-  csvLogMessage += (stimSucces ? "OK" : "KO");
+  csvLogMessage += (!updateStimsResponse.error ? "OK" : "KO");
   csvLogMessage += " - PERS.JSON=";
   csvLogMessage += (persSucces ? "OK" : "KO");
   csvLogMessage += " )";
   deckDatabase.appendCsvLog(CSV_LOG_PATH, csvLogMessage);
 }
+
 
 //-------------------------
 
@@ -1304,9 +1260,7 @@ void loopStateDisplayDtodResult()
   if (navigationMachine.executeOnce)
   {
     lastNavigationStateChange = millis();
-#if DECKINO_DEBUG_SERIAL
-    Serial.println("[loopStateDisplayDtodResult] Hello");
-#endif
+    DECKINO_DEBUG_SERIAL_PRINTLN_CST("[loopStateDisplayDtodResult] Hello");
     // Nothing ?
   }
   loopScanOkButton();
@@ -1319,9 +1273,7 @@ void loopStateGenericRemoteScan()
   if (navigationMachine.executeOnce)
   {
     lastNavigationStateChange = millis();
-#if DECKINO_DEBUG_SERIAL
-    Serial.println("[loopStateGenericRemoteScan] Hello");
-#endif
+    DECKINO_DEBUG_SERIAL_PRINTLN_CST("[loopStateGenericRemoteScan] Hello");
     // Nothing ?
   }
   loopScanOkButton();
@@ -1355,9 +1307,7 @@ bool transitionStateMainMenuToDisplayDtodResult()
   if (hasDtodResultToDisplay)
   {
     hasDtodResultToDisplay = false;
-#if DECKINO_DEBUG_SERIAL
-    Serial.println("[transitionStateMainMenuToDisplayDtodResult] Hello");
-#endif
+    DECKINO_DEBUG_SERIAL_PRINTLN_CST("[transitionStateMainMenuToDisplayDtodResult] Hello");
     returnToMainMenuHasBeenPressed = false; // better safe than sorry
     return true;
   }
@@ -1539,9 +1489,7 @@ void loopOledStateOff()
   if (oledMachine.executeOnce)
   {
     oledDisplayBlackScreen();
-#if DECKINO_DEBUG_SERIAL
-    Serial.println("loopOledStateOff!");
-#endif
+    DECKINO_DEBUG_SERIAL_PRINTLN_CST("loopOledStateOff!");
   }
 }
 
