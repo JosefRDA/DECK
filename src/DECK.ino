@@ -1,4 +1,4 @@
-#define DECK_VERSION "v1.5.3"
+#define DECK_VERSION "v1.5.4"
 
 // TODO : Refactor debug via services
 #define DECKINO_DEBUG_SERIAL true
