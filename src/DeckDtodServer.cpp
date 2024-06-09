@@ -2,11 +2,10 @@
 
 // CONSTRUCTORS ------------------------------------------------------------
 
-DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled, DeckDatabase deckDatabase)
+DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled)
 {
 
   _oled = oled;
-  this->_deckDatabase = deckDatabase;
 
   // Set your Static IP address
   IPAddress local_IP(192, 168, 1, 184);
@@ -17,12 +16,12 @@ DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled, DeckDatabase deckDatabase)
   IPAddress primaryDNS(8, 8, 8, 8);   // optional
   IPAddress secondaryDNS(8, 8, 4, 4); // optional
 
-  String sporeActuelStr = _deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", _deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel"));
+  String sporeActuelStr = DeckDatabase::Instance()->getFirstLevelDataByKey("/spor.json", "spore_actuel", DeckDatabase::Instance()->getFirstLevelDataByKey("/pers.json", "spore_actuel"));
   int sporeActuel = 0;
   if(sporeActuelStr.length() > 0) {
     sporeActuel = sporeActuelStr.toInt();
   } 
-  String sporeMaxStr = _deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max");
+  String sporeMaxStr = DeckDatabase::Instance()->getFirstLevelDataByKey("/pers.json", "spore_max");
   int sporeMax = 0; //default 10
   if(sporeMaxStr.length() > 0) {
     sporeMax = sporeMaxStr.toInt();
@@ -34,7 +33,7 @@ DeckDtodServer::DeckDtodServer(Adafruit_SSD1306 oled, DeckDatabase deckDatabase)
 
   //utilZeroPadPlayerId
   char playerIdBuffer[3];
-  sprintf(playerIdBuffer, "%03d", deckDatabase.getFirstLevelDataByKey("/config.json", "player_id").toInt());
+  sprintf(playerIdBuffer, "%03d", DeckDatabase::Instance()->getFirstLevelDataByKey("/config.json", "player_id").toInt());
   String playerId = String(playerIdBuffer);
 
   char sporePercentBuffer[2];
