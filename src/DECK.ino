@@ -1,4 +1,4 @@
-#define DECK_VERSION "v1.5.3"
+#define DECK_VERSION "v1.5.4"
 
 // TODO : Refactor debug via services
 #define DECKINO_DEBUG_SERIAL true
@@ -52,7 +52,6 @@ Adafruit_SSD1306 display_oled(OLED_RESET);
 
 // CONFIG
 #include "DeckDatabase.h"
-DeckDatabase deckDatabase;
 
 #define PIN_BUTTON_OK D6
 #define PIN_BUTTON_UP D7
@@ -182,7 +181,7 @@ void setup(void)
 
   DECKINO_DEBUG_SERIAL_PRINTLN_CST("DECK STARTUP");
 
-  deckDatabase.mountFS();
+  DeckDatabase::Instance()->mountFS();
 
   nfc.begin();
 
@@ -256,13 +255,13 @@ void setup(void)
   // oledMachine transitions end
 
 #if DECKINO_DEBUG_SERIAL
-  deckDatabase.printJsonFile("/pers.json");
+  DeckDatabase::Instance()->printJsonFile("/pers.json");
 #endif
 
-  deckDatabase.appendCsvLog(CSV_LOG_PATH, "DECK STARTUP");
+  DeckDatabase::Instance()->appendCsvLog(CSV_LOG_PATH, "DECK STARTUP");
 
 #if DECKINO_DEBUG_SERIAL
-  deckDatabase.printCsvLog(CSV_LOG_PATH);
+  DeckDatabase::Instance()->printCsvLog(CSV_LOG_PATH);
 #endif
 
   oledRequestSmall = true;
@@ -270,7 +269,7 @@ void setup(void)
 
 void setUpMainMenu(void)
 {
-  // if(deckDatabase.getFirstLevelDataByKey("/pers.json", "can_dtod") == "true") {
+  // if(DeckDatabase::Instance()->getFirstLevelDataByKey("/pers.json", "can_dtod") == "true") {
   //   DeckMenuItem mainMenuItems[] = {
   //     { .label = "SCAN", .value = "SCAN", .selected = true, .shortPressAction = &mainMenuActionScan, .longPressAction = &mainMenuActionEnterCharacterNumber },
   //     { .label = "SERV", .value = "SERV", .selected = false, .shortPressAction = &mainMenuActionDtodServer },
@@ -294,11 +293,11 @@ void setUpMainMenu(void)
 
   mainMenuItems[currentMainMenuItem++] = {.label = "ALOW", .value = "ALOW", .selected = false, .shortPressAction = &actionDtodServer, .longPressAction = &mainMenuActionEmptyLog};
 
-  if (deckDatabase.getFirstLevelDataByKey("/pers.json", "can_dtod") == "true")
+  if (DeckDatabase::Instance()->getFirstLevelDataByKey("/pers.json", "can_dtod") == "true")
   {
     mainMenuItems[currentMainMenuItem++] = {.label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod};
   }
-  LinkedList<String> remoteScans = deckDatabase.getSubNodesOfAFirstLevelNode("/pers.json", "rmt_scan");
+  LinkedList<String> remoteScans = DeckDatabase::Instance()->getSubNodesOfAFirstLevelNode("/pers.json", "rmt_scan");
 
   for (int h = 0; h < remoteScans.size(); h++)
   {
@@ -378,7 +377,7 @@ void loopDtodServer()
     { // TODO : Check possible bug
       dtodServer->close();
       dtodServer = NULL;
-      deckDatabase.appendCsvLog(CSV_LOG_PATH, "ALOW TIMEOUT");
+      DeckDatabase::Instance()->appendCsvLog(CSV_LOG_PATH, "ALOW TIMEOUT");
     }
     else
     {
@@ -698,12 +697,12 @@ void actionDtodServer(void)
 {
   if (dtodServer == NULL)
   {
-    dtodServer = new DeckDtodServer(display_oled, deckDatabase);
+    dtodServer = new DeckDtodServer(display_oled);
   }
   dtodServerUpSince = millis();
   paginableText = new DeckPaginableText("En attente d'être scanné par un autre DECK", display_oled);
   paginableTextRender();
-  deckDatabase.appendCsvLog(CSV_LOG_PATH, "ALOW");
+  DeckDatabase::Instance()->appendCsvLog(CSV_LOG_PATH, "ALOW");
 }
 
 void mainMenuActionEnterCharacterNumber(void)
@@ -714,7 +713,7 @@ void mainMenuActionEnterCharacterNumber(void)
 void mainMenuActionEmptyLog(void)
 {
   // TODO : Move to navigation state ?
-  deckDatabase.emptyCsvLog(CSV_LOG_PATH);
+  DeckDatabase::Instance()->emptyCsvLog(CSV_LOG_PATH);
   oledClearDisplay();
   display_oled.setCursor(0, 0);
   display_oled.println("Log du deck effacé avec succès.");
@@ -725,7 +724,7 @@ void mainMenuActionEmptyLog(void)
 void mainMenuActionScan(void)
 {
   scanHasBeenPressed = true;
-  deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN");
+  DeckDatabase::Instance()->appendCsvLog(CSV_LOG_PATH, "SCAN");
 }
 
 void mainMenuGenericActionRemoteScan(void)
@@ -773,7 +772,7 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
     display_oled.println("Aucun DECK a scanner");
     oledDisplay();
     oledRequestSmall = true;
-    deckDatabase.appendCsvLog(CSV_LOG_PATH, csvLogString + " Aucun DECK a scanner");
+    DeckDatabase::Instance()->appendCsvLog(CSV_LOG_PATH, csvLogString + " Aucun DECK a scanner");
   }
   else
   {
@@ -810,7 +809,7 @@ void mainMenuActionOrRemoteScan(bool isRemoteScan)
     if (maxForce > -999)
     {
 
-      deckDatabase.appendCsvLog(CSV_LOG_PATH, csvLogString + " DECK " + closestDeckSsid + " SCAN");
+      DeckDatabase::Instance()->appendCsvLog(CSV_LOG_PATH, csvLogString + " DECK " + closestDeckSsid + " SCAN");
 
       String labelToDisplay;
       if (isRemoteScan)
@@ -846,7 +845,7 @@ String getDtodLabelFromRemoteData(String playerSporePercent)
   {
     playerSporePercentInt = 1; // Si sporulation 0% on affiche le message de 1%
   }
-  String result = deckDatabase.getMatchingLabelByRange("/pers.json", "dtod_ranges", playerSporePercentInt);
+  String result = DeckDatabase::Instance()->getMatchingLabelByRange("/pers.json", "dtod_ranges", playerSporePercentInt);
 
   DECKINO_DEBUG_SERIAL_PRINTLN("[getDtodLabelFromRemoteData] Label found for " + playerSporePercent + "% : \"" + result + "\"");
 
@@ -858,7 +857,7 @@ String getRemoteScanLabelFromRemoteData(String remotePlayerId)
   DeckMenuItem selectedMenuItem = mainMenu->getSelected();
   selectedMenuItem.value;
 
-  String result = deckDatabase.getThirdLevelDataByKeys("/pers.json", "rmt_scan", selectedMenuItem.value, remotePlayerId);
+  String result = DeckDatabase::Instance()->getThirdLevelDataByKeys("/pers.json", "rmt_scan", selectedMenuItem.value, remotePlayerId);
   return result;
 }
 
@@ -973,7 +972,7 @@ void pn532ReadRfidLoop(void)
 
 
     String scanResultId = rfidUidBufferToString(uid);
-    DeckScanResult scanResult = deckDatabase.getStimResultByUid(scanResultId);
+    DeckScanResult scanResult = DeckDatabase::Instance()->getStimResultByUid(scanResultId);
     isScanUsable = scanResult.usable;
     
     DECKINO_DEBUG_SERIAL_PRINT_CST("Label from JSON: ");
@@ -988,7 +987,7 @@ void pn532ReadRfidLoop(void)
     paginableTextRender();
     oledRequestSmall = true;
 
-    deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN RESULT = " + scanResult.label + "(" + scanResultId + " - usable " + (scanResult.usable ? "true" : "false") + ")");
+    DeckDatabase::Instance()->appendCsvLog(CSV_LOG_PATH, "SCAN RESULT = " + scanResult.label + "(" + scanResultId + " - usable " + (scanResult.usable ? "true" : "false") + ")");
 
     rfidUidBufferToStringLastValue = rfidUidBufferToString(uid);
   }
@@ -1002,21 +1001,29 @@ void useScanAction(void)
 
   DECKINO_DEBUG_SERIAL_PRINT_CST("[SPORE](Before use) : ");
   DECKINO_DEBUG_SERIAL_PRINT_CST("- Spore Max : ");
-  DECKINO_DEBUG_SERIAL_PRINT(deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max"));
+  DECKINO_DEBUG_SERIAL_PRINT(DeckDatabase::Instance()->getFirstLevelDataByKey("/pers.json", "spore_max"));
   DECKINO_DEBUG_SERIAL_PRINT_CST(" - Spore Actuel : ");
-  DECKINO_DEBUG_SERIAL_PRINT(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")));
+  DECKINO_DEBUG_SERIAL_PRINT(
+    DeckDatabase::Instance()->getFirstLevelDataByKey("/spor.json", "spore_actuel", 
+    DeckDatabase::Instance()->getFirstLevelDataByKey("/pers.json", "spore_actuel")
+  ));
   DECKINO_DEBUG_SERIAL_PRINTLN_CST("");
 
-  int sporeMaxInt = deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max").toInt();
+  int sporeMaxInt = DeckDatabase::Instance()->getFirstLevelDataByKey("/pers.json", "spore_max").toInt();
   if (sporeMaxInt == 0)
   {
     sporeMaxInt = 10;
   }
-  deckDatabase.persistSporeActuel(
-      String(constrain(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")).toInt() + deckDatabase.getFieldValueByUid(rfidUidBufferToStringLastValue, "spore").toInt(), 0,
-                       sporeMaxInt)));
+  DeckDatabase::Instance()->persistSporeActuel(
+      String(constrain(
+        DeckDatabase::Instance()->getFirstLevelDataByKey("/spor.json", "spore_actuel", 
+        DeckDatabase::Instance()->getFirstLevelDataByKey("/pers.json", "spore_actuel")).toInt() 
+        + DeckDatabase::Instance()->getFieldValueByUid(rfidUidBufferToStringLastValue, "spore").toInt()
+        , 0
+        ,sporeMaxInt
+      )));
 
-  String useScanActionTextToDisplay = deckDatabase.getFieldValueByUid(rfidUidBufferToStringLastValue, "effect");
+  String useScanActionTextToDisplay = DeckDatabase::Instance()->getFieldValueByUid(rfidUidBufferToStringLastValue, "effect");
   if (useScanActionTextToDisplay == "")
   {
     useScanActionTextToDisplay = USE_SCAN_ACTION_DEFAULT_MESSAGE;
@@ -1028,29 +1035,37 @@ void useScanAction(void)
 
   rfidUidBufferToStringLastValue = "";
 
-  sporulationEffectAfterUseScanActionText = deckDatabase.getMatchingLabelByRange("/pers.json", "spore_ranges", utilGetCurrentSporePercent());
+  sporulationEffectAfterUseScanActionText = DeckDatabase::Instance()->getMatchingLabelByRange("/pers.json", "spore_ranges", utilGetCurrentSporePercent());
 
   DECKINO_DEBUG_SERIAL_PRINT_CST("[SPORE](After use) : ");
   DECKINO_DEBUG_SERIAL_PRINT_CST("- Spore Max : ");
   DECKINO_DEBUG_SERIAL_PRINT(String(sporeMaxInt));
   DECKINO_DEBUG_SERIAL_PRINT_CST(" - Spore Actuel : ");
-  DECKINO_DEBUG_SERIAL_PRINT(deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel")));
+  DECKINO_DEBUG_SERIAL_PRINT(DeckDatabase::Instance()->getFirstLevelDataByKey(
+    "/spor.json", 
+    "spore_actuel", 
+    DeckDatabase::Instance()->getFirstLevelDataByKey("/pers.json", "spore_actuel")
+  ));
   DECKINO_DEBUG_SERIAL_PRINT_CST("");
   DECKINO_DEBUG_SERIAL_PRINT_CST("Range Label : ");
   DECKINO_DEBUG_SERIAL_PRINT(sporulationEffectAfterUseScanActionText);
   DECKINO_DEBUG_SERIAL_PRINT_CST("");
-  deckDatabase.appendCsvLog(CSV_LOG_PATH, "SCAN USED");
+  DeckDatabase::Instance()->appendCsvLog(CSV_LOG_PATH, "SCAN USED");
 }
 
 int utilGetCurrentSporePercent(void)
 {
-  String sporeActuelStr = deckDatabase.getFirstLevelDataByKey("/spor.json", "spore_actuel", deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_actuel"));
+  String sporeActuelStr = DeckDatabase::Instance()->getFirstLevelDataByKey(
+    "/spor.json", 
+    "spore_actuel", 
+    DeckDatabase::Instance()->getFirstLevelDataByKey("/pers.json", "spore_actuel")
+  );
   int sporeActuel = 0;
   if (sporeActuelStr.length() > 0)
   {
     sporeActuel = sporeActuelStr.toInt();
   }
-  String sporeMaxStr = deckDatabase.getFirstLevelDataByKey("/pers.json", "spore_max");
+  String sporeMaxStr = DeckDatabase::Instance()->getFirstLevelDataByKey("/pers.json", "spore_max");
   int sporeMax = 0; // default 10
   if (sporeMaxStr.length() > 0)
   {
@@ -1078,7 +1093,10 @@ void sporulationEffectAfterUseScanAction(void)
 
 void confirmBeforeEnterCharacterNumberAction(void)
 {
-  String confirmBeforeEnterCharacterNumberActionMessage = "ID_PERS=" + utilZeroPadPlayerId(deckDatabase.getFirstLevelDataByKey("/config.json", "player_id")) + " changer ?";
+  String confirmBeforeEnterCharacterNumberActionMessage = 
+    "ID_PERS=" 
+    + utilZeroPadPlayerId(DeckDatabase::Instance()->getFirstLevelDataByKey("/config.json", "player_id")) 
+    + " changer ?";
   confirmationPopUp = new DeckConfirmationPopUp(confirmBeforeEnterCharacterNumberActionMessage, display_oled);
   confirmationPopUp->render();
   oledRequestAlways = true; // necessary ?
@@ -1093,34 +1111,42 @@ void confirmBeforeUseScanAction(void)
 
 void enterCharacterNumberAction(void)
 {
-  choiceNumberPopUp = new DeckChoiceNumberPopUp(display_oled, deckDatabase.getFirstLevelDataByKey("/config.json", "player_id").toInt());
+  choiceNumberPopUp = new DeckChoiceNumberPopUp(display_oled, DeckDatabase::Instance()->getFirstLevelDataByKey("/config.json", "player_id").toInt());
   choiceNumberPopUp->render();
 }
 
 void tryToUpdateStimOkButtonAction(void)
 {
-  String oldPaddedPlayerId = utilZeroPadPlayerId(deckDatabase.getFirstLevelDataByKey("/config.json", "player_id"));
+  String oldPaddedPlayerId = utilZeroPadPlayerId(DeckDatabase::Instance()->getFirstLevelDataByKey("/config.json", "player_id"));
 
-  deckDatabase.persistFirstLevelDataByKeyValue("/config.json", "player_id", String(choiceNumberPopUp->getFinalValue()));
+  DeckDatabase::Instance()->persistFirstLevelDataByKeyValue(
+    "/config.json", 
+    "player_id", 
+    String(choiceNumberPopUp->getFinalValue())
+  );
 
-  String paddedPlayerId = utilZeroPadPlayerId(deckDatabase.getFirstLevelDataByKey("/config.json", "player_id"));
+  String paddedPlayerId = utilZeroPadPlayerId(DeckDatabase::Instance()->getFirstLevelDataByKey("/config.json", "player_id"));
 
   paginableText = new DeckPaginableText("DOWN ID" + paddedPlayerId + "...", display_oled);
   paginableTextRender();
 
   DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] before mthrClient construct");
   DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] begin print /wifi.json");
-  deckDatabase.printJsonFile("/wifi.json");
+  DeckDatabase::Instance()->printJsonFile("/wifi.json");
   DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] end print /wifi.json");
 
-  DeckMthrClient *mthrClient = new DeckMthrClient(deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_ssid"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_password"), deckDatabase.getFirstLevelDataByKey("/wifi.json", "mthr_uri"));
+  DeckMthrClient *mthrClient = new DeckMthrClient(
+    DeckDatabase::Instance()->getFirstLevelDataByKey("/wifi.json", "mthr_ssid"), 
+    DeckDatabase::Instance()->getFirstLevelDataByKey("/wifi.json", "mthr_password"), 
+    DeckDatabase::Instance()->getFirstLevelDataByKey("/wifi.json", "mthr_uri")
+  );
 
   DECKINO_DEBUG_SERIAL_PRINTLN_CST("[tryToUpdateStimOkButtonAction] after mthrClient construct");
 
 
   // DOWNLOAD STIM.JSON
 
-  UpdateStimsResponse updateStimsResponse = mthrClient->updateStims(paddedPlayerId, deckDatabase, true);
+  UpdateStimsResponse updateStimsResponse = mthrClient->updateStims(paddedPlayerId, true);
 
   String userDisplayMessage = updateStimsResponse.userMessage;
   
@@ -1140,7 +1166,7 @@ void tryToUpdateStimOkButtonAction(void)
   else
   {
 
-    deckDatabase.persistFullFile("/pers.json", motherResponse.payload);
+    DeckDatabase::Instance()->persistFullFile("/pers.json", motherResponse.payload);
     userDisplayMessage += " - SUCCESS PERS : DATA UPDATED";
     persSucces = true;
   }
@@ -1153,7 +1179,7 @@ void tryToUpdateStimOkButtonAction(void)
   csvLogMessage += " - PERS.JSON=";
   csvLogMessage += (persSucces ? "OK" : "KO");
   csvLogMessage += " )";
-  deckDatabase.appendCsvLog(CSV_LOG_PATH, csvLogMessage);
+  DeckDatabase::Instance()->appendCsvLog(CSV_LOG_PATH, csvLogMessage);
 }
 
 

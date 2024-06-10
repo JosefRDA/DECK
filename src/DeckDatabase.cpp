@@ -1,5 +1,19 @@
 #include "DeckDatabase.h"
 
+#pragma region singleton
+
+DeckDatabase* DeckDatabase::pInstance = nullptr;
+
+DeckDatabase *DeckDatabase::Instance(){
+	//static Cleanup cleanup;
+ if(pInstance==nullptr){
+        pInstance = new DeckDatabase();
+    }
+    return pInstance;
+}
+
+#pragma endregion
+
 // CONSTRUCTORS ------------------------------------------------------------
 
 DeckDatabase::DeckDatabase() {}
@@ -404,7 +418,7 @@ void DeckDatabase::persistFullFile(const char *filename, String fileContent)
 // @obselete
 void DeckDatabase::appendUsedStimLog(const char *filename, String usableStimCode)
 {
-  // Usage : deckDatabase.appendUsedStimLog("/used_stim_log.json", deckDatabase.getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "stim_code"));
+  // Usage : DeckDatabase::Instance()->appendUsedStimLog("/used_stim_log.json", DeckDatabase::Instance()->getFieldValueByUid("/stim.json", rfidUidBufferToStringLastValue, "stim_code"));
 
   DynamicJsonDocument doc(8192); // TODO : Check Size
 

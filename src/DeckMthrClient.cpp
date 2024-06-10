@@ -143,7 +143,7 @@ RessourceResponse DeckMthrClient::DownloadRessource(String relativePath)  {
     return result;
 } 
 
-UpdateStimsResponse DeckMthrClient::updateStims(String paddedPlayerId, DeckDatabase deckDatabase, bool forceUpdate) {
+UpdateStimsResponse DeckMthrClient::updateStims(String paddedPlayerId, bool forceUpdate) {
    DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST("[DeckMthrClient::updateStims] begin");
    UpdateStimsResponse result;
 
@@ -166,7 +166,7 @@ UpdateStimsResponse DeckMthrClient::updateStims(String paddedPlayerId, DeckDatab
       DECKMTHRCLIENT_DEBUG_SERIAL_PRINT_CST(" - lastUpdateTimestamp : ");
       DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN(lastUpdateTimestamp[i]);
 
-      this->updateStimIfNeeded(paddedPlayerId.c_str(), uid[i], lastUpdateTimestamp[i], deckDatabase, forceUpdate);
+      this->updateStimIfNeeded(paddedPlayerId.c_str(), uid[i], lastUpdateTimestamp[i], forceUpdate);
     }
     result.error = false;
     result.userMessage = "STIMs : DATA UPDATED";
@@ -182,9 +182,9 @@ UpdateStimsResponse DeckMthrClient::updateStims(String paddedPlayerId, DeckDatab
    return result;
 }
 
-void DeckMthrClient::updateStimIfNeeded(const char * paddedPlayerId, const char * stimUid, int32_t lastUpdateTimestamp, DeckDatabase deckDatabase, bool forceUpdate) {
+void DeckMthrClient::updateStimIfNeeded(const char * paddedPlayerId, const char * stimUid, int32_t lastUpdateTimestamp, bool forceUpdate) {
     if(forceUpdate || checkIfStimUpdateIsNeeded(stimUid, lastUpdateTimestamp)) {
-        this->updateStim(paddedPlayerId, stimUid, deckDatabase);
+        this->updateStim(paddedPlayerId, stimUid);
     }
 }
 
@@ -193,14 +193,14 @@ bool DeckMthrClient::checkIfStimUpdateIsNeeded(const char * stimUid, int32_t las
     return true;
 }
 
-void DeckMthrClient::updateStim(const char * paddedPlayerId, const char * stimUid, DeckDatabase deckDatabase) {
+void DeckMthrClient::updateStim(const char * paddedPlayerId, const char * stimUid) {
   DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST("[DeckMthrClient::updateStim] begin");
 
   RessourceResponse motherResponse = this->downloadRessourceWithDebug("/HTTP/pers/" + String(paddedPlayerId) + "/stim/" + String(stimUid) + ".json", "updateStim");
 
   if(motherResponse.httpCode == t_http_codes::HTTP_CODE_OK) {
     String fileFullPath = "/stim/" + String(stimUid) + ".json";
-    deckDatabase.persistFullFile(fileFullPath.c_str(), motherResponse.payload);
+    DeckDatabase::Instance()->persistFullFile(fileFullPath.c_str(), motherResponse.payload);
   }
 
   DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST("[DeckMthrClient::updateStim] end");

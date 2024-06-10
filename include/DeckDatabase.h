@@ -40,69 +40,88 @@
 
 
 class DeckDatabase {
+  private:
+
+    #pragma region singleton
+    static DeckDatabase* pInstance; // Static variable holding the pointer to the only instance of this
+
+    // CONSTRUCTORS ------------------------------------------------------------
+    
+    DeckDatabase();
+    #pragma endregion
+
   public:
-  
-  // CONSTRUCTORS ------------------------------------------------------------
-  
-  DeckDatabase();
-  
-  // CLASS MEMBER FUNCTIONS ----------------------------------------------
 
-  void mountFS(void);
+    #pragma region singleton
+    /**
+     * Singletons should not be cloneable.
+     */
+    DeckDatabase(DeckDatabase &other) = delete;
+    /**
+     * Singletons should not be assignable.
+     */
+    void operator=(const DeckDatabase &) = delete;
+    
+    static DeckDatabase *Instance();
+    
+    #pragma endregion
+    
+    // CLASS MEMBER FUNCTIONS ----------------------------------------------
 
-  void printJsonFile(const char * filename);
+    void mountFS(void);
 
-  String jsonFileToString(const char * filename);
+    void printJsonFile(const char * filename);
 
-  void listDir(const char * dirname);
+    String jsonFileToString(const char * filename);
 
-  DeckScanResult getStimResultByUid(String uid);
+    void listDir(const char * dirname);
 
-  String getLabelByUid(String uid);
+    DeckScanResult getStimResultByUid(String uid);
 
-  String getFieldValueByUid(String uid, String fieldKey);
-  
-  bool getUsableByUid(String uid);
+    String getLabelByUid(String uid);
 
-  JsonObject getStimByUid(String uid);
+    String getFieldValueByUid(String uid, String fieldKey);
+    
+    bool getUsableByUid(String uid);
 
-  void persistFirstLevelDataByKeyValue(const char * filename, String fieldKey, String fieldValue);
+    JsonObject getStimByUid(String uid);
 
-  void persistSporeActuel(String fieldValue);
+    void persistFirstLevelDataByKeyValue(const char * filename, String fieldKey, String fieldValue);
 
-  JsonObject getRessourceByUid(const char *folderPath, String uid);
+    void persistSporeActuel(String fieldValue);
 
-  bool fileExists(const char *fileFullPath, String debugCallContext = "");
+    JsonObject getRessourceByUid(const char *folderPath, String uid);
 
-  File openFile(const char *filename, const char *mode, String debugCallContext = "");
+    bool fileExists(const char *fileFullPath, String debugCallContext = "");
 
-  void logDocumentDeserializationError(DeserializationError error, const char *filename, String debugCallContext = "");
+    File openFile(const char *filename, const char *mode, String debugCallContext = "");
 
-  String getFirstLevelDataByKey(const char * filename, String fieldKey);
+    void logDocumentDeserializationError(DeserializationError error, const char *filename, String debugCallContext = "");
 
-  String getFirstLevelDataByKey(const char * filename, String fieldKey, String fallback);
+    String getFirstLevelDataByKey(const char * filename, String fieldKey);
 
-  String getMatchingLabelByRange(const char * filename, String fieldKey, int rangeValue);
-  
-  void persistFullFile(const char * filename, String fileContent);
+    String getFirstLevelDataByKey(const char * filename, String fieldKey, String fallback);
 
-  // @obselete
-  void appendUsedStimLog(const char * filename, String contient);
+    String getMatchingLabelByRange(const char * filename, String fieldKey, int rangeValue);
+    
+    void persistFullFile(const char * filename, String fileContent);
 
-  LinkedList<String> getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName);
+    // @obselete
+    void appendUsedStimLog(const char * filename, String contient);
 
-  String getThirdLevelDataByKeys(const char * filename, String firstLevelKey, String secondLevelKey, String thirdLevelKey);
+    LinkedList<String> getSubNodesOfAFirstLevelNode(const char * filename, String firstLevelNodeName);
 
-  void appendCsvLog(const char * filename, String line);
+    String getThirdLevelDataByKeys(const char * filename, String firstLevelKey, String secondLevelKey, String thirdLevelKey);
 
-  void rawPrintFile(const char * filename);
+    void appendCsvLog(const char * filename, String line);
 
-  void printCsvLog(const char * filename);
+    void rawPrintFile(const char * filename);
 
-  void emptyCsvLog(const char * filename);
+    void printCsvLog(const char * filename);
+
+    void emptyCsvLog(const char * filename);
   
 };
-
 
 
 #endif // end _DECKDATABASE_H_

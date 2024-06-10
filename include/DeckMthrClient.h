@@ -53,7 +53,7 @@ class DeckMthrClient {
 
     RessourceResponse DownloadRessource(String relativePath);
 
-    UpdateStimsResponse updateStims(String paddedPlayerId, DeckDatabase deckDatabase, bool forceUpdate = false);
+    UpdateStimsResponse updateStims(String paddedPlayerId, bool forceUpdate = false);
 
   private:
 
@@ -63,9 +63,9 @@ class DeckMthrClient {
     
 
     // CLASS PRIVATE FUNCTIONS ----------------------------------------------
-    void updateStimIfNeeded(const char * paddedPlayerId, const char * stimUid, int32_t lastUpdateTimestamp, DeckDatabase deckDatabase, bool forceUpdate = false);
+    void updateStimIfNeeded(const char * paddedPlayerId, const char * stimUid, int32_t lastUpdateTimestamp, bool forceUpdate = false);
     bool checkIfStimUpdateIsNeeded(const char * stimUid, int32_t lastUpdateTimestamp);
-    void updateStim(const char * paddedPlayerId, const char * stimUid, DeckDatabase deckDatabase);
+    void updateStim(const char * paddedPlayerId, const char * stimUid);
     RessourceResponse downloadRessourceWithDebug(const String relativePath, const char * debugCallContext);
 
   

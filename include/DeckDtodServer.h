@@ -27,7 +27,7 @@ class DeckDtodServer {
   
   // CONSTRUCTORS ------------------------------------------------------------
   
-  DeckDtodServer(Adafruit_SSD1306 oled, DeckDatabase deckDatabase);
+  DeckDtodServer(Adafruit_SSD1306 oled);
   
   // CLASS MEMBER FUNCTIONS ----------------------------------------------
 
@@ -40,7 +40,6 @@ class DeckDtodServer {
   // PRIVATE PROPERTIES ----------------------------------------------
   ESP8266WebServer* _webServer;
   Adafruit_SSD1306 _oled;
-  DeckDatabase _deckDatabase;
   
 
   // CLASS PRIVATE FUNCTIONS ----------------------------------------------
