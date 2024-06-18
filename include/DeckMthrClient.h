@@ -12,6 +12,7 @@
 #include "DeckDatabase.h" //TODO : Exporter les adhérences vers une classe métier intermédiare pour éviter un couplage fort ?
 
 #define DECKMTHRCLIENT_MAX_STIM 500
+#define DECKMTHRCLIENT_UPDATE_STIM_MAX_RETRY 3
 
 #define DECKMTHRCLIENT_DEBUG true
 
@@ -65,6 +66,7 @@ class DeckMthrClient {
     // CLASS PRIVATE FUNCTIONS ----------------------------------------------
     void updateStimIfNeeded(const char * paddedPlayerId, const char * stimUid, int32_t lastUpdateTimestamp, bool forceUpdate = false);
     bool checkIfStimUpdateIsNeeded(const char * stimUid, int32_t lastUpdateTimestamp);
+    void updateStimWithRetry(const char * paddedPlayerId, const char * stimUid, uint8_t maxRetryNumber = DECKMTHRCLIENT_UPDATE_STIM_MAX_RETRY);
     void updateStim(const char * paddedPlayerId, const char * stimUid);
     RessourceResponse downloadRessourceWithDebug(const String relativePath, const char * debugCallContext);
 

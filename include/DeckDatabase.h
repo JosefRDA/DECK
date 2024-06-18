@@ -106,6 +106,12 @@ class DeckDatabase {
     
     void persistFullFile(const char * filename, String fileContent);
 
+    bool checkIfJsonFileIsValid(const char *filename);
+
+    void deleteFile(const char *filename);
+
+    void deleteJsonFileIfInvalid(const char *folderPath);
+
     // @obselete
     void appendUsedStimLog(const char * filename, String contient);
 
