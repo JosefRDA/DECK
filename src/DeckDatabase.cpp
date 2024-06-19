@@ -415,6 +415,73 @@ void DeckDatabase::persistFullFile(const char *filename, String fileContent)
   file.close();
 }
 
+bool DeckDatabase::checkIfJsonFileIsValid(const char *filename) {
+  bool result = false;
+
+  // Open file for reading
+  File file = LittleFS.open(filename, "r");
+  if (!file)
+  {
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST("[DeckDatabase::checkIfJsonFileIsValid] Failed to open file for reading");
+  } else {
+
+    if(file.size() < 2)
+    {
+      DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::checkIfJsonFileIsValid] File ");
+      DECKDATABASE_DEBUG_SERIAL_PRINT(filename);
+      DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST(" is empty");
+    } else {
+
+      StaticJsonDocument<STATIC_JSON_DOCUMENT_SIZE> doc;
+
+      // Deserialize the JSON document
+      DeserializationError error = deserializeJson(doc, file);
+      if (error)
+      {
+        DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::checkIfJsonFileIsValid] Failed to deserialize file : ");
+        DECKDATABASE_DEBUG_SERIAL_PRINTLN(filename);
+        DECKDATABASE_DEBUG_SERIAL_PRINT_CST("Error : ");
+        DECKDATABASE_DEBUG_SERIAL_PRINTLN(error.c_str());
+      }
+      else
+      {
+        DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::checkIfJsonFileIsValid] File ");
+        DECKDATABASE_DEBUG_SERIAL_PRINT(filename);
+        DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST(" is a valid json file");
+        
+        result = true;
+      }
+    }
+  }
+
+  file.close();
+  return result;
+
+}
+
+void DeckDatabase::deleteFile(const char *filename)
+{
+  if (LittleFS.exists(filename))
+  {
+    LittleFS.remove(filename);
+    DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::deleteFile] File ");
+    DECKDATABASE_DEBUG_SERIAL_PRINT(filename);
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST(" successfuly deleted");
+  } else {
+    DECKDATABASE_DEBUG_SERIAL_PRINT_CST("[DeckDatabase::deleteFile] File ");
+    DECKDATABASE_DEBUG_SERIAL_PRINT(filename);
+    DECKDATABASE_DEBUG_SERIAL_PRINTLN_CST(" does not exist");
+  }
+}
+
+void DeckDatabase::deleteJsonFileIfInvalid(const char *folderPath)
+{
+  if (!this->checkIfJsonFileIsValid(folderPath))
+  {
+    this->deleteFile(folderPath);
+  }
+}
+
 // @obselete
 void DeckDatabase::appendUsedStimLog(const char *filename, String usableStimCode)
 {

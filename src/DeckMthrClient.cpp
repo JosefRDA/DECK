@@ -184,13 +184,30 @@ UpdateStimsResponse DeckMthrClient::updateStims(String paddedPlayerId, bool forc
 
 void DeckMthrClient::updateStimIfNeeded(const char * paddedPlayerId, const char * stimUid, int32_t lastUpdateTimestamp, bool forceUpdate) {
     if(forceUpdate || checkIfStimUpdateIsNeeded(stimUid, lastUpdateTimestamp)) {
-        this->updateStim(paddedPlayerId, stimUid);
+        this->updateStimWithRetry(paddedPlayerId, stimUid);
     }
 }
 
 //TODO
 bool DeckMthrClient::checkIfStimUpdateIsNeeded(const char * stimUid, int32_t lastUpdateTimestamp) {
     return true;
+}
+
+void DeckMthrClient::updateStimWithRetry(const char * paddedPlayerId, const char * stimUid, uint8_t maxRetryNumber) {
+  DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST("[DeckMthrClient::updateStimWithRetry] begin");
+
+  this->updateStim(paddedPlayerId, stimUid);
+
+  String fileFullPath = "/stim/" + String(stimUid) + ".json";
+  while(!DeckDatabase::Instance()->checkIfJsonFileIsValid(fileFullPath.c_str()) && maxRetryNumber > 0) {
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINT_CST("[DeckMthrClient::updateStimWithRetry] Retry number : ");
+    DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN(maxRetryNumber);
+    DeckDatabase::Instance()->deleteFile(fileFullPath.c_str());
+    this->updateStim(paddedPlayerId, stimUid);
+    maxRetryNumber--;
+  }
+
+  DECKMTHRCLIENT_DEBUG_SERIAL_PRINTLN_CST("[DeckMthrClient::updateStimWithRetry] end");
 }
 
 void DeckMthrClient::updateStim(const char * paddedPlayerId, const char * stimUid) {
