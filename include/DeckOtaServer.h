@@ -10,7 +10,8 @@
 
 #include "DeckDatabase.h"
 
-#define DECKOTASERVER_SSID 
+#define DECKOTASERVER_WAITING_FOR_OTA_UPDATE_LOOP_DELAY 1000
+#define DECKOTASERVER_WAITING_FOR_MTHR_WIFI_LOOP_DELAY 500
 
 #define DECKOTASERVER_DEBUG_SERIAL true
 
@@ -46,7 +47,8 @@ class DeckOtaServer {
     // PRIVATE PROPERTIES ------------------------------------------------------
 
     ESP8266WiFiMulti* _wiFiMulti;
-    String _hostName; //with port without final slash
+    unsigned long _lastLoopTimestamp = 0;
+    bool _active = false;
 
     // PRIVATE FUNCTIONS -------------------------------------------------------
 
@@ -73,6 +75,8 @@ class DeckOtaServer {
     void setup();
     
     void loop();
+
+    void stop();
   
 };
 

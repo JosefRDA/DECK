@@ -21,38 +21,32 @@ DeckOtaServer::DeckOtaServer() {}
 // CLASS MEMBER FUNCTIONS --------------------------------------------------
 
 void DeckOtaServer::setup() {
-	this->connectToMthr();
-  // Port defaults to 8266
-  // ArduinoOTA.setPort(8266);
+	if(!this->_active) {
+		this->connectToMthr(); //TODO : Handle connexion error
 
-  // Hostname defaults to esp8266-[ChipID]
-  // ArduinoOTA.setHostname("myesp8266");
+		ArduinoOTA.onStart([]() {
+			DECKOTASERVER_DEBUG_SERIAL_PRINTLN_CST("[DeckOtaServer::ArduinoOTA.onStart] Start updating ");
+		});
+		ArduinoOTA.onError([](int code, const char* msg) {
+			DECKOTASERVER_DEBUG_SERIAL_PRINT_CST("[DeckOtaServer::ArduinoOTA.onError] ERROR : CODE ");
+			DECKOTASERVER_DEBUG_SERIAL_PRINT(code);
+			DECKOTASERVER_DEBUG_SERIAL_PRINT_CST(" MSG ");
+			DECKOTASERVER_DEBUG_SERIAL_PRINTLN(msg);
+		});
+		ArduinoOTA.beforeApply([]() {
+			DECKOTASERVER_DEBUG_SERIAL_PRINTLN_CST("[DeckOtaServer::ArduinoOTA.beforeApply] Start applying update");
+		});
 
-  // No authentication by default
-  // ArduinoOTA.setPassword((const char *)"123");
+		ArduinoOTA.begin(WiFi.localIP(), "DECK", "Cluster1", InternalStorage);
 
-  // ArduinoOTA.onStart([]() {
-  //   Serial.println("Start");
-  // });
-  // ArduinoOTA.onEnd([]() {
-  //   Serial.println("\nEnd");
-  // });
-  // ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-  //   Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-  // });
-  // ArduinoOTA.onError([](ota_error_t error) {
-  //   Serial.printf("Error[%u]: ", error);
-  //   if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-  //   else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-  //   else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-  //   else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-  //   else if (error == OTA_END_ERROR) Serial.println("End Failed");
-  // });
-  ArduinoOTA.begin(WiFi.localIP(), "DECK", "Cluster1", InternalStorage);
-  Serial.println("Ready");
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
+		this->_active = true;
+		DECKOTASERVER_DEBUG_SERIAL_PRINT_CST("[DeckOtaServer::setup] Ready IP address: ");
+		DECKOTASERVER_DEBUG_SERIAL_PRINTLN(WiFi.localIP());
+	} else {
+		DECKOTASERVER_DEBUG_SERIAL_PRINTLN_CST("[DeckOtaServer::setup] ALREADY ACTIVE");
+	}
 }
+	
 
 bool DeckOtaServer::connectToMthr() {
 	this->_wiFiMulti = new ESP8266WiFiMulti();
@@ -61,7 +55,6 @@ bool DeckOtaServer::connectToMthr() {
 
 	const String ssid = DeckDatabase::Instance()->getFirstLevelDataByKey("/wifi.json", "mthr_ssid");
 	const String password = DeckDatabase::Instance()->getFirstLevelDataByKey("/wifi.json", "mthr_password");
-	this->_hostName = DeckDatabase::Instance()->getFirstLevelDataByKey("/wifi.json", "mthr_uri");
 
 	this->_wiFiMulti->addAP(ssid.c_str(), password.c_str());
 	
@@ -70,9 +63,6 @@ bool DeckOtaServer::connectToMthr() {
 	DECKOTASERVER_DEBUG_SERIAL_PRINT(ssid);
 	DECKOTASERVER_DEBUG_SERIAL_PRINT_CST(" ");
 	DECKOTASERVER_DEBUG_SERIAL_PRINT(password);
-	DECKOTASERVER_DEBUG_SERIAL_PRINT_CST(" ");
-	DECKOTASERVER_DEBUG_SERIAL_PRINTLN(this->_hostName);
-
 	while(this->_wiFiMulti->run() != WL_CONNECTED) {
 			
 		DECKOTASERVER_DEBUG_SERIAL_PRINT_CST("[DeckOtaServer::connectToMthr] TESTING CONNEXION STATUS : ");
@@ -100,9 +90,34 @@ bool DeckOtaServer::connectToMthr() {
 				break;
 		}
 		DECKOTASERVER_DEBUG_SERIAL_PRINTLN();
-		delay(100);
+		delay(DECKOTASERVER_WAITING_FOR_MTHR_WIFI_LOOP_DELAY);
 	}
 	
 	DECKOTASERVER_DEBUG_SERIAL_PRINTLN_CST("[DeckOtaServer::connectToMthr] CONNECTED");
 	return true;
+}
+
+void DeckOtaServer::loop() {
+	if(this->_active) {
+		if(millis() - this->_lastLoopTimestamp > DECKOTASERVER_WAITING_FOR_OTA_UPDATE_LOOP_DELAY) {
+			if(this->_wiFiMulti->run() == WL_CONNECTED) {
+				DECKOTASERVER_DEBUG_SERIAL_PRINTLN_CST("[DeckOtaServer::loop] WAITING FOR OTA UPDATE");
+				ArduinoOTA.handle();
+			} else {
+				DECKOTASERVER_DEBUG_SERIAL_PRINTLN_CST("[DeckOtaServer::loop] NOT CONNECTED TO MTHR");
+			}
+			this->_lastLoopTimestamp = millis();
+		}
+	}
+}
+
+void DeckOtaServer::stop() {
+	if(this->_active) {
+		ArduinoOTA.end();
+		WiFi.disconnect(true);
+		this->_active = false;
+		DECKOTASERVER_DEBUG_SERIAL_PRINTLN_CST("[DeckOtaServer::stop] STOPPED");
+	} else {
+		DECKOTASERVER_DEBUG_SERIAL_PRINTLN_CST("[DeckOtaServer::stop] ALREADY STOPPED");
+	}
 }

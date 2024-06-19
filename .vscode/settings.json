@@ -18,7 +18,9 @@
         "deque": "cpp",
         "list": "cpp",
         "unordered_map": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "memory": "cpp",
+        "random": "cpp"
     },
     "cmake.configureOnOpen": false
 }
