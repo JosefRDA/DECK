@@ -52,6 +52,7 @@ Adafruit_SSD1306 display_oled(OLED_RESET);
 
 // CONFIG
 #include "DeckDatabase.h"
+#include "DeckOtaServer.h"
 
 #define PIN_BUTTON_OK D6
 #define PIN_BUTTON_UP D7
@@ -295,7 +296,7 @@ void setUpMainMenu(void)
 
   if (DeckDatabase::Instance()->getFirstLevelDataByKey("/pers.json", "can_dtod") == "true")
   {
-    mainMenuItems[currentMainMenuItem++] = {.label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod};
+    mainMenuItems[currentMainMenuItem++] = {.label = "DTOD", .value = "DTOD", .selected = false, .shortPressAction = &mainMenuActionDtod, .longPressAction = &mainMenuActionStartOrStopOtaServer};
   }
   LinkedList<String> remoteScans = DeckDatabase::Instance()->getSubNodesOfAFirstLevelNode("/pers.json", "rmt_scan");
 
@@ -347,6 +348,7 @@ void loop(void)
 {
   loopVibrationMotor();
   loopDtodServer();
+  DeckOtaServer::Instance()->loop();
   navigationMachine.run();
   if (navigationMachine.currentState != NULL)
   {
@@ -719,6 +721,18 @@ void mainMenuActionEmptyLog(void)
   display_oled.println("Log du deck effacé avec succès.");
   oledDisplay();
   oledRequestSmall = true;
+}
+
+void mainMenuActionStartOrStopOtaServer(void)
+{
+  if (DeckOtaServer::Instance()->isActive())
+  {
+    DeckOtaServer::Instance()->stop();
+  }
+  else
+  {
+    DeckOtaServer::Instance()->setup();
+  }
 }
 
 void mainMenuActionScan(void)

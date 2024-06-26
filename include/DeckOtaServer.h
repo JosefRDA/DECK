@@ -77,6 +77,8 @@ class DeckOtaServer {
     void loop();
 
     void stop();
+
+    bool isActive();
   
 };
 

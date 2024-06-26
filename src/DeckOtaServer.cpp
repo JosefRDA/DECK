@@ -121,3 +121,7 @@ void DeckOtaServer::stop() {
 		DECKOTASERVER_DEBUG_SERIAL_PRINTLN_CST("[DeckOtaServer::stop] ALREADY STOPPED");
 	}
 }
+
+bool DeckOtaServer::isActive() {
+	return this->_active;
+}
