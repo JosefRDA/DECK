@@ -1,4 +1,4 @@
-#define DECK_VERSION "v1.5.0"
+#define DECK_VERSION "v1.5.b"
 
 // TODO : Refactor debug via services
 #define DECKINO_DEBUG_SERIAL true
@@ -160,15 +160,22 @@ void setup(void)
   oledDisplay();
   delay(1000);
 
-  oledDisplayBlackScreen();
-
-  Serial.begin(115200);
+    Serial.begin(115200);
 
 #if DECKINO_DEBUG_SERIAL
   Serial.println("Hello!");
 #endif
 
   deckDatabase.mountFS();
+
+  display_oled.setCursor(0, 40);
+  display_oled.println(deckDatabase.getFirstLevelDataByKey("/pers.json", "player_id", "XXX"));
+  oledDisplay();
+  delay(1000);
+
+  oledDisplayBlackScreen();
+
+
 
   nfc.begin();
 
