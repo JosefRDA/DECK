@@ -11,6 +11,8 @@
 #define MAX_SIZE_CODE 9
 #define STATIC_JSON_DOCUMENT_SIZE 2048
 
+#define DECK_DATABASE_DEBUG_UNKNOWN_UID false
+
 class DeckDatabase {
   public:
   

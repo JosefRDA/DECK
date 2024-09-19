@@ -106,9 +106,14 @@ DeckScanResult DeckDatabase::getLabelByUid(const char *filename, String uid)
   }
   else
   {
-    result.label = String("[UNKNOWN] :") + uid;
-    result.usable = false;
-    return result;
+    if(DECK_DATABASE_DEBUG_UNKNOWN_UID || uid == "default") {
+      result.label = String("[UNKNOWN] :") + uid;
+      result.usable = false;
+      return result;
+    }
+    else {
+      return getLabelByUid(filename, "default");
+    }
   }
 }
 
@@ -124,7 +129,11 @@ String DeckDatabase::getFieldValueByUid(const char *filename, String uid, String
   }
   else
   {
-    result = String("[UNKNOWN] :") + uid;
+    if(DECK_DATABASE_DEBUG_UNKNOWN_UID || uid == "default") {
+      result = String("[UNKNOWN] :") + uid;
+    } else {
+      return getFieldValueByUid(filename, "default", fieldKey);
+    }
   }
 
   return result;
